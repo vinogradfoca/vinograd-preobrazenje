@@ -1,0 +1,649 @@
+<!doctype html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vinograd Preobraženje | Sadnice i reznice vinove loze, Foča</title>
+<meta name="description" content="Provjerene sorte vinove loze iz Foče. Sadnice, reznice i lična iskustva sa uzgojem na 450 m nadmorske visine.">
+<meta property="og:title" content="Vinograd Preobraženje | Sadnice i reznice vinove loze">
+<meta property="og:description" content="Provjerene sorte vinove loze iz Foče. Sadnice i reznice.">
+<meta property="og:image" content="assets/hero.webp">
+<meta name="theme-color" content="#193d2b">
+<style>
+:root{--green:#193d2b;--green2:#2f6a49;--wine:#891f3d;--cream:#f5f3ec;--ink:#17241d;--muted:#68736d;--line:#dfe5e0;--gold:#e8c88e}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:#fff;line-height:1.5}
+body.lock{overflow:hidden}
+img{max-width:100%;display:block}
+a{color:var(--green2)}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+[hidden]{display:none!important}
+h1,h2,h3,h4{font-family:Georgia,"Times New Roman",serif;line-height:1.12;margin:0}
+
+/* header */
+header{height:76px;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px clamp(14px,4vw,64px);border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(255,255,255,.96);backdrop-filter:blur(12px);z-index:20}
+.icon-btn{border:0;background:none;font-size:20px;color:var(--green);display:flex;align-items:center;gap:8px;padding:8px;min-width:48px;min-height:48px}
+.badge{background:var(--wine);color:#fff;border-radius:999px;padding:2px 8px;font-size:12px}
+.brand{text-decoration:none;color:var(--green);display:flex;align-items:center;justify-content:center;flex:1;min-width:0}
+.logo{height:56px;width:auto;max-width:min(360px,52vw);object-fit:contain}
+.wordmark{display:none;font:400 clamp(17px,4.6vw,26px) Georgia,serif;white-space:nowrap}
+.wordmark b{font-weight:700;color:var(--wine)}
+.brand.nologo .logo{display:none}
+.brand.nologo .wordmark{display:block}
+
+/* drawer */
+#overlay{position:fixed;inset:0;background:#0a1a1099;opacity:0;pointer-events:none;transition:.25s;z-index:40}
+#overlay.on{opacity:1;pointer-events:auto}
+#drawer{position:fixed;top:0;left:0;bottom:0;width:min(330px,86vw);background:#fff;z-index:50;transform:translateX(-102%);transition:.28s;padding:70px 22px 22px;display:flex;flex-direction:column;overflow:auto}
+#drawer.open{transform:none}
+#drawer nav{display:grid;gap:4px}
+#drawer nav a{padding:15px 12px;border-radius:10px;text-decoration:none;color:var(--ink);font-weight:600;font-size:17px}
+#drawer nav a.on,#drawer nav a:hover{background:#e6f1e7;color:var(--green)}
+.drawer-call{margin-top:auto;padding:16px;background:var(--green);color:#fff;border-radius:12px;text-align:center;text-decoration:none;font-weight:700}
+.close{position:absolute;top:12px;right:14px;width:44px;height:44px;border:0;background:#f0f3f1;border-radius:50%;font-size:26px;line-height:1;color:var(--ink);z-index:2}
+
+/* stranice */
+.page{display:none;scroll-margin-top:76px}
+.page.active{display:block}
+.wrap{max-width:1220px;margin:auto;padding:64px 22px}
+.narrow{max-width:820px}
+.eyebrow{letter-spacing:.16em;font-weight:800;font-size:12px;color:var(--wine);margin:0 0 6px}
+.eyebrow.light{color:var(--gold)}
+.wrap h1,.wrap h2{font-size:clamp(30px,4vw,48px);margin-bottom:12px}
+.lead{color:var(--muted);max-width:640px;margin:0 0 24px}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.center{text-align:center;margin-top:30px}
+.page.wrap{min-height:60vh}
+
+/* dugmad */
+.btn{display:inline-flex;align-items:center;justify-content:center;border:1px solid transparent;border-radius:10px;padding:14px 22px;font-weight:800;text-decoration:none;text-align:center;min-height:48px}
+.btn.primary{background:var(--wine);color:#fff}
+.btn.primary:hover{background:#6f1832}
+.btn.outline{background:#fff;color:var(--green);border-color:var(--green)}
+.btn.ghost{background:#f0f3f1;color:var(--ink)}
+.btn.wide{width:100%;margin-top:8px}
+
+/* hero */
+.hero{height:clamp(480px,72vh,620px);position:relative;overflow:hidden;background:var(--green)}
+.hero>img{width:100%;height:100%;object-fit:cover;object-position:60% 50%}
+.hero:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(9,30,20,.8),rgba(9,30,20,.2) 70%)}
+.hero-copy{position:absolute;z-index:2;left:clamp(22px,8vw,120px);right:22px;top:46%;transform:translateY(-50%);color:#fff;max-width:660px}
+.hero-copy span{letter-spacing:.16em;font-weight:800;font-size:12px;color:var(--gold)}
+.hero-copy h1{font-size:clamp(36px,6vw,72px);line-height:1;margin:16px 0}
+.hero-copy p{font-size:clamp(16px,2vw,19px);line-height:1.6;max-width:540px;margin:0 0 24px}
+.benefits{max-width:1120px;margin:-46px auto 0;position:relative;z-index:3;background:#fff;border-radius:14px;box-shadow:0 15px 45px #14251a22;display:grid;grid-template-columns:repeat(3,1fr);padding:22px;width:calc(100% - 36px)}
+.benefits article{display:flex;gap:14px;align-items:center;padding:8px 22px;border-right:1px solid var(--line)}
+.benefits article:last-child{border:0}
+.benefits i{font-style:normal;font-size:26px;color:var(--green2)}
+.benefits b,.benefits small{display:block}
+.benefits small{color:var(--muted)}
+
+/* kartice */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:22px}
+.card{display:block;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:#fff;text-decoration:none;color:inherit;transition:.25s}
+.card:hover{transform:translateY(-4px);box-shadow:0 18px 40px #17352218}
+.card.off{opacity:.6}
+.ph{aspect-ratio:4/5;position:relative;overflow:hidden;background:#e9efe9}
+.ph img{width:100%;height:100%;object-fit:cover;transition:.4s}
+.card:hover .ph img{transform:scale(1.04)}
+.dot{display:inline-block;width:12px;height:12px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px #0003;vertical-align:middle}
+.ph .dot{position:absolute;top:12px;right:12px;width:18px;height:18px}
+.dot.w{background:#d8dc7a}.dot.b{background:#2c2f56}.dot.r{background:#c0425e}
+.cb{padding:14px 16px 16px}
+.tag{font-size:12px;font-weight:800;letter-spacing:.08em;color:var(--green2);text-transform:uppercase}
+.cb h3{font-size:23px;margin:5px 0 3px}
+.cb small{color:var(--muted)}
+
+/* filteri */
+.filters{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px;align-items:center}
+.filters input[type=search]{flex:1 1 220px}
+input,select,textarea{border:1px solid #c9d3cc;border-radius:10px;padding:12px 14px;background:#fff;min-height:48px;width:100%}
+.filters select{width:auto;flex:0 1 190px}
+.check{display:flex;align-items:center;gap:8px;font-weight:600}
+.check input{width:20px;height:20px;min-height:0;accent-color:var(--green2)}
+.empty{text-align:center;padding:34px 10px;color:var(--muted)}
+.empty .btn{margin-top:14px}
+.empty.full{grid-column:1/-1}
+.wide-input{margin-bottom:14px}
+
+/* cjenovnik */
+.ptable{border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.prow{display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:10px;padding:14px 16px;border-top:1px solid var(--line);text-decoration:none;color:var(--ink)}
+.prow:first-child{border-top:0}
+.prow:hover{background:#f6f9f6}
+.phead{background:var(--green);color:#fff;border:0!important}
+.prow span:not(:first-child),.phead b:not(:first-child){text-align:right}
+
+/* traka koraka */
+.band{background:var(--green);color:#fff}
+.band h2{color:#fff}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:20px}
+.steps div{background:#ffffff12;border-radius:14px;padding:22px}
+.steps span{display:inline-grid;place-items:center;width:36px;height:36px;border-radius:50%;background:var(--gold);color:var(--green);font-weight:800;margin-bottom:10px}
+.steps b{display:block;font-size:18px}
+.steps p{margin:6px 0 0;color:#dbe6df}
+.how{padding-left:22px;display:grid;gap:14px;font-size:17px;margin-bottom:22px}
+
+/* kontakt */
+.contact-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:34px;margin-top:20px}
+.contact-card{background:var(--cream);border-radius:16px;padding:24px;display:grid;gap:10px;align-content:start}
+.contact-card a{font-weight:700;text-decoration:none}
+.contact-card p{margin:0}
+footer{background:#10281c;color:#cfdcd4;padding:26px 22px;text-align:center;font-size:14px}
+footer a{color:#fff}
+
+/* modal */
+.modal{position:fixed;inset:0;background:#0a1a10cc;z-index:60;display:none;align-items:center;justify-content:center;padding:18px}
+.modal.open{display:flex}
+.modal-box{background:#fff;border-radius:18px;width:min(1000px,100%);max-height:calc(100vh - 36px);overflow:auto;position:relative}
+.mgrid{display:grid;grid-template-columns:1fr 1fr}
+.gallery{background:#eef2ee;padding:14px;align-self:start;position:sticky;top:0}
+#mainImg{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:12px}
+.thumbs{display:flex;gap:8px;margin-top:10px}
+.thumbs button{width:64px;height:64px;padding:0;border:2px solid transparent;border-radius:10px;overflow:hidden;background:none}
+.thumbs button.on{border-color:var(--wine)}
+.thumbs img{width:100%;height:100%;object-fit:cover}
+.minfo{padding:26px 24px 24px}
+.minfo h2{font-size:clamp(30px,4vw,42px);margin:6px 0 14px}
+.facts{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px}
+.facts span{background:var(--cream);border-radius:10px;padding:8px 14px}
+.facts small{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+.mblock{margin:0 0 14px}
+.mblock h4{font-size:17px;margin-bottom:4px}
+.mblock p{margin:0;color:#35443b;white-space:pre-line}
+.mblock.warn{background:#fff6e6;border-radius:10px;padding:12px 14px}
+.order{border-top:1px solid var(--line);margin-top:18px;padding-top:16px}
+.order h3{font-size:22px;margin-bottom:10px}
+.orow{display:grid;grid-template-columns:1fr auto;gap:8px 12px;align-items:center;padding:14px;border:1px solid var(--line);border-radius:12px;margin-bottom:10px}
+.orow small{display:block;color:var(--muted)}
+.orow.off{opacity:.6}
+.oprice{font-weight:800;color:var(--wine);text-align:right}
+.orow .add{padding:10px 18px;min-height:44px}
+.stepper{display:inline-flex;align-items:center;border:1px solid #c9d3cc;border-radius:10px;overflow:hidden;width:max-content}
+.stepper button{width:42px;height:42px;border:0;background:#f0f3f1;font-size:20px}
+.stepper span{min-width:38px;text-align:center;font-weight:700}
+.ask{display:block;margin-top:12px;font-size:14px}
+
+/* korpa */
+.cart{position:fixed;top:0;right:0;bottom:0;width:min(430px,100%);background:#fff;z-index:50;transform:translateX(102%);transition:.28s;padding:22px;overflow:auto}
+.cart.open{transform:none}
+.cart h2{font-size:28px;margin:6px 0 16px}
+.citem{display:grid;grid-template-columns:64px 1fr 36px;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.citem img{width:64px;height:80px;object-fit:cover;border-radius:8px}
+.cinfo small{display:block;color:var(--muted);margin-bottom:6px}
+.rm{border:0;background:#f0f3f1;border-radius:50%;width:34px;height:34px;font-size:20px}
+.cart-total{display:flex;justify-content:space-between;font-size:20px;margin:18px 0 4px}
+.cart label{display:block;font-weight:600;font-size:14px;margin-top:10px}
+.cart label input,.cart label textarea{margin-top:4px;font-weight:400}
+.err{color:var(--wine);font-weight:600;min-height:20px;margin:8px 0 0}
+
+#toast{position:fixed;left:50%;top:90px;transform:translate(-50%,-20px);background:var(--green);color:#fff;padding:12px 20px;border-radius:999px;opacity:0;pointer-events:none;transition:.25s;z-index:80;max-width:90vw;text-align:center}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+
+/* mobilni */
+@media(max-width:820px){
+  .menu-btn span,.icon-btn span{display:none}
+  .benefits{grid-template-columns:1fr;padding:10px 6px}
+  .benefits article{border-right:0;border-bottom:1px solid var(--line);padding:12px 14px}
+  .benefits article:last-child{border:0}
+  .steps,.contact-grid{grid-template-columns:1fr}
+  .wrap{padding:44px 16px}
+  .mgrid{grid-template-columns:1fr}
+  .gallery{position:static;padding:10px}
+  #mainImg{aspect-ratio:1/1;max-height:44vh;width:100%}
+  .modal{padding:0;align-items:flex-end}
+  .modal-box{max-height:94vh;border-radius:18px 18px 0 0}
+  .close{background:#ffffffe6;box-shadow:0 2px 8px #0003}
+}
+@media(max-width:640px){
+  .grid{grid-template-columns:repeat(2,1fr);gap:12px}
+  .cb{padding:10px 12px 14px}
+  .cb h3{font-size:19px}
+  .tag{font-size:11px;letter-spacing:.04em}
+  .filters select{flex:1 1 45%}
+  .prow{padding:13px 12px;font-size:14px}
+}
+
+</style>
+</head>
+<body>
+
+<header>
+  <button class="icon-btn" id="menuBtn" aria-label="Otvori meni">☰ <span>Meni</span></button>
+  <a class="brand" href="#home" aria-label="Vinograd Preobraženje">
+    <img src="assets/logo.png" alt="" class="logo" onerror="this.parentNode.classList.add('nologo')">
+    <span class="wordmark">Vinograd <b>Preobraženje</b></span>
+  </a>
+  <button class="icon-btn" id="cartBtn" aria-label="Korpa">🛒 <b id="cartCount" class="badge">0</b></button>
+</header>
+
+<aside id="drawer" aria-label="Meni">
+  <button class="close" id="closeMenu" aria-label="Zatvori">×</button>
+  <nav>
+    <a href="#home">Početna</a>
+    <a href="#katalog">Sorte i web-shop</a>
+    <a href="#cjenovnik" id="navPrices">Cjenovnik</a>
+    <a href="#kako">Kako naručiti</a>
+    <a href="#kontakt">O nama i kontakt</a>
+  </nav>
+  <a class="drawer-call" href="tel:065592120">☎ 065/592-120</a>
+</aside>
+<div id="overlay"></div>
+
+<main>
+
+<section id="home" class="page">
+  <div class="hero">
+    <img src="assets/hero.webp" alt="Vinograd u planinskom krajoliku uz rijeku">
+    <div class="hero-copy">
+      <span>FOČA · 450 m NADMORSKE VISINE</span>
+      <h1>Provjerene sorte.<br>Iskustvo sa našeg terena.</h1>
+      <p>Sadnice i reznice vinove loze odabrane kroz godine uzgoja u planinskim uslovima.</p>
+      <a class="btn primary" href="#katalog">Pogledajte sorte →</a>
+    </div>
+  </div>
+
+  <div class="benefits">
+    <article><i>✓</i><div><b>Provjerene sorte</b><small>Lično iskustvo uzgoja</small></div></article>
+    <article><i>◷</i><div><b id="sortCount">Veliki izbor sorti</b><small>Bijele, crne i crvene</small></div></article>
+    <article><i>☎</i><div><b>Pomoć pri izboru</b><small>065/592-120</small></div></article>
+  </div>
+
+  <div class="wrap">
+    <p class="eyebrow">IZDVAJAMO IZ VINOGRADA</p>
+    <h2>Sorte koje vrijedi upoznati</h2>
+    <div id="featured" class="grid"></div>
+    <p class="center"><a class="btn outline" href="#katalog">Sve sorte →</a></p>
+  </div>
+
+  <div class="band">
+    <div class="wrap">
+      <p class="eyebrow light">KAKO NARUČITI</p>
+      <h2>Tri koraka do vaših sadnica</h2>
+      <div class="steps">
+        <div><span>1</span><b>Izaberite sortu</b><p>Pregledajte fotografije, opise i iskustva, pa dodajte sadnice ili reznice u korpu.</p></div>
+        <div><span>2</span><b>Pošaljite upit</b><p>Korpa složi poruku koju šaljete preko WhatsApp-a ili e-maila, ili nas samo nazovete.</p></div>
+        <div><span>3</span><b>Dogovaramo detalje</b><p>Javimo vam se, potvrdimo dostupnost i dogovorimo preuzimanje.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="katalog" class="page wrap">
+  <p class="eyebrow">WEB-SHOP</p>
+  <h1>Sorte vinove loze</h1>
+  <p class="lead">Izaberite sortu za detalje, fotografije i narudžbu. Nedostupne sadnice ili reznice nije moguće poručiti.</p>
+  <div class="filters">
+    <input id="search" type="search" placeholder="Pretražite sorte…" aria-label="Pretražite sorte">
+    <select id="fColor" aria-label="Boja"><option value="">Sve boje</option><option>Bijela</option><option>Crna</option><option>Crvena</option></select>
+    <select id="fRipen" aria-label="Vrijeme zrenja" hidden></select>
+    <select id="fType" aria-label="Vrsta" hidden></select>
+    <label class="check"><input type="checkbox" id="fAvail"> Samo dostupno</label>
+  </div>
+  <p id="resultCount" class="muted"></p>
+  <div id="catalogGrid" class="grid"></div>
+</section>
+
+<section id="cjenovnik" class="page wrap narrow">
+  <p class="eyebrow">CJENOVNIK</p>
+  <h1>Cijene sadnica i reznica</h1>
+  <p class="lead">Cijene su informativne. Za precizne detalje pozovite nas.</p>
+  <input id="priceSearch" type="search" placeholder="Pretražite sortu…" aria-label="Pretraži cjenovnik" class="wide-input">
+  <div class="ptable">
+    <div class="prow phead"><b>Sorta</b><b>Sadnica</b><b>Reznica</b></div>
+    <div id="priceList"></div>
+  </div>
+</section>
+
+<section id="kako" class="page wrap narrow">
+  <p class="eyebrow">NARUDŽBA</p>
+  <h1>Kako naručiti</h1>
+  <ol class="how">
+    <li><b>Izaberite sortu.</b> U katalogu otvorite sortu, izaberite sadnicu ili reznicu i količinu, pa dodajte u korpu.</li>
+    <li><b>Pošaljite upit.</b> U korpi upišite ime i telefon. Poruka se složi sama, a vi je šaljete preko WhatsApp-a ili e-maila.</li>
+    <li><b>Dogovor.</b> Javimo vam se, potvrdimo dostupnost i cijenu i dogovorimo preuzimanje.</li>
+  </ol>
+  <p>Ako vam je lakše, nazovite nas na <a href="tel:065592120">065/592-120</a> i pomoći ćemo vam pri izboru.</p>
+  <a class="btn primary" href="#katalog">Pogledajte sorte →</a>
+</section>
+
+<section id="kontakt" class="page wrap">
+  <p class="eyebrow">O NAMA</p>
+  <h1>Vinograd Preobraženje</h1>
+  <div class="contact-grid">
+    <div>
+      <h2>Vinograd iz Foče</h2>
+      <p>Na nadmorskoj visini od oko 450 metara pratimo ponašanje velikog broja sorti i otvoreno dijelimo njihovu otpornost, ukus, vrijeme zrenja i moguće nedostatke.</p>
+    </div>
+    <div class="contact-card">
+      <a href="tel:065592120">☎ 065/592-120</a>
+      <a id="waLink" href="#" target="_blank" rel="noopener">💬 WhatsApp</a>
+      <a href="mailto:vinogradfoca@gmail.com">✉ vinogradfoca@gmail.com</a>
+      <p>⌖ Šuba bb, Foča</p>
+      <a href="https://maps.app.goo.gl/zjia9Jqr959i946s9" target="_blank" rel="noopener">Prikaži na mapi →</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <b>Vinograd Preobraženje</b> · Šuba bb, Foča · <a href="tel:065592120">065/592-120</a> · <a href="mailto:vinogradfoca@gmail.com">vinogradfoca@gmail.com</a>
+</footer>
+
+<div id="modal" class="modal" aria-hidden="true"><div class="modal-box"><button class="close" id="modalClose" aria-label="Zatvori">×</button><div id="modalContent"></div></div></div>
+
+<aside id="cart" class="cart" aria-label="Korpa">
+  <button class="close" id="cartClose" aria-label="Zatvori">×</button>
+  <h2>Vaša korpa</h2>
+  <div id="cartItems"></div>
+  <div id="cartFoot">
+    <div class="cart-total">Ukupno <b id="total">0,00 KM</b></div>
+    <p id="totalNote" class="muted small"></p>
+    <label>Ime i prezime<input id="cName" autocomplete="name"></label>
+    <label>Telefon<input id="cPhone" type="tel" autocomplete="tel"></label>
+    <label>Napomena<textarea id="cNote" rows="2"></textarea></label>
+    <p id="cartErr" class="err" role="alert"></p>
+    <a id="sendWa" class="btn primary wide" href="#" target="_blank" rel="noopener">Pošalji upit na WhatsApp</a>
+    <a id="sendMail" class="btn outline wide" href="#">Pošalji upit e-mailom</a>
+    <a class="btn ghost wide" href="tel:065592120">☎ Radije zovem</a>
+  </div>
+</aside>
+
+<div id="toast" role="status"></div>
+
+<script>
+/* ==========================================================
+   KATALOG SORTI – ovdje mijenjaš sve podatke o sortama.
+   Svaka sorta je jedan red: v("id","Naziv","Boja",["slika1.webp","slika2.webp"],{dodatno})
+
+   U dodatno možeš upisati:
+     ripen:"Rana"          (Ultra rana / Rana / Srednje rana / Kasna)
+     type:"Stona"          (Stona / Besjemena / Vinska)
+     featured:true         (prikaži na početnoj u "Izdvajamo")
+     desc:"Opis sorte"
+     exp:"Lično iskustvo na mom terenu"
+     flaws:"Nedostaci"
+     sapling:{price:12,qty:30}   cijena u KM i količina sadnica
+     cutting:{price:3,qty:200}   cijena u KM i količina reznica
+   Pravila: price:null = "Cijena na upit"; qty:null = "Na upit"; qty:0 = nema na stanju.
+   ========================================================== */
+
+const IMG_DIR = "assets/";   // folder u kojem su fotografije sorti
+
+const SHOP = {
+  phone: "065/592-120",
+  phoneIntl: "38765592120",          // za WhatsApp, bez + i bez nula
+  email: "vinogradfoca@gmail.com"
+};
+
+const v = (id, name, color, images, o = {}) => ({
+  id, name, color, images,
+  ripen: "", type: "", featured: false,
+  desc: "", exp: "", flaws: "",
+  sapling: { price: null, qty: null },
+  cutting: { price: null, qty: null },
+  ...o
+});
+
+const VARIETIES = [
+  v("azalija","Azalija","Bijela",["azalija-1.webp","azalija-2.webp"]),
+  v("bajkonur","Bajkonur","Crna",["bajkonur-2.webp"]),
+  v("bijelo-otporno","Bijelo otporno","Bijela",["bijelo-otporno-1.webp"]),
+  v("black-grand","Black Grand","Crna",["black-grand-2.webp","black-grand-3.webp"],{featured:true}),
+  v("blagovest","Blagovest","Bijela",["blagovest-2.webp","blagovest-4.webp"],{featured:true}),
+  v("dikson","Dikson","Crvena",["web-dikson.webp"]),
+  v("everest","Everest","Crna",["everest-1.webp"]),
+  v("favor","Favor","Crna",["favor-1.webp"]),
+  v("garmonia","Garmonia","Crna",["garmonia-2.webp"]),
+  v("gold-finger","Gold Finger","Bijela",["gold-finger-3.webp"]),
+  v("halloween","Halloween","Crna",["halloween-1.webp"]),
+  v("kameleon","Kameleon","Bijela",["kameleon-1.webp","kameleon-3.webp"]),
+  v("km-342","KM-342","Bijela",["km-342-1.webp","km-342-3.webp"]),
+  v("korjanka","Korjanka","Crna",["korjanka-1.webp"]),
+  v("livija","Livija","Crvena",["livija-1.webp","livija-3.webp"],{featured:true}),
+  v("muskat-blu","Muskat Blu","Crna",["web-muskat-blu.webp"]),
+  v("nadezda-azos","Nadežda Azos","Crna",["web-nadezda-azos.webp"]),
+  v("nizina","Nizina","Crna",["nizina-3.webp","nizina-4.webp","nizina-2.webp"],{featured:true}),
+  v("podarok-ukrajine","Podarok Ukrajine","Bijela",["podarok-ukrajine-2.webp"]),
+  v("poslanik","Poslanik","Crna",["poslanik-signalni-1.webp"]),
+  v("prima-parisa","Prima Parisa","Bijela",["prima-parisa-1.webp"]),
+  v("ratatuj","Ratatuj","Bijela",["ratatuj-1.webp","ratatuj-3.webp"],{featured:true}),
+  v("rusko-rano","Rusko rano","Bijela",["rusko-rano-1.webp"]),
+  v("vatra","Vatra","Crna",["vatra-1.webp"]),
+  v("veles","Veles","Crvena",["veles-2.webp"]),
+  v("viktor","Viktor","Bijela",["viktor-3.webp","viktor-4.webp"],{featured:true})
+];
+
+</script>
+<script>
+(function(){
+"use strict";
+const $=s=>document.querySelector(s);
+const $$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const KM=n=>n.toFixed(2).replace(".",",")+" KM";
+const KIND={sapling:"Sadnica",cutting:"Reznica"};
+const PAGES=["home","katalog","cjenovnik","kako","kontakt"];
+const byId=id=>VARIETIES.find(x=>x.id===id);
+const img=f=>IMG_DIR+f;
+
+/* ---------- pomoćne ---------- */
+const orderable=o=>o.qty===null||o.qty>0;
+const priceText=o=>o.price==null?"Cijena na upit":KM(o.price);
+const stockText=o=>o.qty===0?"Nema na stanju":o.qty===null?"Na upit":"Dostupno: "+o.qty;
+const available=x=>orderable(x.sapling)||orderable(x.cutting);
+const hasPrices=VARIETIES.some(x=>x.sapling.price!=null||x.cutting.price!=null);
+const colorClass=c=>({Bijela:"w",Crna:"b",Crvena:"r"}[c]||"w");
+
+/* ---------- korpa ---------- */
+const CART_KEY="vp-cart-v1";
+let cart=[];
+try{cart=JSON.parse(localStorage.getItem(CART_KEY)||"[]").filter(i=>byId(i.id)&&KIND[i.kind])}catch(e){cart=[]}
+const saveCart=()=>{try{localStorage.setItem(CART_KEY,JSON.stringify(cart))}catch(e){}};
+function addToCart(id,kind,qty){
+  const o=byId(id)[kind];
+  if(!orderable(o)) return;
+  let it=cart.find(i=>i.id===id&&i.kind===kind);
+  if(!it){it={id,kind,qty:0};cart.push(it)}
+  it.qty+=qty;
+  if(o.qty!==null) it.qty=Math.min(it.qty,o.qty);
+  saveCart();renderCart();
+  toast(byId(id).name+" ("+KIND[kind].toLowerCase()+") je u korpi");
+}
+function setQty(id,kind,q){
+  const it=cart.find(i=>i.id===id&&i.kind===kind);if(!it)return;
+  const o=byId(id)[kind];
+  if(q<=0)cart=cart.filter(i=>i!==it);
+  else it.qty=o.qty!==null?Math.min(q,o.qty):q;
+  saveCart();renderCart();
+}
+function cartTotals(){
+  let total=0,unpriced=0;
+  cart.forEach(i=>{const o=byId(i.id)[i.kind];if(o.price==null)unpriced++;else total+=o.price*i.qty});
+  return{total,unpriced};
+}
+function buildMessage(){
+  const name=$("#cName").value.trim(),phone=$("#cPhone").value.trim(),note=$("#cNote").value.trim();
+  const {total,unpriced}=cartTotals();
+  let t="Zdravo, želim da pošaljem upit za narudžbu:\n\n";
+  cart.forEach(i=>{const x=byId(i.id),o=x[i.kind];
+    t+="• "+x.name+" – "+KIND[i.kind].toLowerCase()+" × "+i.qty+(o.price!=null?" ("+KM(o.price*i.qty)+")":" (cijena na upit)")+"\n"});
+  if(total>0)t+="\nUkupno"+(unpriced?" (bez stavki na upit)":"")+": "+KM(total)+"\n";
+  if(note)t+="\nNapomena: "+note+"\n";
+  t+="\nIme: "+name+"\nTelefon: "+phone;
+  return t;
+}
+function renderCart(){
+  $("#cartCount").textContent=cart.reduce((a,i)=>a+i.qty,0);
+  const box=$("#cartItems");
+  if(!cart.length){
+    box.innerHTML='<div class="empty">Korpa je prazna.<br><a href="#katalog" class="btn outline">Pogledajte sorte</a></div>';
+    $("#cartFoot").hidden=true;return;
+  }
+  $("#cartFoot").hidden=false;
+  box.innerHTML=cart.map(i=>{
+    const x=byId(i.id),o=x[i.kind];
+    return `<div class="citem"><img src="${img(x.images[0])}" alt=""><div class="cinfo"><b>${esc(x.name)}</b><small>${KIND[i.kind]} · ${o.price!=null?KM(o.price*i.qty):"cijena na upit"}</small>
+    <div class="stepper"><button data-q="-1" data-id="${x.id}" data-k="${i.kind}" aria-label="Manje">−</button><span>${i.qty}</span><button data-q="1" data-id="${x.id}" data-k="${i.kind}" aria-label="Više">+</button></div></div>
+    <button class="rm" data-q="0" data-id="${x.id}" data-k="${i.kind}" aria-label="Ukloni">×</button></div>`}).join("");
+  const {total,unpriced}=cartTotals();
+  $("#total").textContent=(total===0&&unpriced)?"Po upitu":KM(total);
+  $("#totalNote").textContent=unpriced?"Za "+unpriced+" stavk"+(unpriced===1?"u":"e")+" cijenu potvrđujemo u odgovoru.":"";
+}
+$("#cartItems").addEventListener("click",e=>{
+  const b=e.target.closest("button[data-q]");if(!b)return;
+  const it=cart.find(i=>i.id===b.dataset.id&&i.kind===b.dataset.k);if(!it)return;
+  const d=+b.dataset.q;setQty(it.id,it.kind,d===0?0:it.qty+d);
+});
+function validateSend(e){
+  const ok=$("#cName").value.trim()&&$("#cPhone").value.trim();
+  $("#cartErr").textContent=ok?"":"Upišite ime i telefon da bismo vam se javili.";
+  if(!ok){e.preventDefault();return false}
+  return true;
+}
+$("#sendWa").addEventListener("click",e=>{
+  if(!validateSend(e))return;
+  $("#sendWa").href="https://wa.me/"+SHOP.phoneIntl+"?text="+encodeURIComponent(buildMessage());
+});
+$("#sendMail").addEventListener("click",e=>{
+  if(!validateSend(e))return;
+  $("#sendMail").href="mailto:"+SHOP.email+"?subject="+encodeURIComponent("Upit za narudžbu – Vinograd Preobraženje")+"&body="+encodeURIComponent(buildMessage());
+});
+
+/* ---------- kartice ---------- */
+function card(x){
+  const p=[x.sapling.price,x.cutting.price].filter(n=>n!=null);
+  const from=p.length?"od "+KM(Math.min(...p)):"Cijena na upit";
+  const av=available(x);
+  return `<a class="card${av?"":" off"}" href="#sorta/${x.id}">
+    <div class="ph"><img src="${img(x.images[0])}" alt="Grozd sorte ${esc(x.name)}" loading="lazy"><span class="dot ${colorClass(x.color)}"></span></div>
+    <div class="cb"><span class="tag">${x.color}${x.ripen?" · "+esc(x.ripen):""}</span><h3>${esc(x.name)}</h3><small>${av?from:"Trenutno nedostupno"}</small></div></a>`;
+}
+function renderFeatured(){
+  const f=VARIETIES.filter(x=>x.featured);
+  $("#featured").innerHTML=(f.length?f:VARIETIES.slice(0,6)).map(card).join("");
+}
+function fillSelect(sel,label,key){
+  const vals=[...new Set(VARIETIES.map(x=>x[key]).filter(Boolean))];
+  if(!vals.length)return;
+  sel.innerHTML=`<option value="">${label}</option>`+vals.map(s=>`<option>${esc(s)}</option>`).join("");
+  sel.hidden=false;
+}
+function renderCatalog(){
+  const q=$("#search").value.trim().toLowerCase(),c=$("#fColor").value,r=$("#fRipen").value,t=$("#fType").value,a=$("#fAvail").checked;
+  const list=VARIETIES.filter(x=>(!q||x.name.toLowerCase().includes(q))&&(!c||x.color===c)&&(!r||x.ripen===r)&&(!t||x.type===t)&&(!a||available(x)));
+  $("#resultCount").textContent=list.length+" od "+VARIETIES.length+" sorti";
+  $("#catalogGrid").innerHTML=list.length?list.map(card).join(""):'<div class="empty full">Nema sorti za zadate filtere.</div>';
+}
+["search","fColor","fRipen","fType","fAvail"].forEach(id=>$("#"+id).addEventListener("input",renderCatalog));
+
+function renderPrices(){
+  const q=$("#priceSearch").value.trim().toLowerCase();
+  const cell=o=>o.price==null?"–":KM(o.price);
+  $("#priceList").innerHTML=VARIETIES.filter(x=>!q||x.name.toLowerCase().includes(q)).map(x=>
+    `<a class="prow" href="#sorta/${x.id}"><span><i class="dot ${colorClass(x.color)}"></i> ${esc(x.name)}</span><span>${cell(x.sapling)}</span><span>${cell(x.cutting)}</span></a>`).join("");
+}
+$("#priceSearch").addEventListener("input",renderPrices);
+
+/* ---------- modal sorte ---------- */
+let modalState=null;
+function openModal(x){
+  modalState={id:x.id,qty:{sapling:1,cutting:1}};
+  const thumbs=x.images.length>1?`<div class="thumbs">${x.images.map((f,i)=>`<button class="${i?"":"on"}" data-img="${i}" aria-label="Fotografija ${i+1}"><img src="${img(f)}" alt=""></button>`).join("")}</div>`:"";
+  const facts=[["Zrenje",x.ripen],["Vrsta",x.type]].filter(f=>f[1]).map(f=>`<span><small>${f[0]}</small><b>${esc(f[1])}</b></span>`).join("");
+  const block=(t,txt,cls)=>txt?`<div class="mblock ${cls||""}"><h4>${t}</h4><p>${esc(txt)}</p></div>`:"";
+  const row=k=>{const o=x[k],ok=orderable(o);
+    return `<div class="orow${ok?"":" off"}"><div><b>${KIND[k]}</b><small>${stockText(o)}</small></div><div class="oprice">${priceText(o)}</div>
+    ${ok?`<div class="stepper" data-k="${k}"><button data-d="-1" aria-label="Manje">−</button><span id="q-${k}">1</span><button data-d="1" aria-label="Više">+</button></div><button class="btn primary add" data-add="${k}">U korpu</button>`:`<span class="muted">Nedostupno</span>`}</div>`};
+  $("#modalContent").innerHTML=`<div class="mgrid"><div class="gallery"><img id="mainImg" src="${img(x.images[0])}" alt="Grozd sorte ${esc(x.name)}">${thumbs}</div>
+  <div class="minfo"><span class="tag">${x.color}</span><h2>${esc(x.name)}</h2>${facts?`<div class="facts">${facts}</div>`:""}
+  ${block("Opis",x.desc)}${block("Lično iskustvo na mom terenu",x.exp)}${block("⚠️ Nedostaci",x.flaws,"warn")}
+  ${x.desc||x.exp||x.flaws?"":'<p class="muted">Više o ovoj sorti pitajte nas, rado ćemo podijeliti iskustvo sa našeg terena.</p>'}
+  <div class="order"><h3>Naručite</h3>${row("sapling")}${row("cutting")}
+  <a class="ask" href="tel:065592120">Pitanje o sorti? Nazovite 065/592-120</a></div></div></div>`;
+  $("#modal").classList.add("open");$("#modal").setAttribute("aria-hidden","false");
+  document.body.classList.add("lock");
+}
+function closeModal(){
+  $("#modal").classList.remove("open");$("#modal").setAttribute("aria-hidden","true");
+  if(!$("#cart").classList.contains("open")&&!$("#drawer").classList.contains("open"))document.body.classList.remove("lock");
+  modalState=null;
+  if(location.hash.startsWith("#sorta/"))history.replaceState(null,"","#"+(current==="home"?"home":current));
+}
+$("#modalClose").addEventListener("click",closeModal);
+$("#modal").addEventListener("click",e=>{if(e.target.id==="modal")closeModal()});
+$("#modalContent").addEventListener("click",e=>{
+  const t=e.target.closest("button");if(!t||!modalState)return;
+  if(t.dataset.img!==undefined){
+    const x=byId(modalState.id);$("#mainImg").src=img(x.images[+t.dataset.img]);
+    $$(".thumbs button").forEach(b=>b.classList.toggle("on",b===t));return;
+  }
+  if(t.dataset.d){
+    const k=t.closest(".stepper").dataset.k,o=byId(modalState.id)[k];
+    let q=modalState.qty[k]+ +t.dataset.d;q=Math.max(1,q);if(o.qty!==null)q=Math.min(q,o.qty);
+    modalState.qty[k]=q;$("#q-"+k).textContent=q;return;
+  }
+  if(t.dataset.add){
+    const k=t.dataset.add;addToCart(modalState.id,k,modalState.qty[k]);
+  }
+});
+
+/* ---------- navigacija ---------- */
+let current="home";
+function show(page){
+  current=page;
+  PAGES.forEach(p=>$("#"+p).classList.toggle("active",p===page));
+  $$("#drawer nav a").forEach(a=>a.classList.toggle("on",a.getAttribute("href")==="#"+page));
+}
+function route(){
+  const h=location.hash.replace(/^#/,"")||"home";
+  if(h.startsWith("sorta/")){
+    const x=byId(h.slice(6));
+    if(!x){location.hash="#katalog";return}
+    if(!$(".page.active"))show("katalog");
+    openModal(x);return;
+  }
+  if(modalState)closeModal();
+  closeAll();
+  show(PAGES.includes(h)?h:"home");
+  window.scrollTo(0,0);
+}
+window.addEventListener("hashchange",route);
+
+/* ---------- meni, korpa, overlay ---------- */
+function closeAll(){
+  $("#drawer").classList.remove("open");$("#cart").classList.remove("open");$("#overlay").classList.remove("on");
+  if(!$("#modal").classList.contains("open"))document.body.classList.remove("lock");
+}
+function openPanel(sel){
+  $(sel).classList.add("open");$("#overlay").classList.add("on");document.body.classList.add("lock");
+}
+$("#menuBtn").addEventListener("click",()=>openPanel("#drawer"));
+$("#cartBtn").addEventListener("click",()=>openPanel("#cart"));
+$("#closeMenu").addEventListener("click",closeAll);
+$("#cartClose").addEventListener("click",closeAll);
+$("#overlay").addEventListener("click",closeAll);
+$("#drawer").addEventListener("click",e=>{if(e.target.closest("a"))closeAll()});
+$("#cartItems").addEventListener("click",e=>{if(e.target.closest("a"))closeAll()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(modalState)closeModal();else closeAll()}});
+
+let tt;
+function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("on");clearTimeout(tt);tt=setTimeout(()=>t.classList.remove("on"),2200)}
+
+/* ---------- start ---------- */
+$("#waLink").href="https://wa.me/"+SHOP.phoneIntl;
+$("#sortCount").textContent=VARIETIES.length+" sorti u ponudi";
+if(!hasPrices){$("#navPrices").hidden=true}
+fillSelect($("#fRipen"),"Sva vremena zrenja","ripen");
+fillSelect($("#fType"),"Sve vrste","type");
+renderFeatured();renderCatalog();renderPrices();renderCart();
+route();
+})();
+
+</script>
+</body>
+</html>
