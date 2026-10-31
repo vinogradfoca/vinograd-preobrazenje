@@ -470,6 +470,7 @@
         "exp": "",
         "flaws": "",
         "images": [
+          "livija-1",
           "livija-3"
         ],
         "sapling": {
@@ -985,6 +986,15 @@
       "korjanka-1": {
         "file": "korjanka-1.webp",
         "alt": "Grozd sorte Korjanka",
+        "w": null,
+        "h": null,
+        "variants": {},
+        "createdAt": null,
+        "createdBy": null
+      },
+      "livija-1": {
+        "file": "livija-1.webp",
+        "alt": "Grozd sorte Livija",
         "w": null,
         "h": null,
         "variants": {},
