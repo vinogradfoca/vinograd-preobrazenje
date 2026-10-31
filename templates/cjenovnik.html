@@ -1,0 +1,12 @@
+<section id="cjenovnik" class="page wrap narrow">
+  <p class="eyebrow">CJENOVNIK</p>
+  <h1>Cijene sadnica i reznica</h1>
+  <p class="lead">Cijene su informativne. Za precizne detalje pozovite nas.</p>
+  <input id="priceSearch" type="search" placeholder="Pretražite sortu…" aria-label="Pretraži cjenovnik" class="wide-input" hidden>
+  <div class="ptable">
+    <div class="prow phead"><b>Sorta</b><b>Sadnica</b><b>Reznica</b></div>
+    <div id="priceList">
+    {{#each varieties}}<a class="prow" href="{{url}}" data-name="{{search}}"><span><i class="dot {{colorClass}}"></i> {{name}}</span><span>{{priceSapling}}</span><span>{{priceCutting}}</span></a>
+    {{/each}}</div>
+  </div>
+</section>

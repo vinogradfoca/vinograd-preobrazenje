@@ -1,0 +1,1143 @@
+{
+  "vinograd": {
+    "settings": {
+      "name": "Vinograd Preobraženje",
+      "phone": "065/592-120",
+      "phoneIntl": "38765592120",
+      "email": "vinogradfoca@gmail.com",
+      "address": "Šuba bb, Foča",
+      "mapUrl": "https://maps.app.goo.gl/zjia9Jqr959i946s9",
+      "siteUrl": ""
+    },
+    "pages": {
+      "home": {
+        "eyebrow": "FOČA · 450 m NADMORSKE VISINE",
+        "title": "Provjerene sorte.\nIskustvo sa našeg terena.",
+        "text": "Sadnice i reznice vinove loze odabrane kroz godine uzgoja u planinskim uslovima.",
+        "heroImage": "hero",
+        "seoTitle": "Vinograd Preobraženje | Sadnice i reznice vinove loze, Foča",
+        "seoDescription": "Provjerene sorte vinove loze iz Foče. Sadnice, reznice i lična iskustva sa uzgojem na 450 m nadmorske visine."
+      },
+      "kako": {
+        "title": "Kako naručiti",
+        "intro": "",
+        "steps": [
+          {
+            "title": "Izaberite sortu.",
+            "text": "U katalogu otvorite sortu, izaberite sadnicu ili reznicu i količinu, pa dodajte u korpu."
+          },
+          {
+            "title": "Pošaljite upit.",
+            "text": "U korpi upišite ime i telefon. Poruka se složi sama, a vi je šaljete preko WhatsApp-a ili e-maila."
+          },
+          {
+            "title": "Dogovor.",
+            "text": "Javimo vam se, potvrdimo dostupnost i cijenu i dogovorimo preuzimanje."
+          }
+        ],
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "kontakt": {
+        "title": "Vinograd iz Foče",
+        "about": "Na nadmorskoj visini od oko 450 metara pratimo ponašanje velikog broja sorti i otvoreno dijelimo njihovu otpornost, ukus, vrijeme zrenja i moguće nedostatke.",
+        "seoTitle": "",
+        "seoDescription": ""
+      }
+    },
+    "varieties": {
+      "azalija": {
+        "name": "Azalija",
+        "slug": "azalija",
+        "color": "Bijela",
+        "ripen": "",
+        "type": "",
+        "order": 1,
+        "featured": false,
+        "visible": true,
+        "desc": "",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "azalija-1",
+          "azalija-2"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "cutting": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "seoTitle": "",
+        "seoDescription": "",
+        "updatedAt": null
+      },
+      "bajkonur": {
+        "name": "Bajkonur",
+        "slug": "bajkonur",
+        "color": "Crna",
+        "ripen": "",
+        "type": "",
+        "order": 2,
+        "featured": false,
+        "visible": true,
+        "desc": "",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "bajkonur-2"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "cutting": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "seoTitle": "",
+        "seoDescription": "",
+        "updatedAt": null
+      },
+      "bijelo-otporno": {
+        "name": "Bijelo otporno",
+        "slug": "bijelo-otporno",
+        "color": "Bijela",
+        "ripen": "",
+        "type": "",
+        "order": 3,
+        "featured": false,
+        "visible": true,
+        "desc": "",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "bijelo-otporno-1"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "cutting": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "seoTitle": "",
+        "seoDescription": "",
+        "updatedAt": null
+      },
+      "black-grand": {
+        "name": "Black Grand",
+        "slug": "black-grand",
+        "color": "Crna",
+        "ripen": "",
+        "type": "",
+        "order": 4,
+        "featured": true,
+        "visible": true,
+        "desc": "",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "black-grand-2",
+          "black-grand-3"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "cutting": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "seoTitle": "",
+        "seoDescription": "",
+        "updatedAt": null
+      },
+      "blagovest": {
+        "name": "Blagovest",
+        "slug": "blagovest",
+        "color": "Bijela",
+        "ripen": "",
+        "type": "",
+        "order": 5,
+        "featured": true,
+        "visible": true,
+        "desc": "",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "blagovest-2",
+          "blagovest-4"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "cutting": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "seoTitle": "",
+        "seoDescription": "",
+        "updatedAt": null
+      },
+      "dikson": {
+        "name": "Dikson",
+        "slug": "dikson",
+        "color": "Crvena",
+        "ripen": "",
+        "type": "",
+        "order": 6,
+        "featured": false,
+        "visible": true,
+        "desc": "",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "web-dikson"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "cutting": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "seoTitle": "",
+        "seoDescription": "",
+        "updatedAt": null
+      },
+      "everest": {
+        "name": "Everest",
+        "slug": "everest",
+        "color": "Crna",
+        "ripen": "",
+        "type": "",
+        "order": 7,
+        "featured": false,
+        "visible": true,
+        "desc": "",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "everest-1"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "cutting": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "seoTitle": "",
+        "seoDescription": "",
+        "updatedAt": null
+      },
+      "favor": {
+        "name": "Favor",
+        "slug": "favor",
+        "color": "Crna",
+        "ripen": "",
+        "type": "",
+        "order": 8,
+        "featured": false,
+        "visible": true,
+        "desc": "",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "favor-1"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "cutting": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "seoTitle": "",
+        "seoDescription": "",
+        "updatedAt": null
+      },
+      "garmonia": {
+        "name": "Garmonia",
+        "slug": "garmonia",
+        "color": "Crna",
+        "ripen": "",
+        "type": "",
+        "order": 9,
+        "featured": false,
+        "visible": true,
+        "desc": "",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "garmonia-2"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "cutting": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "seoTitle": "",
+        "seoDescription": "",
+        "updatedAt": null
+      },
+      "gold-finger": {
+        "name": "Gold Finger",
+        "slug": "gold-finger",
+        "color": "Bijela",
+        "ripen": "",
+        "type": "",
+        "order": 10,
+        "featured": false,
+        "visible": true,
+        "desc": "",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "gold-finger-3"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "cutting": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "seoTitle": "",
+        "seoDescription": "",
+        "updatedAt": null
+      },
+      "halloween": {
+        "name": "Halloween",
+        "slug": "halloween",
+        "color": "Crna",
+        "ripen": "",
+        "type": "",
+        "order": 11,
+        "featured": false,
+        "visible": true,
+        "desc": "",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "halloween-1"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "cutting": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "seoTitle": "",
+        "seoDescription": "",
+        "updatedAt": null
+      },
+      "kameleon": {
+        "name": "Kameleon",
+        "slug": "kameleon",
+        "color": "Bijela",
+        "ripen": "",
+        "type": "",
+        "order": 12,
+        "featured": false,
+        "visible": true,
+        "desc": "",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "kameleon-1",
+          "kameleon-3"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "cutting": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "seoTitle": "",
+        "seoDescription": "",
+        "updatedAt": null
+      },
+      "km-342": {
+        "name": "KM-342",
+        "slug": "km-342",
+        "color": "Bijela",
+        "ripen": "",
+        "type": "",
+        "order": 13,
+        "featured": false,
+        "visible": true,
+        "desc": "",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "km-342-1",
+          "km-342-3"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "cutting": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "seoTitle": "",
+        "seoDescription": "",
+        "updatedAt": null
+      },
+      "korjanka": {
+        "name": "Korjanka",
+        "slug": "korjanka",
+        "color": "Crna",
+        "ripen": "",
+        "type": "",
+        "order": 14,
+        "featured": false,
+        "visible": true,
+        "desc": "",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "korjanka-1"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "cutting": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "seoTitle": "",
+        "seoDescription": "",
+        "updatedAt": null
+      },
+      "livija": {
+        "name": "Livija",
+        "slug": "livija",
+        "color": "Crvena",
+        "ripen": "",
+        "type": "",
+        "order": 15,
+        "featured": true,
+        "visible": true,
+        "desc": "",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "livija-3"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "cutting": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "seoTitle": "",
+        "seoDescription": "",
+        "updatedAt": null
+      },
+      "muskat-blu": {
+        "name": "Muskat Blu",
+        "slug": "muskat-blu",
+        "color": "Crna",
+        "ripen": "",
+        "type": "",
+        "order": 16,
+        "featured": false,
+        "visible": true,
+        "desc": "",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "web-muskat-blu"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "cutting": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "seoTitle": "",
+        "seoDescription": "",
+        "updatedAt": null
+      },
+      "nadezda-azos": {
+        "name": "Nadežda Azos",
+        "slug": "nadezda-azos",
+        "color": "Crna",
+        "ripen": "",
+        "type": "",
+        "order": 17,
+        "featured": false,
+        "visible": true,
+        "desc": "",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "web-nadezda-azos"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "cutting": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "seoTitle": "",
+        "seoDescription": "",
+        "updatedAt": null
+      },
+      "nizina": {
+        "name": "Nizina",
+        "slug": "nizina",
+        "color": "Crna",
+        "ripen": "",
+        "type": "",
+        "order": 18,
+        "featured": true,
+        "visible": true,
+        "desc": "",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "nizina-3",
+          "nizina-4",
+          "nizina-2"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "cutting": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "seoTitle": "",
+        "seoDescription": "",
+        "updatedAt": null
+      },
+      "podarok-ukrajine": {
+        "name": "Podarok Ukrajine",
+        "slug": "podarok-ukrajine",
+        "color": "Bijela",
+        "ripen": "",
+        "type": "",
+        "order": 19,
+        "featured": false,
+        "visible": true,
+        "desc": "",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "podarok-ukrajine-2"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "cutting": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "seoTitle": "",
+        "seoDescription": "",
+        "updatedAt": null
+      },
+      "poslanik": {
+        "name": "Poslanik",
+        "slug": "poslanik",
+        "color": "Crna",
+        "ripen": "",
+        "type": "",
+        "order": 20,
+        "featured": false,
+        "visible": true,
+        "desc": "",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "poslanik-signalni-1"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "cutting": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "seoTitle": "",
+        "seoDescription": "",
+        "updatedAt": null
+      },
+      "prima-parisa": {
+        "name": "Prima Parisa",
+        "slug": "prima-parisa",
+        "color": "Bijela",
+        "ripen": "",
+        "type": "",
+        "order": 21,
+        "featured": false,
+        "visible": true,
+        "desc": "",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "prima-parisa-1"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "cutting": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "seoTitle": "",
+        "seoDescription": "",
+        "updatedAt": null
+      },
+      "ratatuj": {
+        "name": "Ratatuj",
+        "slug": "ratatuj",
+        "color": "Bijela",
+        "ripen": "",
+        "type": "",
+        "order": 22,
+        "featured": true,
+        "visible": true,
+        "desc": "",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "ratatuj-1",
+          "ratatuj-3"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "cutting": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "seoTitle": "",
+        "seoDescription": "",
+        "updatedAt": null
+      },
+      "rusko-rano": {
+        "name": "Rusko rano",
+        "slug": "rusko-rano",
+        "color": "Bijela",
+        "ripen": "",
+        "type": "",
+        "order": 23,
+        "featured": false,
+        "visible": true,
+        "desc": "",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "rusko-rano-1"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "cutting": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "seoTitle": "",
+        "seoDescription": "",
+        "updatedAt": null
+      },
+      "vatra": {
+        "name": "Vatra",
+        "slug": "vatra",
+        "color": "Crna",
+        "ripen": "",
+        "type": "",
+        "order": 24,
+        "featured": false,
+        "visible": true,
+        "desc": "",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "vatra-1"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "cutting": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "seoTitle": "",
+        "seoDescription": "",
+        "updatedAt": null
+      },
+      "veles": {
+        "name": "Veles",
+        "slug": "veles",
+        "color": "Crvena",
+        "ripen": "",
+        "type": "",
+        "order": 25,
+        "featured": false,
+        "visible": true,
+        "desc": "",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "veles-2"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "cutting": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "seoTitle": "",
+        "seoDescription": "",
+        "updatedAt": null
+      },
+      "viktor": {
+        "name": "Viktor",
+        "slug": "viktor",
+        "color": "Bijela",
+        "ripen": "",
+        "type": "",
+        "order": 26,
+        "featured": true,
+        "visible": true,
+        "desc": "",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "viktor-3",
+          "viktor-4"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "cutting": {
+          "enabled": true,
+          "price": null,
+          "qty": null
+        },
+        "seoTitle": "",
+        "seoDescription": "",
+        "updatedAt": null
+      }
+    },
+    "images": {
+      "hero": {
+        "file": "hero.webp",
+        "alt": "Vinograd u planinskom krajoliku uz rijeku",
+        "w": null,
+        "h": null,
+        "variants": {},
+        "createdAt": null,
+        "createdBy": null
+      },
+      "azalija-1": {
+        "file": "azalija-1.webp",
+        "alt": "Grozd sorte Azalija",
+        "w": null,
+        "h": null,
+        "variants": {},
+        "createdAt": null,
+        "createdBy": null
+      },
+      "azalija-2": {
+        "file": "azalija-2.webp",
+        "alt": "Grozd sorte Azalija",
+        "w": null,
+        "h": null,
+        "variants": {},
+        "createdAt": null,
+        "createdBy": null
+      },
+      "bajkonur-2": {
+        "file": "bajkonur-2.webp",
+        "alt": "Grozd sorte Bajkonur",
+        "w": null,
+        "h": null,
+        "variants": {},
+        "createdAt": null,
+        "createdBy": null
+      },
+      "bijelo-otporno-1": {
+        "file": "bijelo-otporno-1.webp",
+        "alt": "Grozd sorte Bijelo otporno",
+        "w": null,
+        "h": null,
+        "variants": {},
+        "createdAt": null,
+        "createdBy": null
+      },
+      "black-grand-2": {
+        "file": "black-grand-2.webp",
+        "alt": "Grozd sorte Black Grand",
+        "w": null,
+        "h": null,
+        "variants": {},
+        "createdAt": null,
+        "createdBy": null
+      },
+      "black-grand-3": {
+        "file": "black-grand-3.webp",
+        "alt": "Grozd sorte Black Grand",
+        "w": null,
+        "h": null,
+        "variants": {},
+        "createdAt": null,
+        "createdBy": null
+      },
+      "blagovest-2": {
+        "file": "blagovest-2.webp",
+        "alt": "Grozd sorte Blagovest",
+        "w": null,
+        "h": null,
+        "variants": {},
+        "createdAt": null,
+        "createdBy": null
+      },
+      "blagovest-4": {
+        "file": "blagovest-4.webp",
+        "alt": "Grozd sorte Blagovest",
+        "w": null,
+        "h": null,
+        "variants": {},
+        "createdAt": null,
+        "createdBy": null
+      },
+      "web-dikson": {
+        "file": "web-dikson.webp",
+        "alt": "Grozd sorte Dikson",
+        "w": null,
+        "h": null,
+        "variants": {},
+        "createdAt": null,
+        "createdBy": null
+      },
+      "everest-1": {
+        "file": "everest-1.webp",
+        "alt": "Grozd sorte Everest",
+        "w": null,
+        "h": null,
+        "variants": {},
+        "createdAt": null,
+        "createdBy": null
+      },
+      "favor-1": {
+        "file": "favor-1.webp",
+        "alt": "Grozd sorte Favor",
+        "w": null,
+        "h": null,
+        "variants": {},
+        "createdAt": null,
+        "createdBy": null
+      },
+      "garmonia-2": {
+        "file": "garmonia-2.webp",
+        "alt": "Grozd sorte Garmonia",
+        "w": null,
+        "h": null,
+        "variants": {},
+        "createdAt": null,
+        "createdBy": null
+      },
+      "gold-finger-3": {
+        "file": "gold-finger-3.webp",
+        "alt": "Grozd sorte Gold Finger",
+        "w": null,
+        "h": null,
+        "variants": {},
+        "createdAt": null,
+        "createdBy": null
+      },
+      "halloween-1": {
+        "file": "halloween-1.webp",
+        "alt": "Grozd sorte Halloween",
+        "w": null,
+        "h": null,
+        "variants": {},
+        "createdAt": null,
+        "createdBy": null
+      },
+      "kameleon-1": {
+        "file": "kameleon-1.webp",
+        "alt": "Grozd sorte Kameleon",
+        "w": null,
+        "h": null,
+        "variants": {},
+        "createdAt": null,
+        "createdBy": null
+      },
+      "kameleon-3": {
+        "file": "kameleon-3.webp",
+        "alt": "Grozd sorte Kameleon",
+        "w": null,
+        "h": null,
+        "variants": {},
+        "createdAt": null,
+        "createdBy": null
+      },
+      "km-342-1": {
+        "file": "km-342-1.webp",
+        "alt": "Grozd sorte KM-342",
+        "w": null,
+        "h": null,
+        "variants": {},
+        "createdAt": null,
+        "createdBy": null
+      },
+      "km-342-3": {
+        "file": "km-342-3.webp",
+        "alt": "Grozd sorte KM-342",
+        "w": null,
+        "h": null,
+        "variants": {},
+        "createdAt": null,
+        "createdBy": null
+      },
+      "korjanka-1": {
+        "file": "korjanka-1.webp",
+        "alt": "Grozd sorte Korjanka",
+        "w": null,
+        "h": null,
+        "variants": {},
+        "createdAt": null,
+        "createdBy": null
+      },
+      "livija-3": {
+        "file": "livija-3.webp",
+        "alt": "Grozd sorte Livija",
+        "w": null,
+        "h": null,
+        "variants": {},
+        "createdAt": null,
+        "createdBy": null
+      },
+      "web-muskat-blu": {
+        "file": "web-muskat-blu.webp",
+        "alt": "Grozd sorte Muskat Blu",
+        "w": null,
+        "h": null,
+        "variants": {},
+        "createdAt": null,
+        "createdBy": null
+      },
+      "web-nadezda-azos": {
+        "file": "web-nadezda-azos.webp",
+        "alt": "Grozd sorte Nadežda Azos",
+        "w": null,
+        "h": null,
+        "variants": {},
+        "createdAt": null,
+        "createdBy": null
+      },
+      "nizina-3": {
+        "file": "nizina-3.webp",
+        "alt": "Grozd sorte Nizina",
+        "w": null,
+        "h": null,
+        "variants": {},
+        "createdAt": null,
+        "createdBy": null
+      },
+      "nizina-4": {
+        "file": "nizina-4.webp",
+        "alt": "Grozd sorte Nizina",
+        "w": null,
+        "h": null,
+        "variants": {},
+        "createdAt": null,
+        "createdBy": null
+      },
+      "nizina-2": {
+        "file": "nizina-2.webp",
+        "alt": "Grozd sorte Nizina",
+        "w": null,
+        "h": null,
+        "variants": {},
+        "createdAt": null,
+        "createdBy": null
+      },
+      "podarok-ukrajine-2": {
+        "file": "podarok-ukrajine-2.webp",
+        "alt": "Grozd sorte Podarok Ukrajine",
+        "w": null,
+        "h": null,
+        "variants": {},
+        "createdAt": null,
+        "createdBy": null
+      },
+      "poslanik-signalni-1": {
+        "file": "poslanik-signalni-1.webp",
+        "alt": "Grozd sorte Poslanik",
+        "w": null,
+        "h": null,
+        "variants": {},
+        "createdAt": null,
+        "createdBy": null
+      },
+      "prima-parisa-1": {
+        "file": "prima-parisa-1.webp",
+        "alt": "Grozd sorte Prima Parisa",
+        "w": null,
+        "h": null,
+        "variants": {},
+        "createdAt": null,
+        "createdBy": null
+      },
+      "ratatuj-1": {
+        "file": "ratatuj-1.webp",
+        "alt": "Grozd sorte Ratatuj",
+        "w": null,
+        "h": null,
+        "variants": {},
+        "createdAt": null,
+        "createdBy": null
+      },
+      "ratatuj-3": {
+        "file": "ratatuj-3.webp",
+        "alt": "Grozd sorte Ratatuj",
+        "w": null,
+        "h": null,
+        "variants": {},
+        "createdAt": null,
+        "createdBy": null
+      },
+      "rusko-rano-1": {
+        "file": "rusko-rano-1.webp",
+        "alt": "Grozd sorte Rusko rano",
+        "w": null,
+        "h": null,
+        "variants": {},
+        "createdAt": null,
+        "createdBy": null
+      },
+      "vatra-1": {
+        "file": "vatra-1.webp",
+        "alt": "Grozd sorte Vatra",
+        "w": null,
+        "h": null,
+        "variants": {},
+        "createdAt": null,
+        "createdBy": null
+      },
+      "veles-2": {
+        "file": "veles-2.webp",
+        "alt": "Grozd sorte Veles",
+        "w": null,
+        "h": null,
+        "variants": {},
+        "createdAt": null,
+        "createdBy": null
+      },
+      "viktor-3": {
+        "file": "viktor-3.webp",
+        "alt": "Grozd sorte Viktor",
+        "w": null,
+        "h": null,
+        "variants": {},
+        "createdAt": null,
+        "createdBy": null
+      },
+      "viktor-4": {
+        "file": "viktor-4.webp",
+        "alt": "Grozd sorte Viktor",
+        "w": null,
+        "h": null,
+        "variants": {},
+        "createdAt": null,
+        "createdBy": null
+      }
+    },
+    "publish": {
+      "last": null
+    }
+  }
+}

@@ -1,0 +1,10 @@
+<section id="kako" class="page wrap narrow">
+  <p class="eyebrow">NARUDŽBA</p>
+  <h1>{{kako.title}}</h1>
+  {{#if kako.intro}}<p class="lead">{{kako.intro}}</p>{{/if}}
+  <ol class="how">
+    {{#each kako.steps}}<li><b>{{title}}</b> {{text}}</li>
+    {{/each}}</ol>
+  <p>Ako vam je lakše, nazovite nas na <a href="{{site.tel}}">{{site.phone}}</a> i pomoći ćemo vam pri izboru.</p>
+  <a class="btn primary" href="/sorte/">Pogledajte sorte →</a>
+</section>
