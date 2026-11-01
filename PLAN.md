@@ -142,6 +142,8 @@ UID-ovi nisu tajne i mogu biti u pravilima. Hook, API ključevi i sve ostalo taj
 5. Skripta čita bazu, pravi stranice i slike u `dist/`.
 6. Ako izgradnja padne (izlaz različit od 0), Vercel ne mijenja produkciju i prethodna verzija ostaje.
 
+Dok ne postoji dugme Objavi u panelu, nova verzija sajta se pravi ručno: Netlify, Deploys, Trigger deploy, Deploy site.
+
 ### 4.2 Skripta za izgradnju (`build/build.mjs`)
 - Čist Node, bez vanjskih biblioteka. Čita `vinograd.json` GET-om, bez prijave.
 - Mali vlastiti šablonski mehanizam (`{{var}}`, petlje, HTML escaping svega).
