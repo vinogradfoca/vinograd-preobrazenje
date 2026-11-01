@@ -75,6 +75,7 @@ vinograd/
     name, slug, color ("Bijela"|"Crna"|"Crvena"), ripen, type,
     order, featured, visible,
     desc, exp, flaws,
+    facts: { origin, author, maturity, clusterWeight, berryWeight, berrySize, frost, disease, taste }  // tekst; samo popunjena polja
     images: [ <imageId>, ... ]        // prva je naslovna
     sapling: { enabled, price, qty }  // price i qty: broj ili null
     cutting: { enabled, price, qty }

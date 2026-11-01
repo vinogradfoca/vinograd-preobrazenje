@@ -27,7 +27,20 @@ class BuildError extends Error {
 
 // ---------------------------------------------------------------- pomoćne
 const KIND = { sapling: "Sadnica", cutting: "Reznica" };
-const COLORS = { Bijela: "w", Crna: "b", Crvena: "r" };
+const COLORS = { Bijela: "w", Crna: "b", Crvena: "r", "Za provjeru": "x" };
+const CHECK = "Za provjeru";
+// Redoslijed opcija u filterima (vrijednosti kojih nema u podacima se ne prikazuju)
+const ORDER = {
+  color: ["Bijela", "Crna", "Crvena", CHECK],
+  ripen: ["Ultra rana", "Rana", "Srednje rana", "Kasna", CHECK],
+  type: ["Stona", "Besjemena", "Vinska"],
+};
+// Osobine sorte (facts) i njihovi nazivi na sajtu
+const FACTS = [
+  ["origin", "Porijeklo"], ["author", "Autor"], ["maturity", "Vrijeme zrenja"],
+  ["clusterWeight", "Masa grozda"], ["berryWeight", "Masa bobice"], ["berrySize", "Veličina bobice"],
+  ["frost", "Otpornost na mraz"], ["disease", "Otpornost na bolesti"], ["taste", "Ukus"],
+];
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 const isStr = (v) => typeof v === "string" && v.trim() !== "";
@@ -101,7 +114,7 @@ function validate(db) {
     if (!isStr(im.file)) { E.push(`${w}.file: nedostaje ime fajla`); continue; }
     if (im.file.includes("/") || im.file.includes("\\") || !/\.webp$/i.test(im.file)) { E.push(`${w}.file: "${im.file}" mora biti ime .webp fajla, bez foldera`); continue; }
     const fp = path.join(SEED_IMG, im.file);
-    if (!fs.existsSync(fp)) { E.push(`${w}.file: fajl data/seed-img/${im.file} ne postoji`); continue; }
+    if (!fs.existsSync(fp)) { im._missing = true; continue; } // nedostajuće slike: upozorenje, ne greška
     try {
       const d = webpSize(fp);
       if (im.w != null && (im.w !== d.w || im.h !== d.h)) warn(`${w}: u bazi piše ${im.w}×${im.h}, a fajl je ${d.w}×${d.h}. Koristim dimenzije iz fajla.`);
@@ -115,7 +128,11 @@ function validate(db) {
 
   // pages
   const p = db.pages || {};
-  if (req(p.home, ["title", "text", "heroImage"], "pages/home")) imgOk(p.home.heroImage, "pages/home.heroImage");
+  if (req(p.home, ["title", "text", "heroImage"], "pages/home")) {
+    imgOk(p.home.heroImage, "pages/home.heroImage");
+    const h = images[p.home.heroImage];
+    if (h && h._missing) E.push(`pages/home.heroImage: fajl data/seed-img/${h.file} ne postoji`);
+  }
   if (req(p.kako, ["title"], "pages/kako")) {
     if (!Array.isArray(p.kako.steps) || !p.kako.steps.length) E.push("pages/kako.steps: potreban je bar jedan korak");
     else p.kako.steps.forEach((st, i) => req(st, ["title", "text"], `pages/kako.steps[${i}]`));
@@ -135,13 +152,20 @@ function validate(db) {
       if (slugs.has(v.slug)) E.push(`${w}.slug: "${v.slug}" već koristi sorta ${slugs.get(v.slug)}`);
       else slugs.set(v.slug, id);
     }
-    if (isStr(v.color) && !COLORS[v.color]) E.push(`${w}.color: "${v.color}" mora biti Bijela, Crna ili Crvena`);
+    if (isStr(v.color) && !COLORS[v.color]) E.push(`${w}.color: "${v.color}" mora biti Bijela, Crna, Crvena ili ${CHECK}`);
+    if (v.facts != null) {
+      if (typeof v.facts !== "object" || Array.isArray(v.facts)) E.push(`${w}.facts: mora biti objekat`);
+      else for (const [k, val] of Object.entries(v.facts)) {
+        if (!FACTS.some((f) => f[0] === k)) E.push(`${w}.facts.${k}: nepoznato polje (dozvoljeno: ${FACTS.map((f) => f[0]).join(", ")})`);
+        else if (typeof val !== "string") E.push(`${w}.facts.${k}: mora biti tekst`);
+      }
+    }
     for (const k of ["visible", "featured"]) if (typeof v[k] !== "boolean") E.push(`${w}.${k}: mora biti true ili false`);
     if (typeof v.order !== "number" || !Number.isFinite(v.order)) E.push(`${w}.order: mora biti broj`);
     for (const k of ["ripen", "type", "desc", "exp", "flaws", "seoTitle", "seoDescription"]) {
       if (v[k] != null && typeof v[k] !== "string") E.push(`${w}.${k}: mora biti tekst`);
     }
-    if (!Array.isArray(v.images) || !v.images.length) E.push(`${w}.images: potrebna je bar jedna slika`);
+    if (!Array.isArray(v.images)) E.push(`${w}.images: mora biti lista (može biti prazna)`);
     else v.images.forEach((im, i) => imgOk(im, `${w}.images[${i}]`));
     for (const k of Object.keys(KIND)) {
       const o = v[k];
@@ -156,6 +180,13 @@ function validate(db) {
   for (const id of Object.keys(images)) if (!used.has(id)) warn(`images/${id}: slika se nigdje ne koristi`);
   const files = new Set(Object.values(images).map((i) => i?.file));
   if (fs.existsSync(SEED_IMG)) for (const f of fs.readdirSync(SEED_IMG)) if (!files.has(f)) warn(`data/seed-img/${f}: fajl nije upisan u images/`);
+
+  // sorte bez ijedne postojeće slike i fajlovi koji nedostaju (build ne pada)
+  const missing = [...new Set(Object.values(vars).filter((v) => v && v.visible && Array.isArray(v.images))
+    .flatMap((v) => v.images).filter((id) => images[id] && images[id]._missing).map((id) => images[id].file))].sort();
+  const noImg = Object.values(vars).filter((v) => v && v.visible && Array.isArray(v.images) && !v.images.some((id) => images[id] && !images[id]._missing));
+  if (noImg.length) warn(`${noImg.length} ${noImg.length % 10 === 1 && noImg.length % 100 !== 11 ? "sorta nema" : "sorti nema"} nijednu sliku (placeholder + noindex): ${noImg.map((v) => v.name).join(", ")}`);
+  if (missing.length) warn(`Nedostaje ${missing.length} fajlova u data/seed-img/ (kad ih dodate, sljedeći build ih sam koristi):\n    ${missing.join("\n    ")}`);
 
   if (E.length) throw new BuildError(E);
 }
@@ -184,18 +215,21 @@ function buildModel(db) {
     const kinds = Object.keys(KIND).filter((k) => v[k].enabled);
     const prices = kinds.filter((k) => orderable(v[k])).map((k) => v[k].price).filter((n) => n != null);
     const available = kinds.some((k) => orderable(v[k]));
-    const images = v.images.map((id, i) => ({ ...img(id), index: i, on: i === 0, label: `Fotografija ${i + 1}` }));
+    const images = v.images.filter((id) => !db.images[id]._missing)
+      .map((id, i) => ({ ...img(id), index: i, on: i === 0, label: `Fotografija ${i + 1}` }));
     const ripen = v.ripen || "", type = v.type || "";
+    const facts = v.facts || {};
     return {
       id: v.id, slug: v.slug, name: v.name, url: `/sorte/${v.slug}/`,
       color: v.color, colorClass: COLORS[v.color], ripen, type,
-      tag: v.color + (ripen ? " · " + ripen : ""),
+      tag: v.color === CHECK && ripen === CHECK ? CHECK : v.color + (ripen ? " · " + ripen : ""),
       featured: v.featured,
-      cover: images[0], images, multiple: images.length > 1,
+      cover: images[0] || null, images, hasImage: images.length > 0, multiple: images.length > 1,
       facts: [["Zrenje", ripen], ["Vrsta", type]].filter((f) => f[1]).map(([label, value]) => ({ label, value })),
+      props: FACTS.filter(([k]) => isStr(facts[k])).map(([k, label]) => ({ label, value: facts[k] })),
       desc: v.desc || "", exp: v.exp || "", flaws: v.flaws || "",
       hasText: !!(v.desc || v.exp || v.flaws),
-      rows: kinds.map((k) => ({ key: k, label: KIND[k], stock: stockText(v[k]), price: priceText(v[k]), orderable: orderable(v[k]) })),
+      rows: kinds.map((k) => ({ key: k, label: KIND[k], stock: stockText(v[k]), price: priceText(v[k]), orderable: orderable(v[k]), max: v[k].qty == null ? "" : String(v[k].qty) })),
       hasRows: kinds.length > 0,
       sapling: v.sapling, cutting: v.cutting,
       priceSapling: v.sapling.enabled && v.sapling.price != null ? KM(v.sapling.price) : "–",
@@ -208,8 +242,15 @@ function buildModel(db) {
     };
   });
 
-  const featured = varieties.filter((v) => v.featured);
-  const options = (key) => [...new Set(varieties.map((v) => v[key]).filter(Boolean))];
+  // izdvojene; ako nijedna nije označena, prvih 6 koje imaju sliku
+  let featured = varieties.filter((v) => v.featured);
+  if (!featured.length) featured = varieties.filter((v) => v.hasImage).slice(0, 6);
+  if (!featured.length) featured = varieties.slice(0, 6);
+  const options = (key) => {
+    const vals = new Set(varieties.map((v) => v[key]).filter(Boolean));
+    const known = ORDER[key].filter((x) => vals.has(x));
+    return [...known, ...[...vals].filter((x) => !known.includes(x)).sort((a, b) => a.localeCompare(b, "sr"))];
+  };
 
   const nav = (active) => [
     { href: "/", label: "Početna", key: "home" },
@@ -223,7 +264,7 @@ function buildModel(db) {
 
   // Podaci za korpu: korpa je interakcija, pa JS treba naziv, cijenu i stanje svake sorte.
   const cartData = varieties.map((v) => ({
-    id: v.id, name: v.name, url: v.url, img: v.cover.src,
+    id: v.id, name: v.name, url: v.url, img: v.cover ? v.cover.src : "", c: v.colorClass,
     sapling: { enabled: v.sapling.enabled, price: v.sapling.price, qty: v.sapling.qty },
     cutting: { enabled: v.cutting.enabled, price: v.cutting.price, qty: v.cutting.qty },
   }));
@@ -242,14 +283,14 @@ function buildModel(db) {
 
   return {
     s, siteUrl, abs, hero, varieties, featured, hasPrices, nav, cartData, localBusiness,
-    options: { ripen: options("ripen"), type: options("type") },
+    options: { color: options("color"), ripen: options("ripen"), type: options("type") },
     common: {
       hero, varieties,
       site: {
         name: s.name, phone: s.phone, tel: telHref(s.phone), email: s.email, address: s.address,
         mapUrl: s.mapUrl || "", wa: "https://wa.me/" + s.phoneIntl, phoneIntl: s.phoneIntl,
       },
-      cartJson: jsonForScript({ shop: { phoneIntl: s.phoneIntl, email: s.email, name: s.name }, varieties: cartData }),
+      shopJson: jsonForScript({ phoneIntl: s.phoneIntl, email: s.email, name: s.name }),
     },
   };
 }
@@ -269,7 +310,7 @@ function pages(m, db) {
     schema: [m.localBusiness],
   }, {
     home: { eyebrow: home.eyebrow || "", text: home.text, titleLines: home.title.split("\n").map((t, i) => ({ t, br: i > 0 })) },
-    featured: m.featured.length ? m.featured : m.varieties.slice(0, 6),
+    featured: m.featured,
     sortCount: sorti(m.varieties.length) + " u ponudi",
   });
 
@@ -280,7 +321,7 @@ function pages(m, db) {
   }, {
     total: m.varieties.length,
     resultCount: `${m.varieties.length} od ${m.varieties.length} sorti`,
-    ripenOptions: m.options.ripen, typeOptions: m.options.type,
+    colorOptions: m.options.color, ripenOptions: m.options.ripen, typeOptions: m.options.type,
   });
 
   // /sorte/<slug>/
@@ -299,16 +340,19 @@ function pages(m, db) {
       "@context": "https://schema.org",
       "@type": "Product",
       name: v.name,
-      image: v.images.map((i) => m.abs(i.src)),
+      ...(v.hasImage ? { image: v.images.map((i) => m.abs(i.src)) } : {}),
       ...(v.desc ? { description: clip(v.desc, 500) } : {}),
       ...(offers.length ? { offers: offers.length === 1 ? offers[0] : offers } : {}),
     };
-    const fallbackDesc = `${v.name}, ${v.color.toLowerCase()} sorta vinove loze${v.kindsText ? ": " + v.kindsText : ""}. ${name}, ${m.s.address}.`;
+    const colorWord = v.color === CHECK ? "" : v.color.toLowerCase() + " ";
+    const fallbackDesc = `${v.name}, ${colorWord}sorta vinove loze${v.kindsText ? ": " + v.kindsText : ""}. ${name}, ${m.s.address}.`;
     add(v.url, "sorta.html", "sorte", {
       title: v.seoTitle || `${v.name}${v.kindsText ? ", " + v.kindsText : ""} | ${name}`,
       description: v.seoDescription || clip(v.desc || fallbackDesc),
       schema: [product],
       ogType: "product",
+      // stranica bez ijedne slike ostaje u katalogu, ali je noindex i nije u sitemapi dok ne dobije sliku
+      noindex: !v.hasImage,
     }, { v });
   }
 
@@ -317,7 +361,11 @@ function pages(m, db) {
     add("/cjenovnik/", "cjenovnik.html", "cjenovnik", {
       title: "Cjenovnik sadnica i reznica | " + name,
       description: clip(`Cijene sadnica i reznica vinove loze. Cijene su informativne, za precizne detalje pozovite ${m.s.phone}.`),
-    }, {});
+    }, {
+      // u tabeli su samo sorte s bar jednom unesenom cijenom; ostale su "na upit"
+      priced: m.varieties.filter((v) => v.priceSapling !== "–" || v.priceCutting !== "–"),
+      unpricedCount: m.varieties.filter((v) => v.priceSapling === "–" && v.priceCutting === "–").length,
+    });
   } else {
     warn("Nijedna cijena nije unesena: /cjenovnik/ se ne generiše i nije u meniju.");
   }
@@ -415,6 +463,14 @@ function main() {
     assets[key] = "/assets/" + name;
   }
 
+  // podaci za korpu: jedan keširan fajl umjesto kopije u svakoj od 150+ stranica
+  {
+    const buf = Buffer.from(JSON.stringify(m.cartData));
+    const name = `korpa.${hash(buf)}.json`;
+    writeFile(path.join(tmp, "assets", name), buf);
+    assets.cart = "/assets/" + name;
+  }
+
   // slike
   const copied = new Set();
   const copyImg = (id) => {
@@ -450,7 +506,8 @@ function main() {
 
   // sitemap.xml, robots.txt, build.json
   const now = new Date().toISOString();
-  const urls = list.filter((p) => p.route.endsWith("/")).map((p) => `  <url><loc>${escapeHtml(m.abs(p.route))}</loc></url>`);
+  // u sitemapi su samo indeksabilne stranice; sorta bez slike je noindex dok ne dobije sliku
+  const urls = list.filter((p) => p.route.endsWith("/") && !p.seo.noindex).map((p) => `  <url><loc>${escapeHtml(m.abs(p.route))}</loc></url>`);
   writeFile(path.join(tmp, "sitemap.xml"), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join("\n")}\n</urlset>\n`);
   writeFile(path.join(tmp, "robots.txt"), `User-agent: *\nAllow: /\n${m.siteUrl ? `\nSitemap: ${m.siteUrl}/sitemap.xml\n` : ""}`);
   writeFile(path.join(tmp, "build.json"), JSON.stringify({ builtAt: now }) + "\n");
@@ -462,7 +519,9 @@ function main() {
   fs.renameSync(tmp, DIST);
 
   console.log(`Izgrađeno ${list.length} stranica, ${copied.size} slika, za ${Date.now() - t0} ms:`);
-  for (const p of list) console.log("  " + p.route);
+  const vp = list.filter((p) => p.route.startsWith("/sorte/") && p.route !== "/sorte/");
+  for (const p of list) if (!vp.includes(p)) console.log("  " + p.route);
+  console.log(`  /sorte/<slug>/ × ${vp.length} (${vp.filter((p) => p.seo.noindex).length} noindex, bez slike)`);
   console.log("  /sitemap.xml\n  /robots.txt\n  /build.json");
 }
 

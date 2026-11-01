@@ -1,4 +1,4 @@
 <a class="card{{#unless available}} off{{/unless}}" href="{{url}}" data-name="{{search}}" data-color="{{color}}" data-ripen="{{ripen}}" data-type="{{type}}" data-avail="{{#if available}}1{{else}}0{{/if}}">
-      <div class="ph"><img src="{{cover.src}}" width="{{cover.w}}" height="{{cover.h}}" alt="{{cover.alt}}"><span class="dot {{colorClass}}"></span></div>
+      <div class="ph">{{#if hasImage}}<img src="{{cover.src}}" width="{{cover.w}}" height="{{cover.h}}" alt="{{cover.alt}}">{{else}}<span class="noimg {{colorClass}}" role="img" aria-label="Sorta {{name}}, fotografija još nije dodata">{{name}}</span>{{/if}}<span class="dot {{colorClass}}"></span></div>
       <div class="cb"><span class="tag">{{tag}}</span><h3>{{name}}</h3><small>{{small}}</small></div>
     </a>

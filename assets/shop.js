@@ -12,13 +12,22 @@
   var KM = function (n) { return n.toFixed(2).replace(".", ",") + " KM"; };
   var KIND = { sapling: "Sadnica", cutting: "Reznica" };
 
-  var DATA = { shop: {}, varieties: [] };
-  try { DATA = JSON.parse($("#vp-data").textContent); } catch (e) {}
-  var SHOP = DATA.shop;
-  var byId = function (id) {
-    for (var i = 0; i < DATA.varieties.length; i++) if (DATA.varieties[i].id === id) return DATA.varieties[i];
-    return null;
-  };
+  // Kontakt prodavnice je u stranici; naziv, cijena i stanje svih sorti su u jednom
+  // keširanom JSON fajlu (data-cart), koji se učitava jednom po posjeti.
+  var shopEl = $("#vp-shop");
+  var SHOP = {};
+  try { SHOP = JSON.parse(shopEl.textContent); } catch (e) {}
+  var MAP = null, loading = null;
+  function loadData() {
+    if (!loading) {
+      loading = fetch(shopEl.getAttribute("data-cart"))
+        .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+        .then(function (list) { MAP = {}; list.forEach(function (x) { MAP[x.id] = x; }); })
+        .catch(function () { loading = null; MAP = MAP || null; throw new Error("korpa"); });
+    }
+    return loading;
+  }
+  var byId = function (id) { return MAP && Object.prototype.hasOwnProperty.call(MAP, id) ? MAP[id] : null; };
   var orderable = function (o) { return !!o && o.enabled && (o.qty === null || o.qty > 0); };
 
   /* ---------- meni, korpa, overlay ---------- */
@@ -50,15 +59,25 @@
   var cart = [];
   try {
     cart = JSON.parse(localStorage.getItem(CART_KEY) || "[]").filter(function (i) {
-      var x = byId(i.id); return x && KIND[i.kind] && orderable(x[i.kind]) && i.qty > 0;
+      return i && typeof i.id === "string" && KIND[i.kind] && i.qty > 0;
     });
   } catch (e) { cart = []; }
+  // kad stignu podaci, izbaci stavke koje više ne postoje ili se ne mogu poručiti
+  function cleanCart() {
+    var before = cart.length;
+    cart = cart.filter(function (i) { var x = byId(i.id); return x && orderable(x[i.kind]); });
+    if (cart.length !== before) saveCart();
+  }
   function saveCart() { try { localStorage.setItem(CART_KEY, JSON.stringify(cart)); } catch (e) {} }
   function find(id, kind) {
     for (var i = 0; i < cart.length; i++) if (cart[i].id === id && cart[i].kind === kind) return cart[i];
     return null;
   }
   function addToCart(id, kind, qty) {
+    if (!MAP) {
+      loadData().then(function () { addToCart(id, kind, qty); }, function () { toast("Korpa trenutno nije dostupna. Nazovite nas."); });
+      return;
+    }
     var x = byId(id); if (!x) return;
     var o = x[kind]; if (!orderable(o)) return;
     var it = find(id, kind);
@@ -99,6 +118,7 @@
   function renderCart() {
     $("#cartCount").textContent = cart.reduce(function (a, i) { return a + i.qty; }, 0);
     var box = $("#cartItems");
+    if (cart.length && !MAP) { $("#cartFoot").hidden = true; box.innerHTML = '<div class="empty">Učitavanje korpe…</div>'; return; }
     if (!cart.length) {
       box.innerHTML = '<div class="empty">Korpa je prazna.<br><a href="/sorte/" class="btn outline">Pogledajte sorte</a></div>';
       $("#cartFoot").hidden = true; return;
@@ -107,7 +127,8 @@
     box.innerHTML = cart.map(function (i) {
       var x = byId(i.id), o = x[i.kind];
       var a = ' data-id="' + esc(x.id) + '" data-k="' + i.kind + '"';
-      return '<div class="citem"><img src="' + esc(x.img) + '" alt="" width="64" height="80" loading="lazy"><div class="cinfo"><b><a href="' + esc(x.url) + '">' + esc(x.name) + '</a></b><small>' + KIND[i.kind] + " · " + (o.price != null ? KM(o.price * i.qty) : "cijena na upit") + "</small>" +
+      var pic = x.img ? '<img src="' + esc(x.img) + '" alt="" width="64" height="80" loading="lazy">' : '<span class="cimg noimg ' + esc(x.c || "x") + '" aria-hidden="true"></span>';
+      return '<div class="citem">' + pic + '<div class="cinfo"><b><a href="' + esc(x.url) + '">' + esc(x.name) + '</a></b><small>' + KIND[i.kind] + " · " + (o.price != null ? KM(o.price * i.qty) : "cijena na upit") + "</small>" +
         '<div class="stepper"><button type="button" data-q="-1"' + a + ' aria-label="Manje">−</button><span>' + i.qty + '</span><button type="button" data-q="1"' + a + ' aria-label="Više">+</button></div></div>' +
         '<button type="button" class="rm" data-q="0"' + a + ' aria-label="Ukloni">×</button></div>';
     }).join("");
@@ -139,10 +160,19 @@
   // korpa otvorena u drugoj kartici
   window.addEventListener("storage", function (e) {
     if (e.key !== CART_KEY) return;
-    try { cart = JSON.parse(e.newValue || "[]").filter(function (i) { return byId(i.id) && KIND[i.kind]; }); } catch (x) { cart = []; }
+    try { cart = JSON.parse(e.newValue || "[]").filter(function (i) { return i && KIND[i.kind] && i.qty > 0; }); } catch (x) { cart = []; }
+    if (MAP) cleanCart();
     renderCart();
   });
   renderCart();
+  // podaci se učitavaju odmah samo ako korpa nije prazna; inače pri prvom otvaranju ili dodavanju
+  function ensureData() {
+    loadData().then(function () { cleanCart(); renderCart(); }, function () {
+      if (cart.length) $("#cartItems").innerHTML = '<div class="empty">Korpa trenutno nije dostupna. Pokušajte ponovo ili nas nazovite.</div>';
+    });
+  }
+  if (cart.length) ensureData();
+  $("#cartBtn").addEventListener("click", function () { if (!MAP) ensureData(); });
 
   /* ---------- stranica sorte: galerija i narudžba ---------- */
   var main = $("#mainImg");
@@ -157,16 +187,15 @@
     var vid = order.dataset.id, qty = { sapling: 1, cutting: 1 };
     order.addEventListener("click", function (e) {
       var t = e.target.closest("button"); if (!t) return;
-      var x = byId(vid); if (!x) return;
+      if (t.dataset.add) { addToCart(vid, t.dataset.add, qty[t.dataset.add]); return; }
       if (t.dataset.d) {
-        var st = t.closest(".stepper"), k = st.dataset.k, o = x[k];
+        var st = t.closest(".stepper"), k = st.dataset.k, max = st.getAttribute("data-max");
         var q = Math.max(1, qty[k] + (+t.dataset.d));
-        if (o.qty !== null) q = Math.min(q, o.qty);
+        if (max) q = Math.min(q, +max);
         qty[k] = q; st.querySelector("span").textContent = q;
-      } else if (t.dataset.add) {
-        addToCart(vid, t.dataset.add, qty[t.dataset.add]);
       }
     });
+    loadData().catch(function () {}); // da "U korpu" radi odmah
   }
 
   /* ---------- katalog: filteri samo skrivaju kartice koje su već u HTML-u ---------- */

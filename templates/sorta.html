@@ -2,7 +2,7 @@
   <p class="crumbs"><a href="/sorte/">← Sve sorte</a></p>
   <div class="mgrid">
     <div class="gallery">
-      <img id="mainImg" src="{{v.cover.src}}" width="{{v.cover.w}}" height="{{v.cover.h}}" alt="{{v.cover.alt}}">
+      {{#if v.hasImage}}<img id="mainImg" src="{{v.cover.src}}" width="{{v.cover.w}}" height="{{v.cover.h}}" alt="{{v.cover.alt}}">{{else}}<div class="noimg big {{v.colorClass}}" role="img" aria-label="Sorta {{v.name}}, fotografija još nije dodata">{{v.name}}</div>{{/if}}
       {{#if v.multiple}}<div class="thumbs">
         {{#each v.images}}<button type="button"{{#if on}} class="on"{{/if}} data-src="{{src}}" data-w="{{w}}" data-h="{{h}}" data-alt="{{alt}}" aria-label="{{label}}"><img src="{{src}}" width="{{w}}" height="{{h}}" alt=""></button>{{/each}}
       </div>{{/if}}
@@ -12,13 +12,14 @@
       <h1>{{v.name}}</h1>
       {{#if v.facts}}<div class="facts">{{#each v.facts}}<span><small>{{label}}</small><b>{{value}}</b></span>{{/each}}</div>{{/if}}
       {{#if v.desc}}<div class="mblock"><h2 class="h4">Opis</h2><p>{{v.desc}}</p></div>{{/if}}
-      {{#if v.exp}}<div class="mblock"><h2 class="h4">Lično iskustvo na mom terenu</h2><p>{{v.exp}}</p></div>{{/if}}
+      {{#if v.exp}}<div class="mblock"><h2 class="h4">Lično iskustvo</h2><p>{{v.exp}}</p></div>{{/if}}
+      {{#if v.props}}<div class="mblock"><h2 class="h4">Osobine</h2><table class="props"><tbody>{{#each v.props}}<tr><th scope="row">{{label}}</th><td>{{value}}</td></tr>{{/each}}</tbody></table></div>{{/if}}
       {{#if v.flaws}}<div class="mblock warn"><h2 class="h4">⚠️ Nedostaci</h2><p>{{v.flaws}}</p></div>{{/if}}
       {{#unless v.hasText}}<p class="muted">Više o ovoj sorti pitajte nas, rado ćemo podijeliti iskustvo sa našeg terena.</p>{{/unless}}
       <div class="order" data-id="{{v.id}}">
         <h2 class="h3">Naručite</h2>
         {{#each v.rows}}<div class="orow{{#unless orderable}} off{{/unless}}"><div><b>{{label}}</b><small>{{stock}}</small></div><div class="oprice">{{price}}</div>
-          {{#if orderable}}<div class="stepper" data-k="{{key}}"><button type="button" data-d="-1" aria-label="Manje">−</button><span>1</span><button type="button" data-d="1" aria-label="Više">+</button></div><button type="button" class="btn primary add" data-add="{{key}}">U korpu</button>{{else}}<span class="muted">Nedostupno</span>{{/if}}</div>
+          {{#if orderable}}<div class="stepper" data-k="{{key}}"{{#if max}} data-max="{{max}}"{{/if}}><button type="button" data-d="-1" aria-label="Manje">−</button><span>1</span><button type="button" data-d="1" aria-label="Više">+</button></div><button type="button" class="btn primary add" data-add="{{key}}">U korpu</button>{{else}}<span class="muted">Nedostupno</span>{{/if}}</div>
         {{/each}}
         <a class="ask" href="{{site.tel}}">Pitanje o sorti? Nazovite {{site.phone}}</a>
       </div>

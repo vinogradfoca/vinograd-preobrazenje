@@ -4,7 +4,7 @@
   <p class="lead">Izaberite sortu za detalje, fotografije i narudžbu. Nedostupne sadnice ili reznice nije moguće poručiti.</p>
   <div class="filters" id="filters" hidden>
     <input id="search" type="search" placeholder="Pretražite sorte…" aria-label="Pretražite sorte">
-    <select id="fColor" aria-label="Boja"><option value="">Sve boje</option><option>Bijela</option><option>Crna</option><option>Crvena</option></select>
+    <select id="fColor" aria-label="Boja"><option value="">Sve boje</option>{{#each colorOptions}}<option>{{this}}</option>{{/each}}</select>
     {{#if ripenOptions}}<select id="fRipen" aria-label="Vrijeme zrenja"><option value="">Sva vremena zrenja</option>{{#each ripenOptions}}<option>{{this}}</option>{{/each}}</select>{{/if}}
     {{#if typeOptions}}<select id="fType" aria-label="Vrsta"><option value="">Sve vrste</option>{{#each typeOptions}}<option>{{this}}</option>{{/each}}</select>{{/if}}
     <label class="check"><input type="checkbox" id="fAvail"> Samo dostupno</label>
