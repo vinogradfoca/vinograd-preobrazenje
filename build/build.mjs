@@ -15,6 +15,7 @@ import crypto from "node:crypto";
 import { fileURLToPath } from "node:url";
 import { createEngine, escapeHtml } from "./template.mjs";
 import { webpSize } from "./webp.mjs";
+import { toFirebaseShape } from "./firebase-shape.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const DIST = path.join(ROOT, "dist");
@@ -585,6 +586,11 @@ async function main() {
   if (fs.existsSync(PANEL)) {
     fs.cpSync(PANEL, path.join(tmp, "panel"), { recursive: true });
     fs.copyFileSync(FIREBASE_CONFIG, path.join(tmp, "panel", "firebase-config.json"));
+    // probni režim (/panel/?mock=1): cijeli katalog iz data/seed.json, u obliku kakav je u bazi
+    let mock;
+    try { mock = toFirebaseShape(JSON.parse(fs.readFileSync(SEED, "utf8")).vinograd); }
+    catch (e) { throw new BuildError([`panel/mock-data.json: ${e.message}`]); }
+    writeFile(path.join(tmp, "panel", "mock-data.json"), JSON.stringify(mock));
   }
 
   // podaci za korpu: jedan keširan fajl umjesto kopije u svakoj od 150+ stranica
@@ -606,6 +612,19 @@ async function main() {
   };
   copyImg(db.pages.home.heroImage);
   m.varieties.forEach((v) => v.images.forEach((i) => copyImg(i.id)));
+
+  // panel/manifest.json: sličice za panel dok slike nisu u bazi (Korak 4).
+  // images: ključ sorte -> putanje postojećih slika u /img/ (i za sakrivene sorte, pa se njihove slike kopiraju)
+  // published: ključevi sorti koje imaju stranicu na ovoj verziji sajta (za dugme Podijeli)
+  if (fs.existsSync(PANEL)) {
+    const manifest = { images: {}, published: m.varieties.map((v) => v.id) };
+    for (const [key, v] of Object.entries(db.varieties)) {
+      const ids = (Array.isArray(v && v.images) ? v.images : []).filter((id) => db.images[id] && !db.images[id]._missing);
+      ids.forEach(copyImg);
+      if (ids.length) manifest.images[key] = ids.map((id) => "/img/" + db.images[id].file);
+    }
+    writeFile(path.join(tmp, "panel", "manifest.json"), JSON.stringify(manifest));
+  }
 
   const engine = createEngine((name) => fs.readFileSync(path.join(TPL, name), "utf8"));
   const list = pages(m, db);

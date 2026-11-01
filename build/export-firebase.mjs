@@ -16,6 +16,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { toFirebaseShape } from "./firebase-shape.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const SEED = path.join(ROOT, "data", "seed.json");
@@ -32,56 +33,13 @@ function fail(msg) {
   process.exit(1);
 }
 
-// Izbacuje null i prazne objekte/nizove (Firebase ih ne čuva).
-function clean(v) {
-  if (v === null || v === undefined) return undefined;
-  if (Array.isArray(v)) {
-    const a = v.map(clean).filter((x) => x !== undefined);
-    return a.length ? a : undefined;
-  }
-  if (typeof v === "object") {
-    const o = {};
-    for (const [k, x] of Object.entries(v)) {
-      const c = clean(x);
-      if (c !== undefined) o[k] = c;
-    }
-    return Object.keys(o).length ? o : undefined;
-  }
-  return v;
-}
-
 let seed;
 try { seed = JSON.parse(fs.readFileSync(SEED, "utf8")); } catch (e) { fail(`data/seed.json: ${e.message}`); }
-const db = seed && seed.vinograd;
-if (!db || !db.settings || !db.pages || !db.varieties) fail("data/seed.json mora imati vinograd.settings, pages i varieties");
-const images = db.images || {};
-const fileOf = (id, where) => {
-  const im = images[id];
-  if (!im || !im.file) fail(`${where}: slika "${id}" nema fajl u images/`);
-  return im.file;
-};
-
-// pages: naslovna slika postaje naziv fajla, a njen alt ide u heroAlt
-const pages = JSON.parse(JSON.stringify(db.pages));
-if (pages.home && pages.home.heroImage) {
-  const id = pages.home.heroImage;
-  pages.home.heroImage = fileOf(id, "pages/home.heroImage");
-  pages.home.heroAlt = images[id].alt || "";
-}
-
-// sorte: ključ = slug, slike = nazivi fajlova
-const varieties = {};
-for (const [key, v] of Object.entries(db.varieties)) {
-  if (!v || !v.slug) fail(`varieties/${key}: nema slug`);
-  if (varieties[v.slug]) fail(`slug "${v.slug}" se ponavlja`);
-  varieties[v.slug] = { ...v, images: (v.images || []).map((id) => fileOf(id, `varieties/${key}.images`)) };
-}
+let vinograd;
+try { vinograd = toFirebaseShape(seed && seed.vinograd); } catch (e) { fail(e.message); }
 
 const out = {
-  vinograd: {
-    ...clean({ settings: db.settings, pages, varieties }),
-    images: {},
-  },
+  vinograd,
   admins: Object.fromEntries(ADMIN_UIDS.map((uid) => [uid, true])),
 };
 fs.writeFileSync(OUT, JSON.stringify(out, null, 2) + "\n");
