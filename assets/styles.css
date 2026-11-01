@@ -212,3 +212,10 @@ footer a{color:#fff}
 @media(max-width:820px){.noimg.big{aspect-ratio:1/1;max-height:44vh}}
 @media(max-width:640px){.noimg{font-size:17px;padding:10px}}
 .cimg{position:static;width:64px;height:80px;border-radius:8px;display:block}
+
+/* logo tačno u sredini zaglavlja, bez obzira na širinu dugmadi lijevo i desno */
+header{display:grid;grid-template-columns:1fr auto 1fr}
+#menuBtn{justify-self:start}
+#cartBtn{justify-self:end}
+/* logo ima bijelu pozadinu: zaglavlje mora biti potpuno bijelo, inače se pri skrolovanju vidi rub slike */
+header{background:#fff}
