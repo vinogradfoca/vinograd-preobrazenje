@@ -1,0 +1,52 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "vinograd": {
+      ".read": true,
+      ".write": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      "varieties": {
+        "$id": {
+          ".validate": "newData.hasChildren(['name', 'slug', 'color'])",
+          "name": {
+            ".validate": "newData.isString() && newData.val().length >= 1 && newData.val().length <= 120"
+          },
+          "slug": {
+            ".validate": "newData.isString() && newData.val().length >= 1"
+          },
+          "color": {
+            ".validate": "newData.isString() && (newData.val() === 'Bijela' || newData.val() === 'Crna' || newData.val() === 'Crvena' || newData.val() === 'Za provjeru')"
+          },
+          "visible": {
+            ".validate": "newData.isBoolean()"
+          },
+          "featured": {
+            ".validate": "newData.isBoolean()"
+          },
+          "sapling": {
+            "price": {
+              ".validate": "newData.isNumber() && newData.val() >= 0"
+            },
+            "qty": {
+              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() % 1 === 0"
+            }
+          },
+          "cutting": {
+            "price": {
+              ".validate": "newData.isNumber() && newData.val() >= 0"
+            },
+            "qty": {
+              ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() % 1 === 0"
+            }
+          }
+        }
+      }
+    },
+    "admins": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": false
+      }
+    }
+  }
+}

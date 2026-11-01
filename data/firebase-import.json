@@ -1,0 +1,4506 @@
+{
+  "vinograd": {
+    "settings": {
+      "name": "Vinograd Preobraženje",
+      "phone": "065/592-120",
+      "phoneIntl": "38765592120",
+      "email": "vinogradfoca@gmail.com",
+      "address": "Šuba bb, Foča",
+      "mapUrl": "https://maps.app.goo.gl/zjia9Jqr959i946s9",
+      "siteUrl": "https://vinograd-preobrazenje.netlify.app"
+    },
+    "pages": {
+      "home": {
+        "eyebrow": "FOČA · 450 m NADMORSKE VISINE",
+        "title": "Provjerene sorte.\nIskustvo sa našeg terena.",
+        "text": "Sadnice i reznice vinove loze odabrane kroz godine uzgoja u planinskim uslovima.",
+        "heroImage": "hero.webp",
+        "seoTitle": "Vinograd Preobraženje | Sadnice i reznice vinove loze, Foča",
+        "seoDescription": "Provjerene sorte vinove loze iz Foče. Sadnice, reznice i lična iskustva sa uzgojem na 450 m nadmorske visine.",
+        "heroAlt": "Vinograd u planinskom krajoliku uz rijeku"
+      },
+      "kako": {
+        "title": "Kako naručiti",
+        "intro": "",
+        "steps": [
+          {
+            "title": "Izaberite sortu.",
+            "text": "U katalogu otvorite sortu, izaberite sadnicu ili reznicu i količinu, pa dodajte u korpu."
+          },
+          {
+            "title": "Pošaljite upit.",
+            "text": "U korpi upišite ime i telefon. Poruka se složi sama, a vi je šaljete preko WhatsApp-a ili e-maila."
+          },
+          {
+            "title": "Dogovor.",
+            "text": "Javimo vam se, potvrdimo dostupnost i cijenu i dogovorimo preuzimanje."
+          }
+        ],
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "kontakt": {
+        "title": "Vinograd iz Foče",
+        "about": "Na nadmorskoj visini od oko 450 metara pratimo ponašanje velikog broja sorti i otvoreno dijelimo njihovu otpornost, ukus, vrijeme zrenja i moguće nedostatke.",
+        "seoTitle": "",
+        "seoDescription": ""
+      }
+    },
+    "varieties": {
+      "viking": {
+        "name": "Viking",
+        "slug": "viking",
+        "color": "Crna",
+        "ripen": "Rana",
+        "type": "Stona",
+        "order": 1,
+        "featured": false,
+        "visible": true,
+        "desc": "Vrlo rana tamna stona sorta snažnog rasta. Grozdovi su srednje krupni do krupni, rastresiti, a bobice izdužene i tamnoplave.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "disease": "Srednja otpornost; traži redovnu zaštitu od gljivičnih bolesti",
+          "taste": "Slatko-kiselkast, sa tonovima trešnje i šljive"
+        },
+        "images": [
+          "web-viking.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "bijela-mirisavka": {
+        "name": "Bijela mirisavka",
+        "slug": "bijela-mirisavka",
+        "color": "Bijela",
+        "ripen": "Kasna",
+        "type": "Stona",
+        "order": 2,
+        "featured": false,
+        "visible": true,
+        "desc": "Bijela mirisava stona sorta iz kolekcije. Sortni identitet pod ovim lokalnim nazivom nije dovoljno potvrđen.",
+        "exp": "Otporna i mirisava; kod mene sazrijeva oko 20. septembra.",
+        "flaws": "",
+        "facts": {
+          "origin": "Lokalni naziv; porijeklo nije potvrđeno",
+          "author": "Nije pouzdano potvrđen",
+          "maturity": "Kasna; kod mene sazrijeva oko 20. septembra",
+          "disease": "Prema ličnom iskustvu pokazuje dobru otpornost",
+          "taste": "Sladak i izraženo aromatičan"
+        },
+        "images": [
+          "bijela-mirisavka-1.webp",
+          "bijela-mirisavka-2.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "moldavija": {
+        "name": "Moldavija",
+        "slug": "moldavija",
+        "color": "Crna",
+        "ripen": "Kasna",
+        "type": "Stona",
+        "order": 3,
+        "featured": false,
+        "visible": true,
+        "desc": "Kasna sorta pogodna za dužu jesen i čuvanje.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "Moldavija",
+          "author": "Institut „Vierul“, Moldavija",
+          "maturity": "135–140 dana",
+          "clusterWeight": "700–1.000 g",
+          "berryWeight": "5–8 g",
+          "frost": "Do približno −23 °C",
+          "taste": "Harmoničan ukus; deblja pokožica"
+        },
+        "images": [
+          "web-moldavija.webp"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": 10
+        },
+        "cutting": {
+          "enabled": true,
+          "price": 4
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "timur": {
+        "name": "Timur",
+        "slug": "timur",
+        "color": "Bijela",
+        "ripen": "Rana",
+        "type": "Stona",
+        "order": 4,
+        "featured": false,
+        "visible": true,
+        "desc": "Rana bijela stona sorta izduženih bobica.",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "web-timur.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "bl-otporno": {
+        "name": "BL otporno",
+        "slug": "bl-otporno",
+        "color": "Bijela",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 5,
+        "featured": false,
+        "visible": true,
+        "desc": "Otporna sorta; tačan naziv i porijeklo treba dopuniti.",
+        "exp": "",
+        "flaws": "",
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "kuraz": {
+        "name": "Kuraž",
+        "slug": "kuraz",
+        "color": "Bijela",
+        "ripen": "Rana",
+        "type": "Stona",
+        "order": 6,
+        "featured": false,
+        "visible": true,
+        "desc": "Rana stona hibridna forma selekcije S. E. Guseva. Grozdovi su približno 600–1.000 g, a krupne izdužene bobice 14–16 g, ćilibarne do žutoružičaste na osunčanoj strani. Bobice prema dostupnim opisima nisu sklone pucanju.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "Rusija",
+          "author": "S. E. Gusev",
+          "maturity": "Rano",
+          "clusterWeight": "600–1.000 g",
+          "berryWeight": "14–16 g",
+          "frost": "Podatak nije pouzdano potvrđen",
+          "disease": "Nema dovoljno pouzdanih podataka; preporučuje se puna preventivna zaštita",
+          "taste": "Hrskava, mesnato-sočna pulpa; prijatan umjereno sladak ukus"
+        },
+        "images": [
+          "kuraz-1.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "ruska-izabela": {
+        "name": "Ruska Izabela",
+        "slug": "ruska-izabela",
+        "color": "Crna",
+        "ripen": "Kasna",
+        "type": "Stona",
+        "order": 7,
+        "featured": false,
+        "visible": true,
+        "desc": "Izabela je američka hibridna sorta nastala ukrštanjem vrste Vitis labrusca i sorte Petit Meslier. Bujna je, kasno sazrijeva i poznata je po dobroj otpornosti na mraz i bolesti te izraženoj jagodastoj aromi.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "maturity": "150–180 dana",
+          "clusterWeight": "Oko 140 g",
+          "frost": "Do približno −30 °C",
+          "taste": "Prepoznatljiva jagodasta aroma"
+        },
+        "images": [
+          "web-ruska-izabela.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "ratatuj": {
+        "name": "Ratatuj",
+        "slug": "ratatuj",
+        "color": "Bijela",
+        "ripen": "Srednje rana",
+        "type": "Besjemena",
+        "order": 8,
+        "featured": true,
+        "visible": true,
+        "desc": "Besjemena stona sorta službenog naziva IFG Seven, dobijena ukrštanjem A2674 × Princess Seedless. Grozdovi su vrlo krupni, a žuto-ćilibarne bobice čvrste i dobro podnose transport.",
+        "exp": "Kod mene dobro podnosi opterećenje i može nositi po dva grozda na lastaru. Sazrijeva od kraja avgusta do prve polovine septembra.",
+        "flaws": "",
+        "facts": {
+          "origin": "Kalifornija, SAD",
+          "author": "David Cain, International Fruit Genetics",
+          "maturity": "115–120 dana",
+          "clusterWeight": "700–1.500 g",
+          "berryWeight": "7–8 g",
+          "frost": "Približno do −23 °C; preporučuje se pokrivanje",
+          "disease": "Srednja otpornost; osjetljivija na oidijum i traži preventivnu zaštitu",
+          "taste": "Veoma ukusna; mesnata i hrskava pulpa"
+        },
+        "images": [
+          "ratatuj-1.webp",
+          "ratatuj-2.webp",
+          "ratatuj-3.webp",
+          "ratatuj-4.webp"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": 40
+        },
+        "cutting": {
+          "enabled": true,
+          "price": 20
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "artek": {
+        "name": "Artek",
+        "slug": "artek",
+        "color": "Crvena",
+        "ripen": "Rana",
+        "type": "Stona",
+        "order": 9,
+        "featured": false,
+        "visible": true,
+        "desc": "Rana stona hibridna forma nastala ukrštanjem Jubilej Novočerkaska × Muskat ljetni. Grozdovi su prosječno oko 700 g, često 1.000–1.200 g, a velike bijeloružičaste do ćilibarne bobice sa ružičastim vrhom teže približno 12–18 g.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "Rusija",
+          "author": "S. E. Gusev",
+          "maturity": "105–110 dana",
+          "clusterWeight": "700–1.200 g",
+          "berryWeight": "12–18 g",
+          "berrySize": "46 × 26 mm",
+          "frost": "Do približno −22 do −24 °C",
+          "disease": "Srednja otpornost; posebno paziti na oidijum",
+          "taste": "Harmoničan, ponekad sa blagim muškatom"
+        },
+        "images": [
+          "artek-1.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "gusar": {
+        "name": "Gusar",
+        "slug": "gusar",
+        "color": "Crvena",
+        "ripen": "Rana",
+        "type": "Stona",
+        "order": 10,
+        "featured": false,
+        "visible": true,
+        "desc": "Stona hibridna forma nastala ukrštanjem Talisman × Krasotka. Grozdovi su krupni, konični do širokokonični, a izduženo-ovalne tamnoružičaste bobice teže približno 12–16 g.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "Rusija",
+          "author": "S. E. Gusev",
+          "maturity": "110–120 dana",
+          "clusterWeight": "800–1.200 g",
+          "berryWeight": "12–16 g",
+          "frost": "Podatak nije pouzdano potvrđen",
+          "disease": "Otpornost se još ispituje; preporučuje se redovna preventivna zaštita",
+          "taste": "Harmoničan; mesnato-sočna pulpa i tanka pokožica"
+        },
+        "images": [
+          "web-gusar.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "husein-kelin-barmak-nevestini-prsti": {
+        "name": "Husein Kelin Barmak (Nevestini prsti)",
+        "slug": "husein-kelin-barmak-nevestini-prsti",
+        "color": "Bijela",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 11,
+        "featured": false,
+        "visible": true,
+        "desc": "Stara bijela stona sorta poznata kao Nevestini prsti, prepoznatljiva po dugim cilindričnim bobicama. Najbolje rezultate daje na toplim i sunčanim položajima.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "Srednja Azija",
+          "author": "Stara narodna sorta",
+          "maturity": "Srednje rana do srednja",
+          "frost": "Slabija otpornost na mraz; preporučuje se za toplije položaje i zimsko pokrivanje",
+          "disease": "Prema Rasadniku Lađarević pokazuje dobru otpornost na česte gljivične bolesti, uz preventivnu zaštitu",
+          "taste": "Sladak, aromatičan i harmoničan"
+        },
+        "images": [
+          "web-husein-kelin-barmak-nevestini-prsti.webp"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": 10
+        },
+        "cutting": {
+          "enabled": true,
+          "price": 4
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "v20": {
+        "name": "V20",
+        "slug": "v20",
+        "color": "Bijela",
+        "ripen": "Rana",
+        "type": "Stona",
+        "order": 12,
+        "featured": false,
+        "visible": true,
+        "desc": "Rana bijela stona sorta označena kao V20 u ponudi Rasadnika Lađarević. Na javno dostupnim stranicama nisu pronađene dovoljno pouzdane specifikacije o porijeklu, masi grozda i bobice, pa su ta polja ostavljena za potvrdu.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "Nije pouzdano potvrđeno",
+          "author": "Nije pouzdano potvrđen",
+          "maturity": "Rana",
+          "frost": "Nema pouzdano potvrđenog podatka",
+          "disease": "Rasadnik Lađarević je predstavlja kao sortu jednostavnu za održavanje; precizni podaci nisu objavljeni",
+          "taste": "Nije pouzdano potvrđeno"
+        },
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "valek": {
+        "name": "Valek",
+        "slug": "valek",
+        "color": "Bijela",
+        "ripen": "Ultra rana",
+        "type": "Stona",
+        "order": 13,
+        "featured": false,
+        "visible": true,
+        "desc": "Veoma rana bijela stona hibridna forma nastala ukrštanjem Keša 1, Zvjezdani i Rizamat. Grozdovi su vrlo krupni, često 1.500–2.500 g, a ovalne žutozlatne bobice približno 10–14 g. Dobro podnosi transport i bobice nisu naročito sklone pucanju.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "Ukrajina",
+          "author": "N. P. Višnjevecki",
+          "maturity": "95–105 dana",
+          "clusterWeight": "1.500–2.500 g",
+          "berryWeight": "10–14 g",
+          "berrySize": "Oko 30 × 25 mm",
+          "frost": "Do približno −24 °C",
+          "disease": "Povišena otpornost na gljivične bolesti i sivu trulež, uz preventivne tretmane",
+          "taste": "Izražen muškat sa prijatnim kruškolikim tonom"
+        },
+        "images": [
+          "web-valek.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "bijelo-otporno": {
+        "name": "Bijelo otporno",
+        "slug": "bijelo-otporno",
+        "color": "Bijela",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 14,
+        "featured": false,
+        "visible": true,
+        "desc": "Bijela stona sorta dobre otpornosti.",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "bijelo-otporno-1.webp",
+          "bijelo-otporno-2.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "muskat-blu": {
+        "name": "Muskat Blu",
+        "slug": "muskat-blu",
+        "color": "Crna",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 15,
+        "featured": false,
+        "visible": true,
+        "desc": "Aromatična tamna muskatna sorta.",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "web-muskat-blu.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "muskat-zuti": {
+        "name": "Muskat žuti",
+        "slug": "muskat-zuti",
+        "color": "Bijela",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 16,
+        "featured": false,
+        "visible": true,
+        "desc": "Bijela sorta izražene muskatne arome.",
+        "exp": "",
+        "flaws": "",
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "muskat-plavi": {
+        "name": "Muskat plavi",
+        "slug": "muskat-plavi",
+        "color": "Crna",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 17,
+        "featured": false,
+        "visible": true,
+        "desc": "Tamna muskatna sorta prijatne arome.",
+        "exp": "",
+        "flaws": "",
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "viktorija-crvena": {
+        "name": "Viktorija crvena",
+        "slug": "viktorija-crvena",
+        "color": "Crvena",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 18,
+        "featured": false,
+        "visible": true,
+        "desc": "Crvena stona sorta lijepih grozdova.",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "web-viktorija-crvena.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "podarok-nesvetaja": {
+        "name": "Podarok Nesvetaja",
+        "slug": "podarok-nesvetaja",
+        "color": "Crvena",
+        "ripen": "Rana",
+        "type": "Stona",
+        "order": 19,
+        "featured": false,
+        "visible": true,
+        "desc": "Rana stona sorta krupnih bobica.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "Rusija",
+          "author": "E. G. Pavlovski",
+          "maturity": "90–100 dana",
+          "clusterWeight": "600–1.200 g",
+          "berryWeight": "10–14 g",
+          "frost": "Do približno −23 °C",
+          "taste": "Mesnata pulpa sa aromom muškata; veoma ukusna"
+        },
+        "images": [
+          "web-podarok-nesvetaja.webp"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": 12
+        },
+        "cutting": {
+          "enabled": true,
+          "price": 4
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "krasava": {
+        "name": "Krasava",
+        "slug": "krasava",
+        "color": "Crvena",
+        "ripen": "Rana",
+        "type": "Stona",
+        "order": 20,
+        "featured": false,
+        "visible": true,
+        "desc": "Atraktivna rana sorta.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "Ukrajina",
+          "author": "V. M. Kalugin",
+          "maturity": "105–110 dana",
+          "clusterWeight": "700–1.200 g",
+          "berryWeight": "15–18 g",
+          "frost": "Do približno −23 °C",
+          "taste": "Hrskava pulpa i skladan ukus"
+        },
+        "images": [
+          "web-krasava.webp"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": 30
+        },
+        "cutting": {
+          "enabled": true,
+          "price": 10
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "gold-finger": {
+        "name": "Gold Finger",
+        "slug": "gold-finger",
+        "color": "Bijela",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 21,
+        "featured": false,
+        "visible": true,
+        "desc": "Rodna bijela stona sorta izduženih bobica, dobro prilagođena umjerenim i toplim uslovima. Dobro podnosi sušu i temperaturne promjene.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "disease": "Vrlo dobra otpornost na gljivične bolesti",
+          "taste": "Sladak i harmoničan"
+        },
+        "images": [
+          "gold-finger-1.webp",
+          "gold-finger-2.webp",
+          "gold-finger-3.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "jubilej-novocerkaska": {
+        "name": "Jubilej Novočerkaska",
+        "slug": "jubilej-novocerkaska",
+        "color": "Crvena",
+        "ripen": "Rana",
+        "type": "Stona",
+        "order": 22,
+        "featured": false,
+        "visible": true,
+        "desc": "Rana stona hibridna forma V. N. Krainova, veoma krupnih grozdova i velikih izduženih ružičastožutih bobica.",
+        "exp": "Krupna rana sorta; kod mene sazrijeva oko 15. avgusta.",
+        "flaws": "",
+        "facts": {
+          "origin": "Rusija",
+          "author": "V. N. Krainov",
+          "maturity": "110–120 dana",
+          "clusterWeight": "700–1.500 g",
+          "berryWeight": "14–18 g",
+          "frost": "Do približno −21 °C",
+          "disease": "Srednja otpornost; potrebna preventivna zaštita",
+          "taste": "Sočna i mesnata pulpa, harmoničnog ukusa"
+        },
+        "images": [
+          "jubilej-novocerkaska-1.webp",
+          "jubilej-novocerkaska-2.webp",
+          "jubilej-novocerkaska-3.webp",
+          "jubilej-novocerkaska-4.webp"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": 12
+        },
+        "cutting": {
+          "enabled": true,
+          "price": 4
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "preobrazenje": {
+        "name": "Preobraženje",
+        "slug": "preobrazenje",
+        "color": "Crvena",
+        "ripen": "Rana",
+        "type": "Stona",
+        "order": 23,
+        "featured": false,
+        "visible": true,
+        "desc": "Rana crvena stona sorta veoma krupnih grozdova i izduženih bobica. Snažnog je rasta, rodna i vrlo atraktivna za svježu potrošnju.",
+        "exp": "Krupna sorta; kod mene sazrijeva oko 20. avgusta i odgovara joj duža rezidba.",
+        "flaws": "",
+        "facts": {
+          "origin": "Rusija",
+          "author": "V. N. Krainov",
+          "maturity": "110–120 dana",
+          "clusterWeight": "700–1.500 g",
+          "berryWeight": "14–18 g",
+          "berrySize": "20 × 45 mm",
+          "frost": "Do približno −21 °C",
+          "disease": "Srednja do dobra otpornost uz preventivnu zaštitu",
+          "taste": "Mesnata i sočna pulpa, skladnog ukusa"
+        },
+        "images": [
+          "preobrazenje-1.webp",
+          "preobrazenje-2.webp"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": 10
+        },
+        "cutting": {
+          "enabled": true,
+          "price": 4
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "nizina": {
+        "name": "Nizina",
+        "slug": "nizina",
+        "color": "Crvena",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 24,
+        "featured": true,
+        "visible": true,
+        "desc": "Stona hibridna forma V. N. Krainova nastala ukrštanjem Talisman × Tomajski.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "Rusija",
+          "author": "V. N. Krainov",
+          "maturity": "Srednje rana, približno 125–130 dana",
+          "clusterWeight": "600–1.500 g, pojedini grozdovi i veći",
+          "berryWeight": "12–16 g",
+          "frost": "Do približno −23 °C",
+          "disease": "Srednja do dobra otpornost, uz preventivnu zaštitu",
+          "taste": "Harmoničan, mesnato-sočna pulpa"
+        },
+        "images": [
+          "nizina-1.webp",
+          "nizina-2.webp",
+          "nizina-3.webp",
+          "nizina-4.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "dolgozdani": {
+        "name": "Dolgoždani",
+        "slug": "dolgozdani",
+        "color": "Bijela",
+        "ripen": "Rana",
+        "type": "Stona",
+        "order": 25,
+        "featured": false,
+        "visible": true,
+        "desc": "Rana stona hibridna forma nastala ukrštanjem Talisman × Kišmiš Lučisti. Grozdovi su krupni, najčešće 500–800 g, a bobice bijele, izdužene i približno 8–9 g.",
+        "exp": "Kod mene sazrijeva oko 30. avgusta. Primijetio sam da bobice mogu pucati.",
+        "flaws": "",
+        "facts": {
+          "origin": "Rusija",
+          "author": "V. N. Krainov",
+          "maturity": "Rana, približno 105–115 dana",
+          "frost": "Zahtijeva zimsko pokrivanje",
+          "disease": "Srednja otpornost; obavezna preventivna zaštita od plamenjače i pepelnice",
+          "taste": "Sladak i harmoničan, mesnato-sočna pulpa"
+        },
+        "images": [
+          "dolgozdani-1.webp",
+          "dolgozdani-2.webp",
+          "dolgozdani-3.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "sarlota": {
+        "name": "Šarlota",
+        "slug": "sarlota",
+        "color": "Crna",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 26,
+        "featured": false,
+        "visible": true,
+        "desc": "Stona sorta; osobine treba dopuniti.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "maturity": "125–140 dana",
+          "clusterWeight": "500–1.100 g",
+          "berryWeight": "7–10 g",
+          "frost": "Do približno −18 °C",
+          "taste": "Slatka pulpa bez posebne arome, harmoničnog ukusa"
+        },
+        "images": [
+          "web-sarlota.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true,
+          "price": 4
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "favor": {
+        "name": "Favor",
+        "slug": "favor",
+        "color": "Crvena",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 27,
+        "featured": false,
+        "visible": true,
+        "desc": "Krupna stona sorta atraktivnih bobica.",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "favor-1.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "timosa": {
+        "name": "Timoša",
+        "slug": "timosa",
+        "color": "Crvena",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 28,
+        "featured": false,
+        "visible": true,
+        "desc": "Sorta iz kolekcije; podatke treba dopuniti.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "Ukrajina – potrebno potvrditi",
+          "author": "Aleksandar S. Nagornjak",
+          "maturity": "125–130 dana",
+          "clusterWeight": "700–1.200 g",
+          "berryWeight": "14–16 g",
+          "frost": "Do približno −23 °C",
+          "taste": "Harmoničan ukus"
+        },
+        "sapling": {
+          "enabled": true,
+          "price": 12
+        },
+        "cutting": {
+          "enabled": true,
+          "price": 5
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "zarevo": {
+        "name": "Zarevo",
+        "slug": "zarevo",
+        "color": "Crvena",
+        "ripen": "Kasna",
+        "type": "Stona",
+        "order": 29,
+        "featured": false,
+        "visible": true,
+        "desc": "Kasna sorta koja zahtijeva dovoljno dugu i toplu jesen.",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "web-zarevo.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "nadezda-azos": {
+        "name": "Nadežda Azos",
+        "slug": "nadezda-azos",
+        "color": "Crna",
+        "ripen": "Kasna",
+        "type": "Stona",
+        "order": 30,
+        "featured": false,
+        "visible": true,
+        "desc": "Tamna stona sorta krupnih grozdova i izduženih bobica. Odlikuje se stabilnom rodnošću, dobrom otpornošću i pogodna je za transport.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "disease": "Dobra otpornost na bolesti",
+          "taste": "Harmoničan i prijatan"
+        },
+        "images": [
+          "nadezda-azos-1.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "basanti": {
+        "name": "Basanti",
+        "slug": "basanti",
+        "color": "Crvena",
+        "ripen": "Ultra rana",
+        "type": "Stona",
+        "order": 31,
+        "featured": false,
+        "visible": true,
+        "desc": "Ultra rana stona hibridna forma A. V. Burdaka, nastala ukrštanjem Sindikat × Kišmiš Lučisti. Ima velike ovalne ružičastocrvene bobice i snažan rast.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "Ukrajina",
+          "author": "A. V. Burdak",
+          "maturity": "110–120 dana",
+          "clusterWeight": "700–1.200 g",
+          "berryWeight": "16–18 g",
+          "frost": "Do približno −22 °C",
+          "taste": "Harmoničan ukus"
+        },
+        "images": [
+          "basanti-1.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "zorenjka": {
+        "name": "Zorenjka",
+        "slug": "zorenjka",
+        "color": "Crvena",
+        "ripen": "Ultra rana",
+        "type": "Stona",
+        "order": 32,
+        "featured": false,
+        "visible": true,
+        "desc": "Vrlo rana ružičasta stona sorta krupnih ovalnih bobica, dobre rodnosti i transportabilnosti.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "maturity": "Približno 90–95 dana",
+          "clusterWeight": "Do približno 1.500 g",
+          "berryWeight": "Približno 8–12 g",
+          "frost": "Do približno −23 °C",
+          "taste": "Harmoničan sa muškatnom aromom"
+        },
+        "images": [
+          "web-zorenjka.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "buba": {
+        "name": "Buba",
+        "slug": "buba",
+        "color": "Bijela",
+        "ripen": "Kasna",
+        "type": "Stona",
+        "order": 33,
+        "featured": false,
+        "visible": true,
+        "desc": "Kasna sorta, vegetacija približno 125–135 dana.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "Ukrajina",
+          "author": "V. M. Kalugin",
+          "maturity": "120–125 dana",
+          "clusterWeight": "1.000–1.200 g",
+          "berryWeight": "30–35 g",
+          "berrySize": "40 × 34 mm",
+          "frost": "Do približno −23 °C",
+          "taste": "Gusta i mesnata pulpa, skladnog ukusa"
+        },
+        "images": [
+          "web-buba.webp"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": 30
+        },
+        "cutting": {
+          "enabled": true,
+          "price": 15
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "velika": {
+        "name": "Velika",
+        "slug": "velika",
+        "color": "Crna",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 34,
+        "featured": false,
+        "visible": true,
+        "desc": "Krupna tamna stona sorta.",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "web-velika.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "viktor": {
+        "name": "Viktor",
+        "slug": "viktor",
+        "color": "Crvena",
+        "ripen": "Rana",
+        "type": "Stona",
+        "order": 35,
+        "featured": true,
+        "visible": true,
+        "desc": "Rana crvena stona sorta snažnog rasta, krupnih grozdova i velikih izduženih bobica. Cijenjena je zbog atraktivnog izgleda i dobre rodnosti.",
+        "exp": "Rana krupna sorta; kod mene sazrijeva od 15. do 30. avgusta.",
+        "flaws": "",
+        "facts": {
+          "origin": "Rusija",
+          "author": "V. N. Krainov",
+          "maturity": "100–110 dana",
+          "clusterWeight": "700–1.500 g",
+          "berryWeight": "10–15 g",
+          "berrySize": "24 × 40 mm",
+          "frost": "Do približno −22 °C",
+          "disease": "Dobra otpornost uz redovnu preventivnu zaštitu",
+          "taste": "Hrskava pulpa i harmoničan ukus"
+        },
+        "images": [
+          "viktor-1.webp",
+          "viktor-2.webp",
+          "viktor-3.webp",
+          "viktor-4.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true,
+          "price": 4
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "super-visnja": {
+        "name": "Super Višnja",
+        "slug": "super-visnja",
+        "color": "Crvena",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 36,
+        "featured": false,
+        "visible": true,
+        "desc": "Crvenkasta sorta; podatke treba dopuniti.",
+        "exp": "",
+        "flaws": "",
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "crno-otporno": {
+        "name": "Crno otporno",
+        "slug": "crno-otporno",
+        "color": "Crna",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 37,
+        "featured": false,
+        "visible": true,
+        "desc": "Tamna stona sorta dobre otpornosti.",
+        "exp": "",
+        "flaws": "",
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "dunav": {
+        "name": "Dunav",
+        "slug": "dunav",
+        "color": "Crvena",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 38,
+        "featured": false,
+        "visible": true,
+        "desc": "Crvena stona sorta privlačnog izgleda, stabilne rodnosti i dobrog kvaliteta ploda.",
+        "exp": "Srednje rana sorta; kod mene pokazuje slabiju otpornost.",
+        "flaws": "",
+        "images": [
+          "dunav-1.webp",
+          "dunav-2.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "emir": {
+        "name": "Emir",
+        "slug": "emir",
+        "color": "Crna",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 39,
+        "featured": false,
+        "visible": true,
+        "desc": "Tamna stona sorta; podatke treba dopuniti.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "Ukrajina",
+          "author": "V. M. Kalugin",
+          "maturity": "120–125 dana",
+          "clusterWeight": "800–2.000 g",
+          "berryWeight": "15–22 g",
+          "frost": "Do približno −23 °C",
+          "taste": "Mesnata i hrskava pulpa, skladnog ukusa"
+        },
+        "images": [
+          "web-emir.webp"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": 11
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "geliodor": {
+        "name": "Geliodor",
+        "slug": "geliodor",
+        "color": "Bijela",
+        "ripen": "Rana",
+        "type": "Besjemena",
+        "order": 40,
+        "featured": false,
+        "visible": true,
+        "desc": "Rana svijetla besjemena sorta.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "Ukrajina",
+          "author": "V. V. Zagoruljko",
+          "maturity": "100–105 dana",
+          "clusterWeight": "700–3.000 g",
+          "berryWeight": "5–8 g",
+          "frost": "Do približno −21 °C",
+          "taste": "Mesnata i sočna pulpa sa aromom muškata"
+        },
+        "images": [
+          "web-geliodor.webp"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": 12
+        },
+        "cutting": {
+          "enabled": true,
+          "price": 4
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "lancelot": {
+        "name": "Lancelot",
+        "slug": "lancelot",
+        "color": "Bijela",
+        "ripen": "Kasna",
+        "type": "Stona",
+        "order": 41,
+        "featured": false,
+        "visible": true,
+        "desc": "Bijela stona sorta krupnih grozdova i mesnatih bobica, stabilne rodnosti i dobre tržišne vrijednosti.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "disease": "Dobra otpornost uz preventivnu zaštitu"
+        },
+        "images": [
+          "web-lancelot.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "prima-parisa": {
+        "name": "Prima Parisa",
+        "slug": "prima-parisa",
+        "color": "Crvena",
+        "ripen": "Rana",
+        "type": "Stona",
+        "order": 42,
+        "featured": false,
+        "visible": true,
+        "desc": "Rana stona sorta svijetlih do blago ružičastih ovalnih bobica i zbijenih grozdova. Pod nazivom Prima Parisa nema dovoljno pouzdanih stručnih podataka, pa porijeklo i autor ostaju za potvrdu.",
+        "exp": "Kod mene je ukusna, ali je čokot nešto slabije bujnosti.",
+        "flaws": "",
+        "facts": {
+          "origin": "Tačno porijeklo treba potvrditi",
+          "author": "Nije pouzdano potvrđen",
+          "maturity": "Rana",
+          "frost": "Nema pouzdano potvrđenog podatka",
+          "disease": "Srednja; preporučuje se redovna preventivna zaštita",
+          "taste": "Prijatan, harmoničan"
+        },
+        "images": [
+          "prima-parisa-1.webp",
+          "prima-parisa-2.webp",
+          "prima-parisa-3.webp",
+          "prima-parisa-4.webp",
+          "prima-parisa-5.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "vatra": {
+        "name": "Vatra",
+        "slug": "vatra",
+        "color": "Crvena",
+        "ripen": "Kasna",
+        "type": "Stona",
+        "order": 43,
+        "featured": false,
+        "visible": true,
+        "desc": "",
+        "exp": "Kasna sorta koja je kod mene pokazala slabiju otpornost na bolesti.",
+        "flaws": "",
+        "facts": {
+          "origin": "Ukrajina – potrebno potvrditi",
+          "author": "B. M. Pavlij",
+          "maturity": "115–125 dana",
+          "clusterWeight": "800–1.500 g",
+          "frost": "Do približno −26 °C",
+          "taste": "Slatka, harmonična aroma sa blagom kiselinom"
+        },
+        "images": [
+          "vatra-1.webp"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": 10
+        },
+        "cutting": {
+          "enabled": true,
+          "price": 4
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "kameleon": {
+        "name": "Kameleon",
+        "slug": "kameleon",
+        "color": "Crvena",
+        "ripen": "Rana",
+        "type": "Stona",
+        "order": 44,
+        "featured": false,
+        "visible": true,
+        "desc": "Snažna i veoma rodna stona sorta sa krupnim grozdovima i velikim ovalnim bobicama. Boja prelazi od žutozelene do svijetloružičaste, zavisno od osunčanosti.",
+        "exp": "Na mom terenu sazrijeva od 10. do 20. avgusta. Pokazala se stabilno i otporno.",
+        "flaws": "",
+        "facts": {
+          "origin": "Ukrajina",
+          "author": "N. P. Višnjevecki",
+          "maturity": "95–105 dana",
+          "clusterWeight": "800–1.500 g",
+          "berryWeight": "8–11 g",
+          "frost": "Do približno −23 °C",
+          "disease": "Povišena otpornost na gljivične bolesti i sivu trulež, uz preventivne tretmane",
+          "taste": "Mesnata i hrskava pulpa, skladnog ukusa"
+        },
+        "images": [
+          "kameleon-1.webp",
+          "kameleon-2.webp",
+          "kameleon-3.webp",
+          "kameleon-4.webp"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": 10
+        },
+        "cutting": {
+          "enabled": true,
+          "price": 4
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "aleksa": {
+        "name": "Aleksa",
+        "slug": "aleksa",
+        "color": "Bijela",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 45,
+        "featured": false,
+        "visible": true,
+        "desc": "Snažna stona sorta poznata i kao Pamiati Kostrikin, nastala ukrštanjem Biruinca × Vostorg. Grozdovi su vrlo krupni, 700–1.000 g, a pojedini dostižu oko 1,8 kg; bijele ovalne bobice teže 10–14 g.",
+        "exp": "Na mom terenu sazrijeva od 25. do 30. avgusta i pokazala se dobro.",
+        "flaws": "",
+        "facts": {
+          "origin": "Rusija",
+          "author": "VNIIViV „J. I. Potapenko“",
+          "maturity": "Rana do srednje rana, oko 120–125 dana",
+          "frost": "Do približno −25 °C",
+          "disease": "Dobra otpornost na plamenjaču i sivu trulež; srednja na oidijum",
+          "taste": "Harmoničan, čvrsta i mesnata pulpa"
+        },
+        "images": [
+          "aleksa-1.webp",
+          "aleksa-2.webp",
+          "aleksa-3.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "talisman": {
+        "name": "Talisman",
+        "slug": "talisman",
+        "color": "Bijela",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 46,
+        "featured": false,
+        "visible": true,
+        "desc": "Bijela stona sorta stabilne rodnosti, dobrog sadržaja šećera i povoljne ravnoteže slatkoće i kiseline. Najbolje rezultate daje na toplim i sunčanim položajima.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "disease": "Dobra otpornost na gljivične bolesti",
+          "taste": "Sladak i harmoničan, sa blagim voćnim tonovima"
+        },
+        "images": [
+          "web-talisman.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "rusko-rano": {
+        "name": "Rusko rano",
+        "slug": "rusko-rano",
+        "color": "Bijela",
+        "ripen": "Rana",
+        "type": "Stona",
+        "order": 47,
+        "featured": false,
+        "visible": true,
+        "desc": "Rana stona sorta nastala ukrštanjem Šasla sjevernaja × Mičurinec. Čokot je snažan i rodnost dobra, a svijetloružičaste bobice sazrijevaju rano i pogodne su za svježu potrošnju.",
+        "exp": "Na mom terenu sazrijeva od 10. do 20. avgusta i pokazala se kao pouzdana sorta.",
+        "flaws": "",
+        "facts": {
+          "origin": "Rusija",
+          "author": "VNIIViV „J. I. Potapenko“",
+          "maturity": "110–120 dana",
+          "clusterWeight": "800–1.700 g",
+          "berryWeight": "7–10 g",
+          "berrySize": "27 × 24 mm",
+          "frost": "Do približno −25 °C",
+          "disease": "Relativno otporna na plamenjaču, oidijum i sivu trulež",
+          "taste": "Veoma slatko, harmonične arome"
+        },
+        "images": [
+          "rusko-rano-1.webp"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": 10
+        },
+        "cutting": {
+          "enabled": true,
+          "price": 4
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "veles": {
+        "name": "Veles",
+        "slug": "veles",
+        "color": "Crvena",
+        "ripen": "Rana",
+        "type": "Besjemena",
+        "order": 48,
+        "featured": false,
+        "visible": true,
+        "desc": "Rana besjemena sorta.",
+        "exp": "Kod mene bobice mogu pucati.",
+        "flaws": "",
+        "facts": {
+          "origin": "Ukrajina",
+          "author": "V. V. Zagoruljko",
+          "maturity": "110–115 dana",
+          "clusterWeight": "700–3.000 g",
+          "berryWeight": "5–8 g",
+          "frost": "Do približno −21 °C",
+          "taste": "Mesnata i sočna pulpa sa blagom aromom muškata"
+        },
+        "images": [
+          "veles-1.webp",
+          "veles-2.webp",
+          "veles-3.webp"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": 10
+        },
+        "cutting": {
+          "enabled": true,
+          "price": 4
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "sfinks": {
+        "name": "Sfinks",
+        "slug": "sfinks",
+        "color": "Crna",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 49,
+        "featured": false,
+        "visible": true,
+        "desc": "Sfinks je vrlo rana tamna stona hibridna forma V. V. Zagoruljka, nastala ukrštanjem sorti Strašenski i Timur. Bujnog je rasta i daje krupne grozdove sa velikim tamnoplavim bobicama. Pokazuje dobru poljsku otpornost, ali i dalje zahtijeva preventivnu zaštitu.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "Ukrajina",
+          "author": "V. V. Zagoruljko",
+          "maturity": "100–105 dana",
+          "clusterWeight": "700–1.600 g",
+          "berryWeight": "7–10 g",
+          "frost": "Do približno −22 °C",
+          "disease": "Dobra otpornost na glavne bolesti vinove loze, uz preventivnu zaštitu",
+          "taste": "Mesnato-sočna pulpa, skladnog i slatkog ukusa"
+        },
+        "images": [
+          "sfinks-1.webp"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": 10
+        },
+        "cutting": {
+          "enabled": true,
+          "price": 4
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "galbena-noy": {
+        "name": "Galbena Noy",
+        "slug": "galbena-noy",
+        "color": "Bijela",
+        "ripen": "Rana",
+        "type": "Stona",
+        "order": 50,
+        "featured": false,
+        "visible": true,
+        "desc": "Galbena Nou, poznata i kao Zolotinka, vrlo je rana do rana bijela stona sorta Instituta Potapenko. Nastala je ukrštanjem sorti Frumoasa alba i Korinka ruska. Bujnog je rasta, dobro sazrijeva loza, a zelenobijele bobice u punoj zrelosti postaju jantarnožute.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "Rusija",
+          "author": "VNIIViV „J. I. Potapenko“",
+          "maturity": "105–120 dana",
+          "clusterWeight": "450–700 g",
+          "berryWeight": "7,5–8 g",
+          "berrySize": "Oko 24 × 23 mm",
+          "frost": "Do približno −25 °C",
+          "taste": "Mesnato-sočna pulpa sa prijatnom muškatnom aromom"
+        },
+        "images": [
+          "galbena-nou-1.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "monarh": {
+        "name": "Monarh",
+        "slug": "monarh",
+        "color": "Bijela",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 51,
+        "featured": false,
+        "visible": true,
+        "desc": "Krupna bijela stona sorta visokog kvaliteta i stabilne rodnosti. Najbolje rezultate daje na osunčanim položajima u umjerenim i toplim područjima.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "disease": "Dobra otpornost na gljivične bolesti",
+          "taste": "Bogat, voćan i harmoničan"
+        },
+        "images": [
+          "web-monarh.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "bajkonur": {
+        "name": "Bajkonur",
+        "slug": "bajkonur",
+        "color": "Crna",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 52,
+        "featured": false,
+        "visible": true,
+        "desc": "Atraktivna sorta.",
+        "exp": "Kod mene sazrijeva oko 5. septembra.",
+        "flaws": "",
+        "facts": {
+          "origin": "Rusija",
+          "author": "E. G. Pavlovski",
+          "maturity": "120–135 dana",
+          "clusterWeight": "700–1.200 g",
+          "berryWeight": "10–12 g",
+          "frost": "Do približno −22 °C",
+          "taste": "Čvrsta pulpa i pokožica, harmoničnog ukusa"
+        },
+        "images": [
+          "bajkonur-1.webp",
+          "bajkonur-2.webp"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": 11
+        },
+        "cutting": {
+          "enabled": true,
+          "price": 4
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "striz": {
+        "name": "Striž",
+        "slug": "striz",
+        "color": "Crna",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 53,
+        "featured": false,
+        "visible": true,
+        "desc": "",
+        "exp": "Kod mene je pokazao slabiju otpornost.",
+        "flaws": "",
+        "facts": {
+          "origin": "Rusija",
+          "author": "E. G. Pavlovski",
+          "maturity": "110–115 dana",
+          "clusterWeight": "300–450 g",
+          "berryWeight": "8–11 g",
+          "frost": "Do približno −22 °C",
+          "taste": "Gusta i hrskava pulpa, harmoničnog ukusa"
+        },
+        "images": [
+          "web-striz.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true,
+          "price": 4
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "km-342": {
+        "name": "KM 342",
+        "slug": "km-342",
+        "color": "Bijela",
+        "ripen": "Rana",
+        "type": "Besjemena",
+        "order": 54,
+        "featured": false,
+        "visible": true,
+        "desc": "Rana besjemena sorta.",
+        "exp": "Kod mene sazrijeva oko 20. avgusta, sitnije bobice.",
+        "flaws": "",
+        "images": [
+          "km-342-1.webp",
+          "km-342-2.webp",
+          "km-342-3.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "rafinad": {
+        "name": "Rafinad",
+        "slug": "rafinad",
+        "color": "Bijela",
+        "ripen": "Kasna",
+        "type": "Stona",
+        "order": 55,
+        "featured": false,
+        "visible": true,
+        "desc": "",
+        "exp": "Kasna sorta koja se kod mene pokazala dobro.",
+        "flaws": "",
+        "images": [
+          "rafinad-1.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "garmonia": {
+        "name": "Garmonia",
+        "slug": "garmonia",
+        "color": "Crna",
+        "ripen": "Ultra rana",
+        "type": "Stona",
+        "order": 56,
+        "featured": false,
+        "visible": true,
+        "desc": "Stona hibridna forma Garmonia KlLA 11-1 snažnog rasta. Bobice su krupne, izduženo-ovalne, tamnoljubičaste, sa mesnato-sočnom pulpom i jestivom pokožicom.",
+        "exp": "Kod mene sazrijeva oko 30. avgusta. Veoma je ukusna, laka za uzgoj i snažnog rasta.",
+        "flaws": "",
+        "facts": {
+          "origin": "Rusija",
+          "author": "Klub vinogradara „Ljubitelji ampelografije“ (KlLA)",
+          "maturity": "Ultra rana, oko 100–110 dana",
+          "frost": "Podatak nije pouzdano potvrđen",
+          "disease": "Srednja otpornost; potrebna je puna preventivna zaštita",
+          "taste": "Harmoničan sa blagom muskatnom aromom"
+        },
+        "images": [
+          "garmonia-1.webp",
+          "garmonia-2.webp",
+          "garmonia-3.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "ilona": {
+        "name": "Ilona",
+        "slug": "ilona",
+        "color": "Bijela",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 57,
+        "featured": false,
+        "visible": true,
+        "desc": "Stona sorta selekcionara A. V. Burdaka, nastala iz kombinacije Lora × (Nina × Nizina). Bujnog je rasta, dobro sazrijeva loza i pokazuje dobru otpornost prema bolestima.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "Ukrajina",
+          "author": "A. V. Burdak"
+        },
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true,
+          "price": 4
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "km-houp": {
+        "name": "KM Houp",
+        "slug": "km-houp",
+        "color": "Crna",
+        "ripen": "Srednje rana",
+        "type": "Besjemena",
+        "order": 58,
+        "featured": false,
+        "visible": true,
+        "desc": "Otporna bijela stona sorta namijenjena stabilnoj proizvodnji u različitim uslovima uzgoja.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "disease": "Povišena otpornost na bolesti"
+        },
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "demir-kapija": {
+        "name": "Demir Kapija",
+        "slug": "demir-kapija",
+        "color": "Crna",
+        "ripen": "Kasna",
+        "type": "Vinska",
+        "order": 59,
+        "featured": false,
+        "visible": true,
+        "desc": "Vinska sorta.",
+        "exp": "Kod mene sitnija i slabije otporna.",
+        "flaws": "",
+        "images": [
+          "web-demir-kapija.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "crno-rano": {
+        "name": "Crno rano",
+        "slug": "crno-rano",
+        "color": "Crna",
+        "ripen": "Rana",
+        "type": "Stona",
+        "order": 60,
+        "featured": false,
+        "visible": true,
+        "desc": "Rana tamna sorta.",
+        "exp": "Kod mene slabije otpornosti.",
+        "flaws": "",
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "karmen": {
+        "name": "Karmen",
+        "slug": "karmen",
+        "color": "Crna",
+        "ripen": "Kasna",
+        "type": "Vinska",
+        "order": 61,
+        "featured": false,
+        "visible": true,
+        "desc": "Tamna sorta kalemljena na livadijsku podlogu.",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "web-karmen.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "morava": {
+        "name": "Morava",
+        "slug": "morava",
+        "color": "Bijela",
+        "ripen": "Kasna",
+        "type": "Vinska",
+        "order": 62,
+        "featured": false,
+        "visible": true,
+        "desc": "Otporna bijela vinska sorta.",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "web-morava.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "livadijski-corni": {
+        "name": "Livadijski čorni",
+        "slug": "livadijski-corni",
+        "color": "Crna",
+        "ripen": "Srednje rana",
+        "type": "Vinska",
+        "order": 63,
+        "featured": false,
+        "visible": true,
+        "desc": "Aromatična tamna vinska sorta.",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "web-livadijski-corni.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "nero": {
+        "name": "Nero",
+        "slug": "nero",
+        "color": "Crna",
+        "ripen": "Rana",
+        "type": "Vinska",
+        "order": 64,
+        "featured": false,
+        "visible": true,
+        "desc": "Rana obojena sorta pogodna i za vino.",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "web-nero.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "frankovka": {
+        "name": "Frankovka",
+        "slug": "frankovka",
+        "color": "Crna",
+        "ripen": "Kasna",
+        "type": "Vinska",
+        "order": 65,
+        "featured": false,
+        "visible": true,
+        "desc": "Poznata crna vinska sorta.",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "web-frankovka.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "crni-pinot": {
+        "name": "Crni pinot",
+        "slug": "crni-pinot",
+        "color": "Crna",
+        "ripen": "Rana",
+        "type": "Vinska",
+        "order": 66,
+        "featured": false,
+        "visible": true,
+        "desc": "Crni pinot (Pinot Noir) stara je francuska vinska sorta porijeklom iz Burgundije. Rano kreće i rano sazrijeva, ima sitnije bobice tanke pokožice i zbijene grozdove, zbog čega traži pažljivu zaštitu i prozračan položaj.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "Francuska",
+          "taste": "U vinu daje prepoznatljive arome trešnje i maline"
+        },
+        "images": [
+          "web-crni-pinot.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "gala": {
+        "name": "Gala",
+        "slug": "gala",
+        "color": "Crna",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 67,
+        "featured": false,
+        "visible": true,
+        "desc": "Rodna tamna stona sorta krupnijih plodova, poznata po slatkom ukusu, mesnatoj pulpi i stabilnom prinosu.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "disease": "Dobra otpornost na više bolesti vinove loze",
+          "taste": "Sladak i prijatan; mesnata i sočna pulpa"
+        },
+        "images": [
+          "web-gala.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "blagovest": {
+        "name": "Blagovest",
+        "slug": "blagovest",
+        "color": "Crvena",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 68,
+        "featured": true,
+        "visible": true,
+        "desc": "Bijela stona sorta stabilne rodnosti i kvalitetnih plodova, prilagođena umjerenim i toplim područjima.",
+        "exp": "Krupna stona sorta koja se kod mene pokazala dobro.",
+        "flaws": "",
+        "facts": {
+          "disease": "Dobra otpornost na gljivične bolesti",
+          "taste": "Voćan, sa blagom kiselinom i harmoničnim karakterom"
+        },
+        "images": [
+          "blagovest-1.webp",
+          "blagovest-2.webp",
+          "blagovest-3.webp",
+          "blagovest-4.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "livija": {
+        "name": "Livija",
+        "slug": "livija",
+        "color": "Crvena",
+        "ripen": "Rana",
+        "type": "Stona",
+        "order": 69,
+        "featured": true,
+        "visible": true,
+        "desc": "Rana ružičasta stona sorta nastala ukrštanjem Flamingo × Arkadia.",
+        "exp": "Lijepog ukusa, ali kod mene nešto slabije otpornosti.",
+        "flaws": "",
+        "facts": {
+          "origin": "Ukrajina",
+          "author": "V. V. Zagoruljko",
+          "maturity": "Vrlo rana do rana, približno 105–115 dana",
+          "clusterWeight": "600–1.000 g, pojedini grozdovi i veći",
+          "berryWeight": "10–15 g",
+          "frost": "Do približno −21 °C",
+          "disease": "Srednja otpornost; potrebna preventivna zaštita",
+          "taste": "Sladak, sa prijatnom muškatnom aromom"
+        },
+        "images": [
+          "livija-1.webp",
+          "livija-2.webp",
+          "livija-3.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "kismis-aksajski": {
+        "name": "Kišmiš Aksajski",
+        "slug": "kismis-aksajski",
+        "color": "Crvena",
+        "ripen": "Rana",
+        "type": "Besjemena",
+        "order": 70,
+        "featured": false,
+        "visible": true,
+        "desc": "Rana besjemena sorta.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "berryWeight": "4–5 g",
+          "berrySize": "Oko 22 × 17 mm",
+          "frost": "Do približno −26 °C",
+          "taste": "Sladak ukus sa muškatnom aromom"
+        },
+        "images": [
+          "web-kismis-aksajski.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "arkadia": {
+        "name": "Arkadia",
+        "slug": "arkadia",
+        "color": "Bijela",
+        "ripen": "Rana",
+        "type": "Stona",
+        "order": 71,
+        "featured": false,
+        "visible": true,
+        "desc": "Rana bijela stona sorta krupnih grozdova i velikih žutozelenih bobica. Veoma je rodna i dobro podnosi transport i čuvanje.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "Rusija",
+          "author": "S. E. Gusev",
+          "maturity": "Rano",
+          "clusterWeight": "800–2.500 g",
+          "berryWeight": "12–15 g",
+          "berrySize": "23 × 28 mm",
+          "frost": "Do približno −23 °C",
+          "disease": "Dobra otpornost na bolesti",
+          "taste": "Mesnata i sočna pulpa, harmoničnog ukusa"
+        },
+        "images": [
+          "arkadia-1.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true,
+          "price": 8
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "ametist-novocerkaska": {
+        "name": "Ametist Novočerkaska",
+        "slug": "ametist-novocerkaska",
+        "color": "Crvena",
+        "ripen": "Rana",
+        "type": "Stona",
+        "order": 72,
+        "featured": false,
+        "visible": true,
+        "desc": "Rana stona sorta tamnoružičastih, blago izduženih bobica.",
+        "exp": "Kod mene sazrijeva oko 30. avgusta i pokazao se dobro.",
+        "flaws": "",
+        "facts": {
+          "origin": "Rusija",
+          "author": "VNIIViV „J. I. Potapenko“",
+          "maturity": "Vrlo rana do rana, približno 90–110 dana",
+          "clusterWeight": "Prosječno oko 570 g",
+          "berryWeight": "Prosječno oko 6,2 g",
+          "frost": "Do približno −25 °C",
+          "disease": "Dobra otpornost uz preventivnu zaštitu",
+          "taste": "Harmoničan, mesnato-sočna pulpa"
+        },
+        "images": [
+          "ametist-novocerkaska-1.webp",
+          "ametist-novocerkaska-2.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "galahad": {
+        "name": "Galahad",
+        "slug": "galahad",
+        "color": "Bijela",
+        "ripen": "Rana",
+        "type": "Stona",
+        "order": 73,
+        "featured": false,
+        "visible": true,
+        "desc": "Rana bijela sorta dobre prilagodljivosti na hladnije i umjerene klimatske uslove. Odlikuju je stabilna rodnost, dobar sadržaj šećera i prijatna ravnoteža slatkoće i kiseline.",
+        "exp": "Rana sorta koja se kod mene pokazala odlično.",
+        "flaws": "",
+        "facts": {
+          "disease": "Dobra otpornost na više gljivičnih bolesti, uz redovnu preventivnu zaštitu",
+          "taste": "Harmoničan i osvježavajući, sa blagim voćnim i cvjetnim tonovima"
+        },
+        "images": [
+          "web-galahad.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "avgustin": {
+        "name": "Avgustin",
+        "slug": "avgustin",
+        "color": "Bijela",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 74,
+        "featured": false,
+        "visible": true,
+        "desc": "Rodna bijela stona sorta, pogodna za različite uslove uzgoja. Odlikuju je stabilan prinos i dobra otpornost na bolesti.",
+        "exp": "Rodna bijela sorta; kod mene se može javiti trulež.",
+        "flaws": "",
+        "facts": {
+          "disease": "Dobra otpornost na bolesti i stabilna rodnost",
+          "taste": "Blag, prijatan i harmoničan"
+        },
+        "images": [
+          "web-avgustin.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "pleven": {
+        "name": "Pleven",
+        "slug": "pleven",
+        "color": "Bijela",
+        "ripen": "Rana",
+        "type": "Stona",
+        "order": 75,
+        "featured": false,
+        "visible": true,
+        "desc": "Bugarska bijela stona sorta stvorena ukrštanjem Italija × Jantar. Ima krupne žutozelene bobice i koristi se prvenstveno za svježu potrošnju.",
+        "exp": "Rana bijela sorta; kod mene se može javiti trulež.",
+        "flaws": "",
+        "facts": {
+          "origin": "Bugarska",
+          "author": "Institut za vinogradarstvo i vinarstvo Pleven",
+          "maturity": "Rana; početak avgusta u toplijim područjima",
+          "clusterWeight": "Približno 250–320 g",
+          "berryWeight": "Približno 7 g",
+          "taste": "Neutralan i prijatan; čvrsta, mesnata pulpa"
+        },
+        "images": [
+          "web-pleven.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "black-grand": {
+        "name": "Black Grand",
+        "slug": "black-grand",
+        "color": "Crna",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 76,
+        "featured": true,
+        "visible": true,
+        "desc": "Tamna stona sorta krupnih ovalnih bobica. Dostupni opisi je navode kao američku selekciju dobre transportabilnosti, ali autor i precizne mase nisu pouzdano potvrđeni.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "SAD",
+          "author": "Nije pouzdano potvrđen",
+          "frost": "Dobra zimska otpornost prema opisima uzgajivača; tačna granica nije potvrđena",
+          "disease": "Dobra otpornost prema iskustvima uzgajivača, uz preventivnu zaštitu",
+          "taste": "Harmoničan, jednostavniji ukus"
+        },
+        "images": [
+          "black-grand-1.webp",
+          "black-grand-2.webp",
+          "black-grand-3.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "azalija": {
+        "name": "Azalija",
+        "slug": "azalija",
+        "color": "Bijela",
+        "ripen": "Rana",
+        "type": "Stona",
+        "order": 77,
+        "featured": false,
+        "visible": true,
+        "desc": "Rana bijela stona hibridna forma V. U. Kapeljušnog: Vostorg krasni × (Tajfi ustojčivi + Nadežda Aksajska).",
+        "exp": "Kod mene sazrijeva oko 20. septembra i pokazala se dobro.",
+        "flaws": "",
+        "facts": {
+          "origin": "Rusija",
+          "author": "V. U. Kapeljušni",
+          "maturity": "Vrlo rana do rana, približno 100–105 dana",
+          "clusterWeight": "600–1.000 g",
+          "berryWeight": "10–14 g",
+          "frost": "Do približno −25 °C",
+          "disease": "Povišena otpornost uz preventivnu zaštitu",
+          "taste": "Harmoničan, mesnato-sočna pulpa"
+        },
+        "images": [
+          "azalija-1.webp",
+          "azalija-2.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "rembo": {
+        "name": "Rembo",
+        "slug": "rembo",
+        "color": "Crna",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 78,
+        "featured": false,
+        "visible": true,
+        "desc": "Tamna atraktivna sorta, poznata i pod radnim nazivom Lambordžini.",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "rembo-2.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "odisej": {
+        "name": "Odisej",
+        "slug": "odisej",
+        "color": "Crna",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 79,
+        "featured": false,
+        "visible": true,
+        "desc": "Stona sorta lijepog ukusa.",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "web-odisej.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "kneginja-olga": {
+        "name": "Kneginja Olga",
+        "slug": "kneginja-olga",
+        "color": "Bijela",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 80,
+        "featured": false,
+        "visible": true,
+        "desc": "Stona sorta veoma krupnih žutozelenih bobica. Dostupni opisi navode dobru sposobnost čuvanja grožđa nakon berbe.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "maturity": "Srednje vrijeme sazrijevanja",
+          "clusterWeight": "Do približno 1.500 g",
+          "berryWeight": "Približno 18–30 g",
+          "frost": "Do približno −24 °C",
+          "taste": "Harmoničan"
+        },
+        "images": [
+          "web-kneginja-olga.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "podarok-ukrajine": {
+        "name": "Podarok Ukrajine",
+        "slug": "podarok-ukrajine",
+        "color": "Bijela",
+        "ripen": "Rana",
+        "type": "Stona",
+        "order": 81,
+        "featured": false,
+        "visible": true,
+        "desc": "Rana stona hibridna forma snažnog rasta. Grozdovi su krupni do vrlo krupni, uglavnom 500–800 g i više, a velike ovalne bobice imaju tanku pokožicu i mesnato-sočnu pulpu.",
+        "exp": "Kod mene je atraktivna i rodna, sa krupnim grozdovima, ali ukus smatram jednostavnijim.",
+        "flaws": "",
+        "facts": {
+          "origin": "Ukrajina",
+          "author": "Selekciona forma iz Ukrajine; autor nije pouzdano potvrđen",
+          "maturity": "Rana, približno 110–120 dana",
+          "frost": "Približno do −23 do −25 °C; u hladnijim predjelima pokrivati",
+          "disease": "Povišena otpornost na plamenjaču, oidijum i sivu trulež",
+          "taste": "Prijatan i harmoničan"
+        },
+        "images": [
+          "podarok-ukrajine-1.webp",
+          "podarok-ukrajine-2.webp",
+          "podarok-ukrajine-3.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "helios": {
+        "name": "Helios",
+        "slug": "helios",
+        "color": "Crvena",
+        "ripen": "Rana",
+        "type": "Stona",
+        "order": 82,
+        "featured": false,
+        "visible": true,
+        "desc": "Helios, poznat i kao Roza Arkadia, rana je stona hibridna forma V. N. Krainova nastala ukrštanjem sorti Arkadia i Kišmiš Nahodka. Bujnog je rasta, daje krupne srednje rastresite grozdove i krupne ovalne ružičaste bobice.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "Rusija",
+          "author": "V. N. Krainov",
+          "maturity": "105–110 dana",
+          "clusterWeight": "500–900 g, pojedini do 1.500 g",
+          "berryWeight": "12–15 g",
+          "berrySize": "30–35 × 22–24 mm",
+          "frost": "Do približno −23 °C",
+          "taste": "Mesnato-sočna pulpa, jestiva pokožica i prijatna muškatna aroma"
+        },
+        "images": [
+          "helios-1.webp",
+          "helios-2.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "everest": {
+        "name": "Everest",
+        "slug": "everest",
+        "color": "Crvena",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 83,
+        "featured": false,
+        "visible": true,
+        "desc": "Rodna crvena stona sorta prilagođena toplim i umjerenim uslovima. Poznata je po dobroj otpornosti na bolesti i sušu.",
+        "exp": "Krupna atraktivna sorta koja se kod mene pokazala dobro.",
+        "flaws": "",
+        "facts": {
+          "origin": "Rusija",
+          "author": "E. G. Pavlovski",
+          "maturity": "110–115 dana",
+          "clusterWeight": "600–1.200 g",
+          "berryWeight": "18–35 g",
+          "frost": "Do približno −23 °C",
+          "disease": "Dobra otpornost na oidijum i plamenjaču; dobro podnosi sušu",
+          "taste": "Gusta i mesnata pulpa, skladnog ukusa"
+        },
+        "images": [
+          "everest-1.webp"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": 10
+        },
+        "cutting": {
+          "enabled": true,
+          "price": 5
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "rombik": {
+        "name": "Rombik",
+        "slug": "rombik",
+        "color": "Crna",
+        "ripen": "Ultra rana",
+        "type": "Stona",
+        "order": 84,
+        "featured": false,
+        "visible": true,
+        "desc": "Veoma rana tamna stona sorta.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "Rusija",
+          "author": "E. G. Pavlovski",
+          "maturity": "110–115 dana",
+          "clusterWeight": "400–700 g",
+          "berryWeight": "10–14 g",
+          "frost": "Do približno −22 °C",
+          "taste": "Hrskava pulpa i harmoničan ukus"
+        },
+        "images": [
+          "web-rombik.webp"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": 10
+        },
+        "cutting": {
+          "enabled": true,
+          "price": 4
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "dikson": {
+        "name": "Dikson",
+        "slug": "dikson",
+        "color": "Bijela",
+        "ripen": "Kasna",
+        "type": "Stona",
+        "order": 85,
+        "featured": false,
+        "visible": true,
+        "desc": "Kasna sorta; otpornost još treba provjeriti.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "Ukrajina",
+          "author": "A. V. Burdak",
+          "maturity": "120–135 dana",
+          "clusterWeight": "600–1.300 g",
+          "berryWeight": "9–18 g",
+          "frost": "Do približno −23 °C",
+          "taste": "Mesnata pulpa i harmoničan ukus"
+        },
+        "images": [
+          "web-dikson.webp"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": 11
+        },
+        "cutting": {
+          "enabled": true,
+          "price": 4
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "kodrjanka": {
+        "name": "Kodrjanka",
+        "slug": "kodrjanka",
+        "color": "Crna",
+        "ripen": "Rana",
+        "type": "Stona",
+        "order": 86,
+        "featured": false,
+        "visible": true,
+        "desc": "Vrlo rana stona sorta nastala ukrštanjem Moldova × Maršalski. Grozdovi su najčešće 400–600 g, ponekad znatno veći, a tamnoljubičaste izdužene bobice teže približno 6–8 g.",
+        "exp": "Kod mene sazrijeva od 20. do 30. avgusta. Sklona je zametanju sitnih bobica, a u nepovoljnim uslovima može se javiti trulež.",
+        "flaws": "",
+        "facts": {
+          "origin": "Moldavija",
+          "author": "Institut „Vierul“, Moldavija",
+          "maturity": "125–130 dana",
+          "clusterWeight": "400–700 g",
+          "berryWeight": "5–8 g",
+          "frost": "Do približno −22 °C",
+          "disease": "Povišena do srednja otpornost na glavne gljivične bolesti",
+          "taste": "Hrskava pulpa, tanka pokožica i harmoničan ukus"
+        },
+        "images": [
+          "korjanka-1.webp"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": 10
+        },
+        "cutting": {
+          "enabled": true,
+          "price": 4
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "bogatjanovski": {
+        "name": "Bogatjanovski",
+        "slug": "bogatjanovski",
+        "color": "Bijela",
+        "ripen": "Kasna",
+        "type": "Stona",
+        "order": 87,
+        "featured": false,
+        "visible": true,
+        "desc": "Rodna bijela stona sorta krupnih plodova, prilagođena umjerenim i toplim područjima. Dobro podnosi sušu i temperaturne promjene.",
+        "exp": "Krupna kvalitetna sorta; kod mene sazrijeva oko 20. septembra.",
+        "flaws": "",
+        "facts": {
+          "origin": "Rusija",
+          "author": "V. N. Krainov",
+          "maturity": "120–130 dana",
+          "clusterWeight": "700–1.000 g",
+          "berryWeight": "14–16 g",
+          "berrySize": "23 × 28 mm",
+          "frost": "Do približno −22 °C",
+          "disease": "Dobra otpornost na više gljivičnih bolesti",
+          "taste": "Hrskava pulpa i harmoničan ukus"
+        },
+        "images": [
+          "web-bogatjanovski.webp"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": 10
+        },
+        "cutting": {
+          "enabled": true,
+          "price": 4
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "poslanik": {
+        "name": "Poslanik",
+        "slug": "poslanik",
+        "color": "Crna",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 88,
+        "featured": false,
+        "visible": true,
+        "desc": "Stona sorta; podatke treba dopuniti.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "Ukrajina",
+          "author": "V. M. Kalugin",
+          "maturity": "125–130 dana",
+          "clusterWeight": "700–1.400 g",
+          "berryWeight": "25–37 g",
+          "berrySize": "30 × 48 mm",
+          "frost": "Do približno −23 °C",
+          "taste": "Mesnata pulpa i skladan ukus"
+        },
+        "images": [
+          "poslanik-signalni-1.webp",
+          "poslanik-signalni-2.webp"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": 20
+        },
+        "cutting": {
+          "enabled": true,
+          "price": 10
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "dinka": {
+        "name": "Dinka",
+        "slug": "dinka",
+        "color": "Crvena",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 89,
+        "featured": false,
+        "visible": true,
+        "desc": "Crvena stona sorta ovalnih bobica; tačno porijeklo i ostale osobine treba potvrditi.",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "dinka-1.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "m-jutarnij": {
+        "name": "M Jutarnij",
+        "slug": "m-jutarnij",
+        "color": "Bijela",
+        "ripen": "Rana",
+        "type": "Stona",
+        "order": 90,
+        "featured": false,
+        "visible": true,
+        "desc": "Rana sorta; podatke treba dopuniti.",
+        "exp": "",
+        "flaws": "",
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "piesnia-bijelo-cudo": {
+        "name": "Piesnia (Bijelo čudo)",
+        "slug": "piesnia-bijelo-cudo",
+        "color": "Bijela",
+        "ripen": "Rana",
+        "type": "Stona",
+        "order": 91,
+        "featured": false,
+        "visible": true,
+        "desc": "Bijelo čudo, poznato i kao Piesnia ili OV-6-pk, vrlo je rana bijela stona hibridna forma Instituta Potapenko, nastala ukrštanjem sorti Original i Vostorg. Grozdovi su veliki, bobice ovalne i bijele, a rod je dobro transportabilan.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "Rusija",
+          "author": "VNIIViV „J. I. Potapenko“",
+          "maturity": "105–110 dana",
+          "clusterWeight": "600–900 g, pojedini do 1.500 g",
+          "berryWeight": "6–8 g",
+          "berrySize": "Oko 24 × 20 mm",
+          "frost": "Do približno −25 °C",
+          "disease": "Visoka otpornost na plamenjaču; dobra otpornost na pepelnicu i sivu trulež",
+          "taste": "Mesnato-sočna pulpa i skladan ukus"
+        },
+        "images": [
+          "bijelo-cudo-1.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "samorodok": {
+        "name": "Samorodok",
+        "slug": "samorodok",
+        "color": "Bijela",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 92,
+        "featured": false,
+        "visible": true,
+        "desc": "Stona sorta; podatke treba dopuniti.",
+        "exp": "",
+        "flaws": "",
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "jupiter": {
+        "name": "Jupiter",
+        "slug": "jupiter",
+        "color": "Crna",
+        "ripen": "Srednje rana",
+        "type": "Besjemena",
+        "order": 93,
+        "featured": false,
+        "visible": true,
+        "desc": "Američka besjemena sorta razvijena na Univerzitetu Arkansas i predstavljena 1998. godine. Nastala je ukrštanjem Arkansas 1258 × Arkansas 1762; ima ovalne plavoljubičaste bobice i prijatnu muškatnu aromu.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "SAD",
+          "author": "Univerzitet Arkansas",
+          "maturity": "Rana do srednje rana",
+          "frost": "Vrlo dobra otpornost na niske temperature; u hladnijim predjelima preporučuje se zaštita mladih čokota",
+          "disease": "Dobra poljska otpornost, uz redovnu preventivnu zaštitu",
+          "taste": "Sladak, sa izraženom cvjetno-muškatnom aromom"
+        },
+        "images": [
+          "jupiter-1.webp",
+          "jupiter-2.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "suvenir": {
+        "name": "Suvenir",
+        "slug": "suvenir",
+        "color": "Crna",
+        "ripen": "Kasna",
+        "type": "Stona",
+        "order": 94,
+        "featured": false,
+        "visible": true,
+        "desc": "Tamna stona sorta; podatke treba dopuniti.",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "web-suvenir.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "bogema": {
+        "name": "Bogema",
+        "slug": "bogema",
+        "color": "Crvena",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 95,
+        "featured": false,
+        "visible": true,
+        "desc": "Stona sorta; podatke treba dopuniti.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "Ukrajina",
+          "author": "V. V. Zagoruljko",
+          "maturity": "110–120 dana",
+          "clusterWeight": "300–700 g",
+          "berryWeight": "10–12 g",
+          "frost": "Do približno −23 °C",
+          "taste": "Harmonična aroma"
+        },
+        "images": [
+          "web-bogema.webp"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": 10
+        },
+        "cutting": {
+          "enabled": true,
+          "price": 4
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "katalonija": {
+        "name": "Katalonija",
+        "slug": "katalonija",
+        "color": "Crna",
+        "ripen": "Ultra rana",
+        "type": "Stona",
+        "order": 96,
+        "featured": false,
+        "visible": true,
+        "desc": "Atraktivna vrlo rana sorta.",
+        "exp": "Kod mene sazrijeva oko 10. avgusta.",
+        "flaws": "",
+        "facts": {
+          "origin": "Ukrajina",
+          "author": "A. V. Burdak",
+          "maturity": "90–100 dana",
+          "clusterWeight": "500–1.000 g",
+          "berryWeight": "10–12 g",
+          "berrySize": "20 × 35 mm",
+          "frost": "Do približno −22 °C",
+          "taste": "Sočna pulpa i skladan ukus"
+        },
+        "images": [
+          "katalonija-1.webp",
+          "katalonija-2.webp"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": 14
+        },
+        "cutting": {
+          "enabled": true,
+          "price": 7
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "darja": {
+        "name": "Darja",
+        "slug": "darja",
+        "color": "Bijela",
+        "ripen": "Rana",
+        "type": "Stona",
+        "order": 97,
+        "featured": false,
+        "visible": true,
+        "desc": "Otporna rana sorta krupnih i ukusnih bobica.",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "darja-1.webp",
+          "darja-2.webp",
+          "darja-3.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "cimus": {
+        "name": "Cimus",
+        "slug": "cimus",
+        "color": "Bijela",
+        "ripen": "Ultra rana",
+        "type": "Stona",
+        "order": 98,
+        "featured": false,
+        "visible": true,
+        "desc": "Veoma rana sorta; prve bobice moguće je konzumirati početkom avgusta.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "Ukrajina",
+          "author": "O. M. Pysanka",
+          "maturity": "90–100 dana",
+          "clusterWeight": "600–1.500 g",
+          "berryWeight": "5–7 g",
+          "frost": "Do približno −23 °C",
+          "taste": "Sočna i mesnata pulpa sa aromom muškata; veoma ukusna"
+        },
+        "images": [
+          "cimus-1.webp",
+          "cimus-2.webp"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": 12
+        },
+        "cutting": {
+          "enabled": true,
+          "price": 4
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "km-ratatui": {
+        "name": "KM Ratatui",
+        "slug": "km-ratatui",
+        "color": "Bijela",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 99,
+        "featured": false,
+        "visible": true,
+        "desc": "Dobro podnosi opterećenje; sazrijeva od 30. avgusta do 15. septembra.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "maturity": "115–120 dana",
+          "clusterWeight": "700–1.500 g",
+          "berryWeight": "7–8 g",
+          "taste": "Veoma ukusna; mesnata i hrskava pulpa"
+        },
+        "images": [
+          "web-km-ratatui.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "halloween": {
+        "name": "Halloween",
+        "slug": "halloween",
+        "color": "Crna",
+        "ripen": "Srednje rana",
+        "type": "Besjemena",
+        "order": 100,
+        "featured": false,
+        "visible": true,
+        "desc": "Američka besjemena stona sorta IFG Twelve, poznata i pod nazivima Witch Fingers i Moon Drops. Prepoznatljiva je po veoma izduženim tamnim bobicama, čvrstoj teksturi i slatkom ukusu.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "SAD",
+          "author": "International Fruit Genetics (IFG), Kalifornija",
+          "maturity": "110–115 dana",
+          "clusterWeight": "500–1.100 g",
+          "berryWeight": "6–7 g",
+          "berrySize": "55 × 18 mm",
+          "taste": "Harmoničan ukus"
+        },
+        "images": [
+          "halloween-1.webp",
+          "halloween-2.webp",
+          "halloween-3.webp"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": 40
+        },
+        "cutting": {
+          "enabled": true,
+          "price": 15
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "bananas": {
+        "name": "Bananas",
+        "slug": "bananas",
+        "color": "Bijela",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 101,
+        "featured": false,
+        "visible": true,
+        "desc": "Bujna i veoma rodna stona sorta sa krupnim grozdovima. Plodovi imaju karakterističnu voćnu aromu koja podsjeća na bananu.",
+        "exp": "Izdužene bobice; kod mene sazrijeva od 20. do 30. avgusta.",
+        "flaws": "",
+        "facts": {
+          "origin": "Ukrajina",
+          "author": "O. M. Pysanka",
+          "maturity": "90–100 dana",
+          "clusterWeight": "500–1.200 g",
+          "berryWeight": "12–18 g",
+          "frost": "Do približno −23 °C",
+          "taste": "Sočna pulpa sa aromom muškata"
+        },
+        "images": [
+          "bananas-1.webp",
+          "bananas-2.webp"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": 13
+        },
+        "cutting": {
+          "enabled": true,
+          "price": 6
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "sarada-ua": {
+        "name": "Šarada UA",
+        "slug": "sarada-ua",
+        "color": "Crna",
+        "ripen": "Ultra rana",
+        "type": "Stona",
+        "order": 102,
+        "featured": false,
+        "visible": true,
+        "desc": "Ultra rana stona hibridna forma. Grozdovi su krupni, najčešće 400–1.200 g, a tamnoplave do gotovo crne ovalne bobice približno 8–14 g.",
+        "exp": "Kod mene se prve bobice mogu konzumirati već od početka avgusta.",
+        "flaws": "",
+        "facts": {
+          "origin": "Ukrajina",
+          "author": "M. A. Grečko",
+          "maturity": "110–120 dana",
+          "clusterWeight": "400–800 g",
+          "berryWeight": "8–10 g",
+          "frost": "Do približno −23 °C",
+          "disease": "Otpornost se još ispituje; potrebna je redovna preventivna zaštita",
+          "taste": "Slatka pulpa i harmoničan ukus"
+        },
+        "images": [
+          "sarada-1.webp",
+          "sarada-2.webp"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": 10
+        },
+        "cutting": {
+          "enabled": true,
+          "price": 4
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "helena": {
+        "name": "Helena",
+        "slug": "helena",
+        "color": "Bijela",
+        "ripen": "Rana",
+        "type": "Stona",
+        "order": 103,
+        "featured": false,
+        "visible": true,
+        "desc": "Rana bijela stona hibridna forma V. U. Kapeljušnog, krupnih ovalnih bobica i snažnog rasta.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "Rusija",
+          "author": "V. U. Kapeljušni",
+          "maturity": "Rana; približno sredina avgusta u toplijim područjima",
+          "clusterWeight": "Do približno 500 g",
+          "berryWeight": "Približno 12–16 g",
+          "frost": "Do približno −23 °C",
+          "taste": "Harmoničan sa muškatnom aromom"
+        },
+        "images": [
+          "helena-1.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "tajozni": {
+        "name": "Tajožni",
+        "slug": "tajozni",
+        "color": "Crna",
+        "ripen": "Rana",
+        "type": "Stona",
+        "order": 104,
+        "featured": false,
+        "visible": true,
+        "desc": "Vrlo otporna sorta pronađena 1933. godine na jugu Primorskog kraja. Pogodna je za svježu potrošnju i preradu.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "Rusija, Primorski kraj",
+          "author": "N. I. Tihonov",
+          "maturity": "Rano do srednje rano",
+          "clusterWeight": "Prosječno oko 150 g",
+          "berryWeight": "Približno 3–3,5 g",
+          "berrySize": "Oko 16 × 16 mm",
+          "frost": "Izuzetno otporan, približno −28 do −35 °C",
+          "disease": "Visoka otpornost na gljivične bolesti",
+          "taste": "Kiselkasto-sladak"
+        },
+        "images": [
+          "tajozni-1.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "aljosa": {
+        "name": "Aljoša",
+        "slug": "aljosa",
+        "color": "Bijela",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 105,
+        "featured": false,
+        "visible": true,
+        "desc": "Stona sorta; podatke treba dopuniti.",
+        "exp": "",
+        "flaws": "",
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "km-dzoj": {
+        "name": "KM Džoj",
+        "slug": "km-dzoj",
+        "color": "Crna",
+        "ripen": "Ultra rana",
+        "type": "Stona",
+        "order": 106,
+        "featured": false,
+        "visible": true,
+        "desc": "Otporna i rodna sorta poznata i pod nazivom Kraljica Mira, pogodna za uzgoj sa smanjenim brojem zaštitnih tretmana.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "disease": "Visoka otpornost na bolesti i štetočine"
+        },
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "hrust": {
+        "name": "Hrust",
+        "slug": "hrust",
+        "color": "Bijela",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 107,
+        "featured": false,
+        "visible": true,
+        "desc": "Muskatna sorta sitnijih bobica.",
+        "exp": "",
+        "flaws": "",
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "sasenka-leonova": {
+        "name": "Sašenka Leonova",
+        "slug": "sasenka-leonova",
+        "color": "Bijela",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 108,
+        "featured": false,
+        "visible": true,
+        "desc": "Otporna sorta osrednjeg ukusa.",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "web-sasenka-leonova.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "orhidea": {
+        "name": "Orhidea",
+        "slug": "orhidea",
+        "color": "Crvena",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 109,
+        "featured": false,
+        "visible": true,
+        "desc": "Atraktivna stona sorta.",
+        "exp": "",
+        "flaws": "",
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "muskat-medovij": {
+        "name": "Muskat Medovij",
+        "slug": "muskat-medovij",
+        "color": "Bijela",
+        "ripen": "Rana",
+        "type": "Stona",
+        "order": 110,
+        "featured": false,
+        "visible": true,
+        "desc": "Rana bijela stona hibridna forma krupnih bobica, cijenjena zbog izražene muškatne arome sa mednim tonovima.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "Ukrajina",
+          "author": "M. Opriško",
+          "maturity": "Rana",
+          "clusterWeight": "Do približno 2.000 g",
+          "berryWeight": "Približno 18–20 g",
+          "frost": "Do približno −23 °C",
+          "taste": "Izražen muškat sa mednim tonovima; hrskava pulpa"
+        },
+        "images": [
+          "muskat-medovij-1.webp",
+          "muskat-medovij-2.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "africki-muskat": {
+        "name": "Afrički muskat",
+        "slug": "africki-muskat",
+        "color": "Crna",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 111,
+        "featured": false,
+        "visible": true,
+        "desc": "Tamna aromatična stona sorta iz kolekcije. Pod ovim nazivom nisu pronađeni dovoljno pouzdani ampelografski podaci.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "Sortni identitet nije pouzdano potvrđen",
+          "author": "Nije pouzdano potvrđen",
+          "maturity": "Srednje rana; kod mene sazrijeva od 20. do 30. avgusta",
+          "disease": "Prema ličnom iskustvu pokazuje dobru otpornost",
+          "taste": "Veoma sladak i izraženo muškatno-aromatičan"
+        },
+        "images": [
+          "africki-muskat-1.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "slava-ukrajine": {
+        "name": "Slava Ukrajine",
+        "slug": "slava-ukrajine",
+        "color": "Bijela",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 112,
+        "featured": false,
+        "visible": true,
+        "desc": "Bijela sorta prilagođena hladnijim i umjerenim područjima. Odlikuje se dobrom rodnošću, stabilnim rezultatima i povoljnom ravnotežom šećera i kiselina.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "Ukrajina",
+          "author": "N. P. Višnjevecki",
+          "maturity": "85–90 dana",
+          "clusterWeight": "1.000–2.500 g",
+          "berryWeight": "18–22 g",
+          "berrySize": "20 × 32 mm",
+          "frost": "Do približno −23 °C",
+          "disease": "Povišena otpornost na više gljivičnih bolesti, uz preporučenu preventivnu zaštitu",
+          "taste": "Gusta i sočna pulpa sa muskatskom aromom"
+        },
+        "images": [
+          "web-slava-ukrajine.webp"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": 15
+        },
+        "cutting": {
+          "enabled": true,
+          "price": 4
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "landis": {
+        "name": "Landiš",
+        "slug": "landis",
+        "color": "Bijela",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 113,
+        "featured": false,
+        "visible": true,
+        "desc": "Aromatična stona sorta.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "Ukrajina",
+          "author": "V. V. Zagoruljko",
+          "maturity": "120–125 dana",
+          "clusterWeight": "600–800 g",
+          "berryWeight": "10–20 g",
+          "frost": "Do približno −21 °C",
+          "taste": "Mesnata i sočna pulpa sa aromom muškata; veoma ukusna"
+        },
+        "images": [
+          "web-landis.webp"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": 10
+        },
+        "cutting": {
+          "enabled": true,
+          "price": 4
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "dnjeprovski-suvenir": {
+        "name": "Dnjeprovski suvenir",
+        "slug": "dnjeprovski-suvenir",
+        "color": "Crna",
+        "ripen": "Kasna",
+        "type": "Stona",
+        "order": 114,
+        "featured": false,
+        "visible": true,
+        "desc": "Rana tamna stona hibridna forma selekcije V. M. Kalugina.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "Ukrajina",
+          "author": "V. M. Kalugin",
+          "maturity": "105–115 dana",
+          "clusterWeight": "800–1.800 g",
+          "berryWeight": "18–25 g",
+          "berrySize": "18 × 54 mm",
+          "frost": "Do približno −23 °C",
+          "taste": "Skladan ukus i visok sadržaj šećera"
+        },
+        "images": [
+          "dnjeprovski-suvenir-1.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true,
+          "price": 15
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "azija": {
+        "name": "Azija",
+        "slug": "azija",
+        "color": "Bijela",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 115,
+        "featured": false,
+        "visible": true,
+        "desc": "Krupna stona sorta.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "Ukrajina",
+          "author": "V. M. Kalugin",
+          "maturity": "115–120 dana",
+          "clusterWeight": "500–1.000 g",
+          "berryWeight": "15–20 g",
+          "berrySize": "20 × 67 mm",
+          "frost": "Do približno −23 °C",
+          "taste": "Sočna pulpa i skladan ukus"
+        },
+        "images": [
+          "web-azija.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true,
+          "price": 4
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "julian": {
+        "name": "Julian",
+        "slug": "julian",
+        "color": "Crvena",
+        "ripen": "Rana",
+        "type": "Stona",
+        "order": 116,
+        "featured": false,
+        "visible": true,
+        "desc": "Rana sorta izduženih ružičastih bobica.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "Rusija",
+          "author": "V. N. Krainov",
+          "maturity": "110–115 dana",
+          "clusterWeight": "800–1.600 g",
+          "berryWeight": "10–15 g",
+          "frost": "Do približno −22 °C",
+          "taste": "Harmoničan ukus"
+        },
+        "images": [
+          "web-julian.webp"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": 10
+        },
+        "cutting": {
+          "enabled": true,
+          "price": 4
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "kazanova": {
+        "name": "Kazanova",
+        "slug": "kazanova",
+        "color": "Crvena",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 117,
+        "featured": false,
+        "visible": true,
+        "desc": "Atraktivna stona sorta.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "Rusija",
+          "author": "VNIIViV „J. I. Potapenko“",
+          "maturity": "105–110 dana",
+          "clusterWeight": "700–2.500 g",
+          "berryWeight": "15–18 g",
+          "berrySize": "42 × 26 mm",
+          "frost": "Do približno −23 °C",
+          "taste": "Mesnata i hrskava pulpa sa muškatnom aromom"
+        },
+        "images": [
+          "web-kazanova.webp"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": 13
+        },
+        "cutting": {
+          "enabled": true,
+          "price": 5
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "crni-kristal": {
+        "name": "Crni kristal",
+        "slug": "crni-kristal",
+        "color": "Crna",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 118,
+        "featured": false,
+        "visible": true,
+        "desc": "Tamna stona sorta.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "Ukrajina",
+          "author": "V. M. Kalugin",
+          "maturity": "110–125 dana",
+          "clusterWeight": "700–1.100 g",
+          "berryWeight": "18–20 g",
+          "frost": "Do približno −23 °C",
+          "taste": "Hrskava pulpa, tanka pokožica i harmonična aroma"
+        },
+        "images": [
+          "web-crni-kristal.webp"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": 11
+        },
+        "cutting": {
+          "enabled": true,
+          "price": 4
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "elvira": {
+        "name": "Elvira",
+        "slug": "elvira",
+        "color": "Bijela",
+        "ripen": "Kasna",
+        "type": "Vinska",
+        "order": 119,
+        "featured": false,
+        "visible": true,
+        "desc": "Bijela sorta stabilne i visoke rodnosti, dobro prilagođena različitim klimatskim uslovima, naročito hladnijim krajevima. Grožđe se uglavnom koristi za lagana i osvježavajuća vina sa blagim voćnim aromama.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "disease": "Dobra otpornost na više bolesti vinove loze; pogodna za vlažnije i hladnije uslove",
+          "taste": "Blage kiseline, sa citrusnim i voćnim aromama"
+        },
+        "images": [
+          "elvira-1.webp",
+          "elvira-2.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "karneval": {
+        "name": "Karneval",
+        "slug": "karneval",
+        "color": "Crvena",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 120,
+        "featured": false,
+        "visible": true,
+        "desc": "Nova sorta u kolekciji od 2025. godine.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "Rusija",
+          "author": "E. G. Pavlovski",
+          "maturity": "95–105 dana",
+          "clusterWeight": "600–1.000 g",
+          "berryWeight": "10–16 g",
+          "frost": "Do približno −23 °C",
+          "taste": "Gusta pulpa i skladan ukus"
+        },
+        "images": [
+          "web-karneval.webp"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": 10
+        },
+        "cutting": {
+          "enabled": true,
+          "price": 4
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "dubovski-rozi": {
+        "name": "Dubovski rozi",
+        "slug": "dubovski-rozi",
+        "color": "Crvena",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 121,
+        "featured": false,
+        "visible": true,
+        "desc": "Atraktivna crvena stona sorta dobre rodnosti i krupnih plodova, pogodna za umjerene i toplije položaje.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "disease": "Dobra otpornost na bolesti, uz redovnu preventivnu zaštitu"
+        },
+        "images": [
+          "web-dubovski-rozi.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "masa": {
+        "name": "Maša",
+        "slug": "masa",
+        "color": "Crvena",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 122,
+        "featured": false,
+        "visible": true,
+        "desc": "Nova sorta u kolekciji od 2025. godine.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "Ukrajina – potrebno potvrditi",
+          "author": "V. D. Šapovalov",
+          "maturity": "90–100 dana",
+          "clusterWeight": "600–1.700 g",
+          "berryWeight": "10–15 g",
+          "frost": "Do približno −23 °C",
+          "taste": "Muškatna aroma sa voćnim tonovima"
+        },
+        "images": [
+          "web-masa.webp"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": 13
+        },
+        "cutting": {
+          "enabled": true,
+          "price": 5
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "krasavcik": {
+        "name": "Krasavčik",
+        "slug": "krasavcik",
+        "color": "Bijela",
+        "ripen": "Ultra rana",
+        "type": "Stona",
+        "order": 123,
+        "featured": false,
+        "visible": true,
+        "desc": "Ultra rana bijela stona hibridna forma snažnog rasta i visoke rodnosti. Grozdovi su krupni, približno 600–1.500 g, a blago ovalne bobice 12–16 g. Bobice su bijele do ćilibarnožute, sa mesnatom, čvrstom i hrskavom pulpom, i uglavnom nisu sklone pucanju.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "Ukrajina",
+          "author": "O. M. Pysanka",
+          "maturity": "95–100 dana",
+          "clusterWeight": "600–1.500 g",
+          "berryWeight": "12–16 g",
+          "frost": "Nije dovoljno pouzdano potvrđena",
+          "disease": "Srednja otpornost; potrebna je redovna preventivna zaštita",
+          "taste": "Izražena voćna muškatna aroma; mesnata, čvrsta i hrskava pulpa"
+        },
+        "images": [
+          "krasavcik-1.webp",
+          "krasavcik-2.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "ilarija": {
+        "name": "Ilarija",
+        "slug": "ilarija",
+        "color": "Bijela",
+        "ripen": "Rana",
+        "type": "Stona",
+        "order": 124,
+        "featured": false,
+        "visible": true,
+        "desc": "Rana svijetla stona sorta.",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "web-ilarija.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "divo": {
+        "name": "Divo",
+        "slug": "divo",
+        "color": "Bijela",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 125,
+        "featured": false,
+        "visible": true,
+        "desc": "Tamna sorta, ranije evidentirana pod nazivom Lend Kruzer.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "maturity": "120–125 dana",
+          "clusterWeight": "500–1.000 g",
+          "berryWeight": "10–14 g",
+          "taste": "Sočna i mesnata pulpa, harmoničnog ukusa"
+        },
+        "images": [
+          "web-divo.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "bruno": {
+        "name": "Bruno",
+        "slug": "bruno",
+        "color": "Crna",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 126,
+        "featured": false,
+        "visible": true,
+        "desc": "Sazrijeva od 20. do 30. avgusta; ukus je jednostavan.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "Ukrajina",
+          "author": "A. V. Burdak",
+          "maturity": "115–120 dana",
+          "clusterWeight": "500–900 g",
+          "berryWeight": "8–10 g",
+          "frost": "Do približno −22 °C",
+          "taste": "Slatka pulpa i harmoničan ukus"
+        },
+        "images": [
+          "web-bruno.webp"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": 12
+        },
+        "cutting": {
+          "enabled": true,
+          "price": 4
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "km-marmelada": {
+        "name": "KM Marmelada",
+        "slug": "km-marmelada",
+        "color": "Crvena",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 127,
+        "featured": false,
+        "visible": true,
+        "desc": "Stona sorta iz kolekcije; podatke treba dopuniti.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "Ukrajina",
+          "author": "O. M. Pysanka",
+          "maturity": "95–105 dana",
+          "clusterWeight": "800–1.400 g",
+          "berryWeight": "5–7 g",
+          "frost": "Do približno −25 °C"
+        },
+        "sapling": {
+          "enabled": true,
+          "price": 10
+        },
+        "cutting": {
+          "enabled": true,
+          "price": 4
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "alvika": {
+        "name": "Alvika",
+        "slug": "alvika",
+        "color": "Crna",
+        "ripen": "Kasna",
+        "type": "Stona",
+        "order": 128,
+        "featured": false,
+        "visible": true,
+        "desc": "Krupna tamna stona sorta.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "Ukrajina",
+          "author": "V. M. Kalugin",
+          "maturity": "115–120 dana",
+          "clusterWeight": "800–1.000 g",
+          "berryWeight": "20–30 g",
+          "berrySize": "26 × 42 mm",
+          "frost": "Do približno −23 °C",
+          "taste": "Harmoničan ukus"
+        },
+        "images": [
+          "web-alvika.webp"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": 10
+        },
+        "cutting": {
+          "enabled": true,
+          "price": 4
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "veljur": {
+        "name": "Veljur",
+        "slug": "veljur",
+        "color": "Crvena",
+        "ripen": "Rana",
+        "type": "Stona",
+        "order": 129,
+        "featured": false,
+        "visible": true,
+        "desc": "Sorta ranog sazrijevanja.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "origin": "Ukrajina – potrebno potvrditi",
+          "author": "S. I. Kriuli i A. I. Kitajčenko",
+          "maturity": "100–105 dana",
+          "clusterWeight": "800–1.200 g",
+          "berryWeight": "18–25 g",
+          "frost": "Do približno −23 °C",
+          "taste": "Sočna pulpa i harmoničan ukus"
+        },
+        "images": [
+          "veljur-1.webp",
+          "veljur-2.webp"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": 12
+        },
+        "cutting": {
+          "enabled": true,
+          "price": 4
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "romina": {
+        "name": "Romina",
+        "slug": "romina",
+        "color": "Crvena",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 130,
+        "featured": false,
+        "visible": true,
+        "desc": "Sorta ranije evidentirana pod nazivom Taldun.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "maturity": "95–105 dana",
+          "clusterWeight": "600–1.000 g",
+          "berryWeight": "13–15 g",
+          "frost": "Do približno −23 °C",
+          "taste": "Mesnata i hrskava pulpa, skladnog ukusa"
+        },
+        "images": [
+          "web-romina.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "selkucnik": {
+        "name": "Šelkućnik",
+        "slug": "selkucnik",
+        "color": "Crvena",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 131,
+        "featured": false,
+        "visible": true,
+        "desc": "Sorta ranije evidentirana uz naziv Artek; podatke treba potvrditi.",
+        "exp": "",
+        "flaws": "",
+        "facts": {
+          "maturity": "115–120 dana",
+          "clusterWeight": "800–1.200 g",
+          "berryWeight": "8–10 g",
+          "taste": "Čvrsta i hrskava pulpa, skladnog ukusa; dobra transportabilnost"
+        },
+        "images": [
+          "web-selkucnik.webp"
+        ],
+        "sapling": {
+          "enabled": true,
+          "price": 10
+        },
+        "cutting": {
+          "enabled": true,
+          "price": 4
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "vanesa": {
+        "name": "Vanesa",
+        "slug": "vanesa",
+        "color": "Za provjeru",
+        "ripen": "Za provjeru",
+        "type": "Stona",
+        "order": 132,
+        "featured": false,
+        "visible": true,
+        "desc": "Nova sorta u kolekciji; pouzdane karakteristike biće dopunjene nakon provjere.",
+        "exp": "",
+        "flaws": "",
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "darivka": {
+        "name": "Darivka",
+        "slug": "darivka",
+        "color": "Crvena",
+        "ripen": "Za provjeru",
+        "type": "Stona",
+        "order": 133,
+        "featured": false,
+        "visible": true,
+        "desc": "Nova stona sorta u kolekciji; pouzdane karakteristike biće dopunjene nakon provjere.",
+        "exp": "",
+        "flaws": "",
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "venus": {
+        "name": "Venus",
+        "slug": "venus",
+        "color": "Crna",
+        "ripen": "Rana",
+        "type": "Besjemena",
+        "order": 134,
+        "featured": false,
+        "visible": true,
+        "desc": "Besjemena stona sorta iz kolekcije.",
+        "exp": "",
+        "flaws": "",
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "muskat-pleven": {
+        "name": "Muskat Pleven",
+        "slug": "muskat-pleven",
+        "color": "Bijela",
+        "ripen": "Za provjeru",
+        "type": "Stona",
+        "order": 135,
+        "featured": false,
+        "visible": true,
+        "desc": "Bijela stona sorta muškatne arome.",
+        "exp": "",
+        "flaws": "",
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "lucistij": {
+        "name": "Lučistij",
+        "slug": "lucistij",
+        "color": "Crvena",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 136,
+        "featured": false,
+        "visible": true,
+        "desc": "Atraktivna stona sorta ružičastih bobica.",
+        "exp": "",
+        "flaws": "",
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "neretinski": {
+        "name": "Neretinski",
+        "slug": "neretinski",
+        "color": "Za provjeru",
+        "ripen": "Za provjeru",
+        "type": "Stona",
+        "order": 137,
+        "featured": false,
+        "visible": true,
+        "desc": "Nova sorta u kolekciji; pouzdane karakteristike biće dopunjene nakon provjere.",
+        "exp": "",
+        "flaws": "",
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "lora": {
+        "name": "Lora",
+        "slug": "lora",
+        "color": "Bijela",
+        "ripen": "Rana",
+        "type": "Stona",
+        "order": 138,
+        "featured": false,
+        "visible": true,
+        "desc": "Rana bijela stona sorta izduženih bobica.",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "rembo-1.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "impuls": {
+        "name": "Impuls",
+        "slug": "impuls",
+        "color": "Za provjeru",
+        "ripen": "Za provjeru",
+        "type": "Stona",
+        "order": 139,
+        "featured": false,
+        "visible": true,
+        "desc": "Nova sorta u kolekciji; pouzdane karakteristike biće dopunjene nakon provjere.",
+        "exp": "",
+        "flaws": "",
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "bespodobni": {
+        "name": "Bespodobni",
+        "slug": "bespodobni",
+        "color": "Bijela",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 140,
+        "featured": false,
+        "visible": true,
+        "desc": "Bijela stona sorta iz kolekcije.",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "bespodobni-1.webp",
+          "bespodobni-2.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "atos": {
+        "name": "Atos",
+        "slug": "atos",
+        "color": "Crna",
+        "ripen": "Rana",
+        "type": "Stona",
+        "order": 141,
+        "featured": false,
+        "visible": true,
+        "desc": "Rana tamna stona sorta izduženih bobica.",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "atos-1.webp",
+          "atos-2.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "novi-podarok-zaporozja": {
+        "name": "Novi podarok Zaporožja",
+        "slug": "novi-podarok-zaporozja",
+        "color": "Bijela",
+        "ripen": "Srednje rana",
+        "type": "Stona",
+        "order": 142,
+        "featured": false,
+        "visible": true,
+        "desc": "Bijela stona sorta krupnih grozdova i bobica.",
+        "exp": "",
+        "flaws": "",
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "zlatna-kupola": {
+        "name": "Zlatna kupola",
+        "slug": "zlatna-kupola",
+        "color": "Bijela",
+        "ripen": "Za provjeru",
+        "type": "Stona",
+        "order": 143,
+        "featured": false,
+        "visible": true,
+        "desc": "Bijela stona sorta iz kolekcije.",
+        "exp": "",
+        "flaws": "",
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "odeski-suvenir": {
+        "name": "Odeski suvenir",
+        "slug": "odeski-suvenir",
+        "color": "Crna",
+        "ripen": "Kasna",
+        "type": "Stona",
+        "order": 144,
+        "featured": false,
+        "visible": true,
+        "desc": "Kasna tamna stona sorta.",
+        "exp": "",
+        "flaws": "",
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "arabela": {
+        "name": "Arabela",
+        "slug": "arabela",
+        "color": "Crvena",
+        "ripen": "Za provjeru",
+        "type": "Stona",
+        "order": 145,
+        "featured": false,
+        "visible": true,
+        "desc": "Stona sorta iz kolekcije; pouzdane karakteristike biće dopunjene nakon provjere.",
+        "exp": "",
+        "flaws": "",
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "roza-rana": {
+        "name": "Roza rana",
+        "slug": "roza-rana",
+        "color": "Crvena",
+        "ripen": "Rana",
+        "type": "Stona",
+        "order": 146,
+        "featured": false,
+        "visible": true,
+        "desc": "Rana stona sorta ružičastih bobica.",
+        "exp": "",
+        "flaws": "",
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "albina": {
+        "name": "Albina",
+        "slug": "albina",
+        "color": "Bijela",
+        "ripen": "Za provjeru",
+        "type": "Stona",
+        "order": 147,
+        "featured": false,
+        "visible": true,
+        "desc": "Bijela stona sorta iz kolekcije.",
+        "exp": "",
+        "flaws": "",
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "agat": {
+        "name": "Agat",
+        "slug": "agat",
+        "color": "Crna",
+        "ripen": "Za provjeru",
+        "type": "Stona",
+        "order": 148,
+        "featured": false,
+        "visible": true,
+        "desc": "Tamna stona sorta iz kolekcije.",
+        "exp": "",
+        "flaws": "",
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "rumejka": {
+        "name": "Rumejka",
+        "slug": "rumejka",
+        "color": "Crvena",
+        "ripen": "Za provjeru",
+        "type": "Stona",
+        "order": 149,
+        "featured": false,
+        "visible": true,
+        "desc": "Stona sorta iz kolekcije; pouzdane karakteristike biće dopunjene nakon provjere.",
+        "exp": "",
+        "flaws": "",
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      },
+      "zironka": {
+        "name": "Zironka",
+        "slug": "zironka",
+        "color": "Crvena",
+        "ripen": "Za provjeru",
+        "type": "Stona",
+        "order": 150,
+        "featured": false,
+        "visible": true,
+        "desc": "Stona sorta ružičastocrvenih bobica iz kolekcije.",
+        "exp": "",
+        "flaws": "",
+        "images": [
+          "zironka-1.webp",
+          "zironka-2.webp",
+          "zironka-3.webp"
+        ],
+        "sapling": {
+          "enabled": true
+        },
+        "cutting": {
+          "enabled": true
+        },
+        "seoTitle": "",
+        "seoDescription": ""
+      }
+    },
+    "images": {}
+  },
+  "admins": {
+    "aXWKivZS0ANh0T3CaXp9vvY5Nt42": true
+  }
+}

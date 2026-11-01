@@ -1,7 +1,11 @@
 #!/usr/bin/env node
 // Izgradnja statičkog sajta u dist/.
 //
-//   node build/build.mjs --seed     čita data/seed.json (Korak 1)
+//   node build/build.mjs --seed     čita data/seed.json
+//   node build/build.mjs --db       čita Firebase bazu (GET <databaseURL>/vinograd.json, bez prijave)
+//
+// Adresa baze je u firebase-config.json (databaseURL). Za provjeru se može dati
+// druga adresa: --db-url=<adresa koja vraća isti JSON kao /vinograd.json>.
 //
 // Čist Node, bez npm paketa. Pri bilo kojoj grešci u podacima izlazi s kodom 1
 // i ne ostavlja polovičan dist/.
@@ -17,6 +21,8 @@ const DIST = path.join(ROOT, "dist");
 const TPL = path.join(ROOT, "templates");
 const SEED = path.join(ROOT, "data", "seed.json");
 const SEED_IMG = path.join(ROOT, "data", "seed-img");
+const FIREBASE_CONFIG = path.join(ROOT, "firebase-config.json");
+const PANEL = path.join(ROOT, "panel");
 
 const warnings = [];
 const warn = (m) => warnings.push(m);
@@ -67,13 +73,113 @@ const hash = (buf) => crypto.createHash("sha256").update(buf).digest("hex").slic
 // ---------------------------------------------------------------- ulaz
 function readArgs() {
   const args = process.argv.slice(2);
-  const known = new Set(["--seed"]);
-  const unknown = args.filter((a) => !known.has(a));
+  const unknown = args.filter((a) => a !== "--seed" && a !== "--db" && !a.startsWith("--db-url="));
   if (unknown.length) throw new BuildError([`Nepoznata opcija: ${unknown.join(" ")}`]);
-  if (!args.includes("--seed")) {
-    throw new BuildError(["Čitanje Firebase baze dolazi u Koraku 2. Za sada pokrenite: node build/build.mjs --seed"]);
+  const seed = args.includes("--seed"), db = args.includes("--db");
+  if (seed === db) throw new BuildError(["Izaberite izvor podataka: node build/build.mjs --seed (data/seed.json) ili --db (Firebase baza)"]);
+  const urlArg = args.find((a) => a.startsWith("--db-url="));
+  if (urlArg && !db) throw new BuildError(["--db-url ide samo uz --db"]);
+  return { source: db ? "db" : "seed", dbUrl: urlArg ? urlArg.slice("--db-url=".length) : null };
+}
+
+// ---------------------------------------------------------------- čitanje baze
+// GET <databaseURL>/vinograd.json, javno čitanje, bez prijave i bez npm paketa.
+async function loadDb(urlOverride) {
+  let url = urlOverride;
+  if (!url) {
+    let cfg;
+    try { cfg = JSON.parse(fs.readFileSync(FIREBASE_CONFIG, "utf8")); } catch (e) { throw new BuildError([`Ne mogu pročitati firebase-config.json: ${e.message}`]); }
+    if (!isStr(cfg.databaseURL) || !/^https:\/\//.test(cfg.databaseURL)) throw new BuildError(["firebase-config.json: databaseURL nedostaje ili ne počinje sa https://"]);
+    url = cfg.databaseURL.replace(/\/+$/, "") + "/vinograd.json";
   }
-  return { seed: true };
+  let res, text;
+  try {
+    res = await fetch(url, { headers: { accept: "application/json" }, signal: AbortSignal.timeout(30000) });
+    text = await res.text();
+  } catch (e) {
+    throw new BuildError([`Baza nije dostupna (${url}): ${e.cause ? e.cause.code || e.cause.message : e.message}. Sajt ostaje na prethodnoj verziji.`]);
+  }
+  const short = text.replace(/\s+/g, " ").trim().slice(0, 200);
+  if (!res.ok) {
+    const hint = res.status === 401 || res.status === 403 ? " Provjerite da pravila baze dozvoljavaju javno čitanje čvora vinograd." : "";
+    throw new BuildError([`Baza je vratila grešku ${res.status} (${url}): ${short}.${hint} Sajt ostaje na prethodnoj verziji.`]);
+  }
+  if (!text.trim()) throw new BuildError([`Baza je vratila prazan odgovor (${url}). Sajt ostaje na prethodnoj verziji.`]);
+  let data;
+  try { data = JSON.parse(text); } catch (e) { throw new BuildError([`Odgovor baze nije ispravan JSON (${url}): ${e.message}. Sajt ostaje na prethodnoj verziji.`]); }
+  if (data === null || typeof data !== "object" || !Object.keys(data).length) {
+    throw new BuildError([`Baza je prazna (${url} vraća ${text.trim().slice(0, 20) || "prazan odgovor"}). Podaci se uvoze iz data/firebase-import.json. Sajt ostaje na prethodnoj verziji.`]);
+  }
+  return normalizeDb(data);
+}
+
+// Firebase ne čuva null, prazne nizove ni prazne objekte, a nizove može vratiti
+// kao objekat s ključevima "0", "1", … ili kao niz s rupama. Ovdje se podaci iz
+// baze vraćaju u isti oblik kao data/seed.json, pa ostatak builda radi isto.
+const arr = (v) => {
+  if (Array.isArray(v)) return v.filter((x) => x != null);
+  if (v && typeof v === "object") {
+    return Object.keys(v).filter((k) => /^\d+$/.test(k)).sort((a, b) => a - b).map((k) => v[k]).filter((x) => x != null);
+  }
+  return [];
+};
+const obj = (v) => (v && typeof v === "object" && !Array.isArray(v) ? v : {});
+const txt = (v) => (typeof v === "string" ? v : "");
+const num = (v) => (typeof v === "number" ? v : null);
+
+function normalizeDb(raw) {
+  const images = {};
+  const dbImages = obj(raw.images);
+  const imageId = (file, alt) => {
+    const id = file.replace(/\.webp$/i, "");
+    if (!images[id]) images[id] = { file, alt: txt(obj(dbImages[id]).alt) || alt, w: null, h: null };
+    return id;
+  };
+
+  const s = obj(raw.settings);
+  const settings = { ...s };
+  for (const k of ["name", "phone", "phoneIntl", "email", "address", "mapUrl", "siteUrl"]) settings[k] = txt(s[k]);
+
+  const P = obj(raw.pages);
+  const h = obj(P.home), k = obj(P.kako), c = obj(P.kontakt);
+  const heroFile = txt(h.heroImage);
+  const pages = {
+    home: {
+      eyebrow: txt(h.eyebrow), title: txt(h.title), text: txt(h.text),
+      heroImage: heroFile ? imageId(heroFile, txt(h.heroAlt)) : "",
+      seoTitle: txt(h.seoTitle), seoDescription: txt(h.seoDescription),
+    },
+    kako: {
+      title: txt(k.title), intro: txt(k.intro),
+      steps: arr(k.steps).map((st) => ({ title: txt(obj(st).title), text: txt(obj(st).text) })),
+      seoTitle: txt(k.seoTitle), seoDescription: txt(k.seoDescription),
+    },
+    kontakt: { title: txt(c.title), about: txt(c.about), seoTitle: txt(c.seoTitle), seoDescription: txt(c.seoDescription) },
+  };
+
+  const kind = (o) => ({ enabled: obj(o).enabled !== false, price: num(obj(o).price), qty: num(obj(o).qty) });
+  const entries = Object.entries(obj(raw.varieties))
+    .sort((a, b) => (num(obj(a[1]).order) ?? Infinity) - (num(obj(b[1]).order) ?? Infinity));
+  const varieties = {};
+  for (const [key, v0] of entries) {
+    const v = obj(v0);
+    const name = txt(v.name);
+    const facts = {};
+    for (const [fk, fv] of Object.entries(obj(v.facts))) if (isStr(fv)) facts[fk] = fv;
+    varieties[key] = {
+      name, slug: txt(v.slug) || key, color: txt(v.color), ripen: txt(v.ripen), type: txt(v.type),
+      order: num(v.order) ?? Number.MAX_SAFE_INTEGER,
+      featured: v.featured === true,
+      visible: v.visible !== false, // nedostaje = vidljiva; samo visible:false sakriva
+      desc: txt(v.desc), exp: txt(v.exp), flaws: txt(v.flaws),
+      facts,
+      images: arr(v.images).filter(isStr).map((f) => imageId(f, "Grozd sorte " + name)),
+      sapling: kind(v.sapling), cutting: kind(v.cutting),
+      seoTitle: txt(v.seoTitle), seoDescription: txt(v.seoDescription),
+      updatedAt: v.updatedAt ?? null,
+    };
+  }
+  return { settings, pages, varieties, images };
 }
 
 function loadSeed() {
@@ -451,10 +557,11 @@ function checkLinks(outDir) {
   return E;
 }
 
-function main() {
+async function main() {
   const t0 = Date.now();
-  readArgs();
-  const db = loadSeed();
+  const opts = readArgs();
+  const db = opts.source === "db" ? await loadDb(opts.dbUrl) : loadSeed();
+  console.log(`Izvor podataka: ${opts.source === "db" ? "Firebase baza" : "data/seed.json"}`);
   validate(db);
   const m = buildModel(db);
 
@@ -473,6 +580,12 @@ function main() {
     assets[key] = "/assets/" + name;
   }
   writeFile(path.join(tmp, m.logo.src), fs.readFileSync(m.logo.file));
+
+  // panel/: statičke stranice (nisu iz baze, nisu u sitemapi, imaju noindex) + javni Firebase config
+  if (fs.existsSync(PANEL)) {
+    fs.cpSync(PANEL, path.join(tmp, "panel"), { recursive: true });
+    fs.copyFileSync(FIREBASE_CONFIG, path.join(tmp, "panel", "firebase-config.json"));
+  }
 
   // podaci za korpu: jedan keširan fajl umjesto kopije u svakoj od 150+ stranica
   {
@@ -537,7 +650,7 @@ function main() {
 }
 
 try {
-  main();
+  await main();
   for (const w of warnings) console.warn("UPOZORENJE: " + w);
 } catch (e) {
   for (const w of warnings) console.warn("UPOZORENJE: " + w);

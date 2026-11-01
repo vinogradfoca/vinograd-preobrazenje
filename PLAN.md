@@ -101,16 +101,27 @@ Pravila značenja:
 - `og` varijantu pravi panel u pregledaču (izrezana slika). Build bez biblioteka ne može mijenjati dimenzije slika.
 
 ### Pravila baze
+Puna verzija je u `database.rules.json` u korijenu repoa. Suština:
 ```json
 {
   "rules": {
+    ".read": false,
+    ".write": false,
     "vinograd": {
       ".read": true,
-      ".write": "auth != null && (auth.uid === 'UID_ZARKO' || auth.uid === 'UID_VLASNIK')"
+      ".write": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      "varieties": { "$id": { ".validate": "naziv, slug, boja, visible, featured, cijene i količine" } }
+    },
+    "admins": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": false
+      }
     }
   }
 }
 ```
+Admini su u čvoru `admins/<uid>: true`, a ne u pravilima. Dodaju se samo kroz Firebase konzolu, pa se novi admin (npr. vlasnik) dodaje bez promjene pravila.
 Napomena: baza se čita javno, pa je i neobjavljeni nacrt tehnički čitljiv onome ko zna adresu baze. Za katalog sadnica to je prihvatljivo. Sorte sa `visible: false` build izostavlja.
 
 ### Pravila Storagea
