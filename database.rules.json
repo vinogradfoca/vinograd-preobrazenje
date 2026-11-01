@@ -40,6 +40,28 @@
             }
           }
         }
+      },
+      "images": {
+        ".indexOn": [
+          "hash"
+        ],
+        "$imageId": {
+          "alt": {
+            ".validate": "newData.isString() && newData.val().length <= 200"
+          },
+          "w": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() % 1 === 0"
+          },
+          "h": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() % 1 === 0"
+          },
+          "source": {
+            ".validate": "newData.isString() && (newData.val() === 'own' || newData.val() === 'web')"
+          },
+          "webApproved": {
+            ".validate": "newData.isBoolean()"
+          }
+        }
       }
     },
     "admins": {

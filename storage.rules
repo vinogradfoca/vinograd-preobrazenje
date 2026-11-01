@@ -1,0 +1,25 @@
+rules_version = '2';
+
+// Pravila za Firebase Storage (bucket vinograd-preobrazenje-92ec6.firebasestorage.app).
+// Storage pravila ne mogu čitati Realtime Database, pa su UID-ovi admina ovdje
+// (isti kao u admins/ u bazi): Žarko i vlasnik. UID nije tajna.
+// Objavljuju se ručno: Firebase konzola → Storage → Rules.
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.uid in ['aXWKivZS0ANh0T3CaXp9vvY5Nt42', 'heBoYKs5KBe5VUoqZhhVyMtXNNB3'];
+    }
+
+    // vinograd/img/<imageId>/400.webp, 800.webp, 1600.webp, og.jpg
+    match /vinograd/img/{imageId}/{file} {
+      allow read: if true;
+      allow create, update: if isAdmin()
+        && request.resource.size < 5 * 1024 * 1024
+        && (request.resource.contentType == 'image/webp' || request.resource.contentType == 'image/jpeg');
+      allow delete: if isAdmin();
+    }
+
+    // sve ostalo je zatvoreno (nema pravila = zabranjeno)
+  }
+}
