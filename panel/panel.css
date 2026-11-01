@@ -180,3 +180,33 @@ details.sec>summary small{font:600 13px Inter,system-ui,sans-serif;color:var(--m
 /* status snimanja u jednom redu na telefonu */
 .savebar>div{flex-wrap:wrap;row-gap:0}
 .savebar .ok .small{font-weight:500;font-size:13px;opacity:.85}
+
+/* slike (Korak 4a) */
+.imrow{display:grid;grid-template-columns:72px 1fr;gap:10px;align-items:start;border:1px solid var(--line);border-radius:14px;padding:10px;margin-top:10px}
+.imthumb{width:72px;height:72px;border-radius:10px;object-fit:cover;display:grid;place-items:center}
+.iminfo{min-width:0}
+.iminfo .field{margin-top:4px}
+.imname{font-weight:700;word-break:break-all}
+.imbtns{grid-column:1/-1;display:grid;grid-template-columns:48px 48px 1fr;gap:8px}
+.imbtns button{min-height:44px;border-radius:12px;border:1px solid #c9d3cc;background:#f0f3f1;font-weight:800;font-size:18px}
+.imbtns button:disabled{opacity:.4}
+.imbtns .rmimg{font-size:15px;color:var(--bad);background:#fff}
+.uploader{margin-top:14px}
+.upbtn{cursor:pointer}
+.upbtn[aria-disabled="true"]{opacity:.5;pointer-events:none}
+.upbtn:focus-within{outline:3px solid #2f6a4955}
+.uplist{display:grid;gap:8px;margin-top:10px}
+.uprow,.uptotal{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.uptotal{background:#e6f1e7;border-color:#cfe3d2}
+.uptotal .row{display:flex;justify-content:space-between;font-weight:700}
+.upname{font-weight:700;word-break:break-all}
+.upmsg{margin-top:6px}
+.upmsg .link{min-height:44px;padding:0 6px;text-decoration:underline}
+.warntext{color:var(--warn);font-weight:700}
+.oktext{color:var(--ok);font-weight:700}
+.libgrid{display:grid;gap:10px;margin-top:8px}
+.libcard{display:grid;grid-template-columns:96px 1fr;gap:12px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px}
+.libcard img{width:96px;height:96px;border-radius:10px;object-fit:cover;background:#e9efe9}
+.libalt{font:700 16px Georgia,serif;word-break:break-word}
+select.search{appearance:auto}
+@media(min-width:760px){.libgrid{grid-template-columns:1fr 1fr}}

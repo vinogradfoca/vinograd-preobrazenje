@@ -15,6 +15,11 @@
 //   update(paths)              multi-path update; ključevi su putanje ispod vinograd/
 //                              (npr. "varieties/viktor/sapling/price"), null briše polje
 //   TIMESTAMP                  vrijednost za "vrijeme na serveru" (updatedAt)
+//   newImageId()               novi push-ključ iz vinograd/images
+//   findImageByHash(hash)      imageId slike s istim SHA-256 ili null
+//   uploadFile(path, blob, contentType, onProgress)   upload u Storage (onProgress(0..1))
+//   deleteFile(path)           brisanje iz Storagea (nepostojeći fajl nije greška)
+//   fileUrl(path)              javna adresa fajla iz Storagea
 //
 // Snimanje uvijek ide putanjama do polja, nikad cijeli objekat sorte.
 
@@ -27,10 +32,11 @@ export async function createDb({ mock }) {
 
 // ------------------------------------------------------------------ Firebase
 async function createFirebase() {
-  const [appMod, authMod, dbMod] = await Promise.all([
+  const [appMod, authMod, dbMod, stMod] = await Promise.all([
     import(SDK + "firebase-app.js"),
     import(SDK + "firebase-auth.js"),
     import(SDK + "firebase-database.js"),
+    import(SDK + "firebase-storage.js"),
   ]);
   const cfg = await (await fetch("firebase-config.json", { cache: "no-store" })).json();
   const app = appMod.initializeApp(cfg);
@@ -38,7 +44,9 @@ async function createFirebase() {
   // prijava traje dok je kartica otvorena; lozinka se nikad ne čuva
   await authMod.setPersistence(auth, authMod.browserSessionPersistence);
   const db = dbMod.getDatabase(app);
-  const { ref, get, update, onValue, serverTimestamp } = dbMod;
+  const { ref, get, update, onValue, serverTimestamp, push, query, orderByChild, equalTo } = dbMod;
+  const storage = stMod.getStorage(app);
+  const bucket = cfg.storageBucket;
 
   const withTimeout = (p) => Promise.race([
     p,
@@ -71,6 +79,26 @@ async function createFirebase() {
       return onValue(ref(db, "vinograd/" + path), (snap) => cb(snap.val()));
     },
     update: (paths) => withTimeout(update(ref(db, "vinograd"), paths)),
+    newImageId: () => push(ref(db, "vinograd/images")).key,
+    async findImageByHash(hash) {
+      const snap = await get(query(ref(db, "vinograd/images"), orderByChild("hash"), equalTo(hash)));
+      const v = snap.val();
+      return v ? Object.keys(v)[0] : null;
+    },
+    uploadFile(path, blob, contentType, onProgress = () => {}) {
+      return new Promise((resolve, reject) => {
+        const task = stMod.uploadBytesResumable(stMod.ref(storage, path), blob, {
+          contentType,
+          cacheControl: "public,max-age=31536000,immutable", // imageId je jedinstven, fajl se nikad ne mijenja
+        });
+        task.on("state_changed", (s) => onProgress(s.totalBytes ? s.bytesTransferred / s.totalBytes : 0), reject, () => resolve());
+      });
+    },
+    async deleteFile(path) {
+      try { await stMod.deleteObject(stMod.ref(storage, path)); }
+      catch (e) { if (e && e.code !== "storage/object-not-found") throw e; }
+    },
+    fileUrl: (path) => `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(path)}?alt=media`,
   };
 }
 
@@ -82,7 +110,9 @@ async function createMock() {
   const user = { uid: "probni-korisnik", email: "probni@primjer.ba" };
   const TIMESTAMP = { ".sv": "timestamp" };
   // window.panelMock.failNext = true: sljedeće snimanje padne (za provjeru poruke "Nije snimljeno")
-  const ctl = (window.panelMock = { failNext: false, writes: [], data });
+  // failUploadAfter = n: poslije n uspješnih uploada sljedeći padne (provjera prekida na pola)
+  const ctl = (window.panelMock = { failNext: false, failUploadAfter: null, writes: [], data, files: new Map(), uploads: 0 });
+  let idCounter = 0;
   const listeners = [];
 
   const setPath = (path, value) => {
@@ -114,10 +144,37 @@ async function createMock() {
     isAdmin: async () => true,
     load: async () => JSON.parse(JSON.stringify(data)),
     watch(path, cb) { listeners.push({ path, cb }); return () => {}; },
+    // Storage u memoriji: blob URL-ovi, ništa ne ide na server
+    newImageId: () => "-probna" + Date.now().toString(36) + (idCounter++).toString(36),
+    async findImageByHash(hash) {
+      const imgs = data.images || {};
+      return Object.keys(imgs).find((k) => imgs[k] && imgs[k].hash === hash) || null;
+    },
+    async uploadFile(path, blob, contentType, onProgress = () => {}) {
+      for (const f of [0.3, 0.7]) { await wait(40); onProgress(f); }
+      if (ctl.failUploadAfter !== null && ctl.uploads >= ctl.failUploadAfter) {
+        ctl.failUploadAfter = null;
+        throw Object.assign(new Error("mock: veza prekinuta"), { code: "storage/retry-limit-exceeded" });
+      }
+      ctl.uploads++;
+      const old = ctl.files.get(path);
+      if (old) URL.revokeObjectURL(old.url);
+      ctl.files.set(path, { url: URL.createObjectURL(blob), type: contentType, size: blob.size, cacheControl: "public,max-age=31536000,immutable" });
+      onProgress(1);
+    },
+    async deleteFile(path) {
+      const f = ctl.files.get(path);
+      if (f) { URL.revokeObjectURL(f.url); ctl.files.delete(path); }
+    },
+    fileUrl: (path) => (ctl.files.get(path) || {}).url || "",
     async update(paths) {
       await wait(150);
       if (ctl.failNext) { ctl.failNext = false; throw Object.assign(new Error("mock: nema veze"), { code: "timeout" }); }
-      for (const [p, v] of Object.entries(paths)) setPath(p, v && v[".sv"] === "timestamp" ? Date.now() : v);
+      const now = Date.now();
+      const resolve = (v) => (v && typeof v === "object"
+        ? (v[".sv"] === "timestamp" ? now : Array.isArray(v) ? v.map(resolve) : Object.fromEntries(Object.entries(v).map(([k, x]) => [k, resolve(x)])))
+        : v);
+      for (const [p, v] of Object.entries(paths)) setPath(p, resolve(v));
       ctl.writes.push(paths);
       for (const l of listeners) l.cb(JSON.parse(JSON.stringify(getPath(l.path) ?? null)));
     },

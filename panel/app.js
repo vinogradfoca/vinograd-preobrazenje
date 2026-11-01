@@ -1,7 +1,8 @@
-// Panel Vinograda Preobraženje (Korak 3a).
-// Ekrani: prijava, Početna, Sorte, Uređivanje sorte, Cijene i količine, Promijeni lozinku.
-// Slike, Objavi i Dodaj sortu su "Uskoro" (Koraci 4 i 5).
+// Panel Vinograda Preobraženje (Koraci 3a i 4a).
+// Ekrani: prijava, Početna, Sorte, Uređivanje sorte (sa slikama), Cijene i količine,
+// Slike (biblioteka i dodavanje), Promijeni lozinku. Objavi i Dodaj sortu su "Uskoro".
 import { createDb } from "./db.js";
+import { convertImage, canMakeWebp, storagePaths, ACCEPT, NO_WEBP_MSG, WIDTHS } from "./images.js";
 
 // ------------------------------------------------------------------ konstante
 const COLORS = ["Bijela", "Crna", "Crvena", "Za provjeru"];
@@ -50,7 +51,7 @@ function toast(msg) {
 
 // ------------------------------------------------------------------ stanje
 const S = {
-  db: null, user: null, mock: false,
+  db: null, user: null, mock: false, oldFiles: new Set(),
   data: { settings: {}, varieties: {} },
   manifest: { images: {}, published: [] },
   ui: { sorteFilter: "", sorteQ: "", cijeneFilter: "", cijeneQ: "" },
@@ -61,7 +62,20 @@ const keysSorted = () => Object.keys(S.data.varieties).sort((a, b) => {
   return (num(va.order) ?? 1e9) - (num(vb.order) ?? 1e9) || str(va.name).localeCompare(str(vb.name), "sr");
 });
 const kind = (v, k) => (v && v[k] && typeof v[k] === "object" ? v[k] : {});
-const thumbs = (key) => S.manifest.images[key] || [];
+// Slike sorte: niz u kojem je stavka ili imageId iz vinograd/images ili stari naziv fajla
+// iz seeda (npr. "viktor-3.webp", prikazuje se iz /img/ preko manifest.json).
+const imgList = (v) => {
+  const a = !v ? [] : Array.isArray(v.images) ? v.images
+    : Object.keys(v.images || {}).filter((k) => /^\d+$/.test(k)).sort((x, y) => x - y).map((k) => v.images[k]);
+  return a.filter((x) => typeof x === "string" && x);
+};
+const isNewImg = (ref) => !!(S.data.images && S.data.images[ref]);
+function imgSrc(ref, size = "400") {
+  const im = S.data.images && S.data.images[ref];
+  if (im) { const vv = (im.variants || {})[size] || (im.variants || {})["400"]; return vv && vv.path ? S.db.fileUrl(vv.path) : ""; }
+  return S.oldFiles.has(ref) ? "/img/" + ref : "";
+}
+const thumbs = (key) => imgList(V(key)).map((r) => imgSrc(r)).filter(Boolean);
 const F = {
   noImg: (key) => !thumbs(key).length,
   noPrice: (key) => KINDS.every(([k]) => num(kind(V(key), k).price) == null),
@@ -178,6 +192,9 @@ function commitInput(input) {
 }
 function onViewChange(e) {
   const el = e.target;
+  if (el.matches("input[type=file][data-upload]")) return onFilesChosen(el);
+  if (el.matches("input[data-imgalt]")) return commitAlt(el);
+  if (el.id === "libSorta") { const f = $("#libFile"); f.disabled = !el.value || !S.webp; f.closest("label").setAttribute("aria-disabled", String(f.disabled)); return; }
   if (el.matches("input[data-f][data-v], textarea[data-f][data-v]")) commitInput(el);
   else if (el.matches("input[type=checkbox][data-f]")) {
     const key = el.closest("[data-key]").dataset.key;
@@ -211,6 +228,8 @@ function onViewClick(e) {
     setIn(V(key), input.dataset.f, next);
     saveLater(key, input.dataset.f, next);
   } else if (b.dataset.share) shareVariety(b.dataset.share);
+  else if (b.dataset.imgmove || b.dataset.imgdel) imgAction(b);
+  else if (b.dataset.retry) retryUpload(b.dataset.retry);
 }
 
 // ------------------------------------------------------------------ dijeljenje
@@ -311,7 +330,7 @@ function screenHome() {
     <div class="big">
       <a href="#/dodaj"><i>＋</i><span>Dodaj sortu <small><span class="soon">Uskoro</span></small></span></a>
       <a href="#/cijene"><i>KM</i><span>Cijene i količine</span></a>
-      <a href="#/slike"><i>▣</i><span>Dodaj slike <small><span class="soon">Uskoro</span></small></span></a>
+      <a href="#/slike"><i>▣</i><span>Dodaj slike</span></a>
       <a href="#/objavi"><i>↑</i><span>Objavi na sajt <small><span class="soon">Uskoro</span></small></span></a>
     </div>
     <div class="card fali">
@@ -415,13 +434,11 @@ const qtyField = (k, v, compact, key) => `
 function screenEdit(key) {
   const v = V(key);
   if (!v) return `${head("Sorta nije pronađena")}<p><a class="btn outline" href="#/sorte">Nazad na sorte</a></p>`;
-  const imgs = Array.isArray(v.images) ? v.images.filter(Boolean) : Object.values(v.images || {}).filter(Boolean);
-  const have = new Set(thumbs(key).map((p) => p.split("/").pop()));
-  setTimeout(() => updateSummaries(key));
+  setTimeout(() => { updateSummaries(key); renderImgBox(key); });
   return `<div data-key="${esc(key)}">
     <a class="back" href="#/sorte">← Sorte</a>
     <div class="ehead"><div><h1 class="js-name">${esc(v.name)}</h1><p class="meta-line" id="metaLine">${esc(metaText(v))}</p></div>${shareButton(key, "btn outline")}</div>
-    <div class="strip">${thumbs(key).map((t) => `<img src="${esc(t)}" alt="" loading="lazy">`).join("") || vThumb(key)}</div>
+    <div class="strip" id="strip">${stripHtml(key)}</div>
 
     <details class="sec" open><summary>Osnovno</summary><div class="secbody">
       ${fieldText("name", "Naziv", v.name, { v: "name" })}
@@ -449,9 +466,9 @@ function screenEdit(key) {
       ${FACTS.map(([k, label]) => fieldText("facts/" + k, label, str(getIn(v, "facts/" + k)))).join("")}
     </div></details>
 
-    <details class="sec"><summary>Slike <small>${imgs.length}</small></summary><div class="secbody">
-      <p class="hint"><span>Dodavanje i redoslijed slika dolaze uskoro (Korak 4). Prva slika je naslovna.</span></p>
-      ${imgs.length ? `<ul class="files">${imgs.map((f) => `<li>${esc(f)}${have.has(f) ? "" : ` <span class="badge warn">fajla još nema</span>`}</li>`).join("")}</ul>` : `<p class="muted">Sorta nema slika.</p>`}
+    <details class="sec" id="secImg"><summary>Slike <small id="sumImg">${imgList(v).length}</small></summary><div class="secbody">
+      <div id="imgBox"></div>
+      ${uploaderHtml(key)}
     </div></details>
 
     <details class="sec"><summary>Napredno</summary><div class="secbody">
@@ -561,6 +578,230 @@ function screenSoon(title, text) {
   return `${head(title)}<div class="card"><p><span class="soon">Uskoro</span></p><p>${text}</p></div><p><a class="btn outline" href="#/">Nazad na početnu</a></p>`;
 }
 
+// ------------------------------------------------------------------ slike (Korak 4a)
+let uploading = 0; // dok traje upload, liste se ne iscrtavaju ponovo
+const uploadJobs = new Map(); // id reda -> { file, key }
+let jobSeq = 0;
+
+function stripHtml(key) {
+  const t = thumbs(key);
+  return t.length ? t.map((src) => `<img src="${esc(src)}" alt="" loading="lazy">`).join("") : vThumb(key);
+}
+function refreshImages(key) {
+  const st = $("#strip"); if (st) st.innerHTML = stripHtml(key);
+  const sm = $("#sumImg"); if (sm) sm.textContent = imgList(V(key)).length;
+  renderImgBox(key);
+}
+function renderImgBox(key) {
+  const box = $("#imgBox"); if (!box) return;
+  const v = V(key), list = imgList(v);
+  if (!list.length) { box.innerHTML = `<p class="muted">Sorta još nema slika.</p>`; return; }
+  box.innerHTML = `<p class="hint"><span>Prva slika je naslovna. Strelicama mijenjaš redoslijed. "Ukloni" sklanja sliku samo sa ove sorte, a slika ostaje u biblioteci.</span></p>` +
+    list.map((ref, i) => {
+      const src = imgSrc(ref), isNew = isNewImg(ref), im = isNew ? S.data.images[ref] : null;
+      return `<div class="imrow">
+        ${src ? `<img src="${esc(src)}" alt="" loading="lazy" class="imthumb">` : `<span class="imthumb thumb x" aria-hidden="true">?</span>`}
+        <div class="iminfo">
+          ${i === 0 ? `<span class="badge ft">naslovna</span>` : ""}
+          ${isNew
+            ? `<div class="field"><label for="alt-${esc(ref)}">Opis slike</label><input id="alt-${esc(ref)}" type="text" data-imgalt="${esc(ref)}" value="${esc(im.alt || "")}" maxlength="200"></div>
+               <div class="hint"><span>${im.w}×${im.h} px${im.createdAt ? " · dodana " + esc(fmtDate(im.createdAt)) : ""}</span></div>`
+            : `<div class="imname">${esc(ref)}</div><div class="hint"><span>${src ? "Starija slika sa sajta" : "Fajl još nije na sajtu"}</span></div>`}
+        </div>
+        <div class="imbtns">
+          <button type="button" data-imgmove="-1" data-idx="${i}" aria-label="Pomjeri gore"${i === 0 ? " disabled" : ""}>↑</button>
+          <button type="button" data-imgmove="1" data-idx="${i}" aria-label="Pomjeri dole"${i === list.length - 1 ? " disabled" : ""}>↓</button>
+          <button type="button" class="rmimg" data-imgdel="1" data-idx="${i}" aria-label="Ukloni sliku sa sorte">Ukloni</button>
+        </div>
+      </div>`;
+    }).join("");
+}
+function imgAction(b) {
+  const key = b.closest("[data-key]").dataset.key;
+  const list = imgList(V(key)), i = +b.dataset.idx;
+  if (b.dataset.imgdel) {
+    if (!confirm("Ukloniti sliku sa ove sorte? Slika ostaje u biblioteci i može se ponovo dodati.")) return;
+    list.splice(i, 1);
+  } else {
+    const j = i + +b.dataset.imgmove;
+    if (j < 0 || j >= list.length) return;
+    [list[i], list[j]] = [list[j], list[i]];
+  }
+  save(key, { images: list.length ? list : null }); // cijeli niz u jednom upisu
+  refreshImages(key);
+}
+function commitAlt(input) {
+  const id = input.dataset.imgalt, t = input.value.trim();
+  if (!t) return fieldError(input, "Opis slike ne smije biti prazan. Npr. \"Grozd sorte Viktor\".");
+  if (t.length > 200) return fieldError(input, "Opis slike može imati najviše 200 znakova.");
+  fieldError(input, "");
+  if (S.data.images[id].alt === t) return;
+  S.data.images[id].alt = t;
+  send({ [`images/${id}/alt`]: t });
+}
+
+function uploaderHtml(key) {
+  setTimeout(checkWebp);
+  return `<div class="uploader">
+    <div class="warnbox nowebp" hidden>${esc(NO_WEBP_MSG)}</div>
+    <label class="btn primary wide upbtn"><input type="file" data-upload="${esc(key)}" accept="${ACCEPT}" multiple hidden>＋ Dodaj slike</label>
+    <p class="hint"><span>Možeš izabrati više slika odjednom. Svaka se pretvara u 4 veličine i snima jedna po jedna.</span></p>
+    <div class="uplist" aria-live="polite"></div>
+  </div>`;
+}
+async function checkWebp() {
+  S.webp = await canMakeWebp();
+  $$(".nowebp").forEach((w) => (w.hidden = S.webp));
+  $$("input[type=file][data-upload]").forEach((inp) => {
+    const lib = inp.id === "libFile";
+    inp.disabled = !S.webp || (lib && !$("#libSorta").value);
+    inp.closest("label").setAttribute("aria-disabled", String(inp.disabled));
+  });
+}
+function onFilesChosen(input) {
+  const key = input.dataset.upload || ($("#libSorta") && $("#libSorta").value);
+  const files = [...input.files];
+  input.value = "";
+  if (!files.length || !key || !V(key)) return;
+  if (!S.webp) return toast(NO_WEBP_MSG);
+  const list = input.closest(".uploader").querySelector(".uplist");
+  const ids = files.map((file) => {
+    const id = "up" + ++jobSeq;
+    uploadJobs.set(id, { file, key });
+    list.insertAdjacentHTML("beforeend", `<div class="uprow" id="${id}"><div class="upname">${esc(file.name)}</div><div class="bar"><span style="width:0%"></span></div><div class="upmsg muted small">Čeka…</div></div>`);
+    return id;
+  });
+  runUploads(ids, list);
+}
+async function runUploads(ids, list) {
+  uploading++;
+  let total = list.querySelector(".uptotal");
+  if (!total) { list.insertAdjacentHTML("afterbegin", `<div class="uptotal"><div class="row"><b>Ukupno</b><span class="cnt"></span></div><div class="bar"><span></span></div></div>`); total = list.querySelector(".uptotal"); }
+  const all = () => $$(".uprow", list);
+  const done = () => all().filter((r) => r.dataset.state === "ok" || r.dataset.state === "dup").length;
+  const upd = () => { const n = all().length, d = done(); total.querySelector(".cnt").textContent = `snimljeno ${d} od ${n}`; total.querySelector(".bar span").style.width = (n ? (d / n) * 100 : 0) + "%"; };
+  upd();
+  for (const id of ids) { await processUpload(id); upd(); }
+  uploading--;
+}
+function retryUpload(id) {
+  const row = $("#" + id); if (!row) return;
+  const list = row.closest(".uplist");
+  runUploads([id], list);
+}
+function setRow(id, pct, msg, state) {
+  const row = $("#" + id); if (!row) return;
+  if (pct != null) row.querySelector(".bar span").style.width = Math.round(pct * 100) + "%";
+  if (state) row.dataset.state = state;
+  row.querySelector(".upmsg").className = "upmsg small " + (state === "err" ? "error" : state === "dup" || state === "warn" ? "warntext" : state === "ok" ? "oktext" : "muted");
+  row.querySelector(".upmsg").innerHTML = msg;
+}
+const STEP_TEXT = { "čitam": "Čitam sliku…", "pravim 400": "Pravim veličinu 400…", "pravim 800": "Pravim veličinu 800…", "pravim 1600": "Pravim veličinu 1600…", "pravim og": "Pravim sliku za pregled linka…" };
+async function processUpload(id) {
+  const job = uploadJobs.get(id); if (!job) return;
+  const { file, key } = job;
+  setRow(id, 0, "Pretvaram…", "busy");
+  let conv;
+  try { conv = await convertImage(file, (s) => setRow(id, 0.05, STEP_TEXT[s] || "Pretvaram…")); }
+  catch (e) { setRow(id, 0, esc(e.message || "Slika se ne može pretvoriti."), "err"); return; }
+
+  let dup;
+  try { dup = await S.db.findImageByHash(conv.hash); }
+  catch { setRow(id, 0, `Nema veze, slika nije snimljena. <button type="button" class="link" data-retry="${id}">Pokušaj ponovo</button>`, "err"); return; }
+  if (dup) { setRow(id, 1, "Ova slika je već dodana.", "dup"); return; }
+
+  const imageId = S.db.newImageId();
+  const paths = storagePaths(imageId);
+  const parts = [...WIDTHS.map(String), "og"];
+  const sizes = parts.map((p) => conv.variants[p].blob.size), sum = sizes.reduce((a, b) => a + b, 0);
+  const uploaded = [];
+  let dbTried = false;
+  const oldList = imgList(V(key));
+  try {
+    let before = 0;
+    for (let i = 0; i < parts.length; i++) {
+      const p = parts[i], vv = conv.variants[p];
+      setRow(id, 0.1 + 0.85 * (before / sum), `Šaljem ${i + 1} od 4…`);
+      await S.db.uploadFile(paths[p], vv.blob, vv.type, (f) => setRow(id, 0.1 + 0.85 * ((before + f * sizes[i]) / sum)));
+      uploaded.push(paths[p]);
+      before += sizes[i];
+    }
+    // tek kad su sva četiri fajla gore: zapis slike i niz slika sorte u jednom upisu
+    const v = V(key);
+    const record = {
+      alt: "Grozd sorte " + v.name, w: conv.w, h: conv.h,
+      variants: Object.fromEntries(parts.map((p) => [p, { path: paths[p], w: conv.variants[p].w, h: conv.variants[p].h }])),
+      hash: conv.hash, source: "own", webApproved: false,
+      createdAt: S.db.TIMESTAMP, createdBy: S.user.uid,
+    };
+    const list = [...imgList(v), imageId];
+    dbTried = true;
+    await S.db.update({
+      [`images/${imageId}`]: record,
+      [`varieties/${key}/images`]: list,
+      [`varieties/${key}/updatedAt`]: S.db.TIMESTAMP,
+      [`varieties/${key}/updatedBy`]: S.user.uid,
+    });
+    S.data.images[imageId] = { ...record, createdAt: Date.now() };
+    V(key).images = list; V(key).updatedAt = Date.now(); V(key).updatedBy = S.user.uid;
+    uploadJobs.delete(id);
+    const kb = (b) => Math.round(b / 1024) + " KB";
+    setRow(id, 1, `✓ Snimljeno (${kb(file.size)} → ${kb(sum)} za sve 4 veličine)` + (conv.warnings.length ? `<br><span class="warntext">${esc(conv.warnings.join(" "))}</span>` : ""), conv.warnings.length ? "ok" : "ok");
+    refreshImages(key);
+    refreshMeta(key);
+    if (location.hash.startsWith("#/slike")) libList();
+  } catch (e) {
+    console.warn("Upload nije uspio:", e && (e.code || e.message));
+    // ništa ne smije ostati na pola: obriši poslane fajlove i (ako je upis krenuo) zapis u bazi
+    for (const p of uploaded) { try { await S.db.deleteFile(p); } catch { /* ostaje za ručno čišćenje */ } }
+    if (dbTried) S.db.update({ [`images/${imageId}`]: null, [`varieties/${key}/images`]: oldList.length ? oldList : null }).catch(() => {});
+    setRow(id, 0, `Slika nije snimljena: veza je prekinuta. <button type="button" class="link" data-retry="${id}">Pokušaj ponovo</button>`, "err");
+  }
+}
+
+// ekran Slike: biblioteka svih slika, najnovije prve
+function libList() {
+  const box = $("#libList"); if (!box) return;
+  const q = (S.ui.libQ || "").trim().toLowerCase();
+  const use = {};
+  for (const [k, v] of Object.entries(S.data.varieties)) for (const r of imgList(v)) (use[r] = use[r] || []).push(v.name || k);
+  const ids = Object.keys(S.data.images || {})
+    .filter((id) => !q || String(S.data.images[id].alt || "").toLowerCase().includes(q))
+    .sort((a, b) => (num(S.data.images[b].createdAt) ?? 0) - (num(S.data.images[a].createdAt) ?? 0));
+  $("#libCount").textContent = `${ids.length} ${ids.length === 1 ? "slika" : ids.length >= 2 && ids.length <= 4 ? "slike" : "slika"}`;
+  box.innerHTML = ids.length ? ids.map((id) => {
+    const im = S.data.images[id], u = use[id] || [];
+    return `<div class="libcard">
+      <img src="${esc(imgSrc(id))}" alt="" loading="lazy">
+      <div><div class="libalt">${esc(im.alt || "(bez opisa)")}</div>
+        <div class="hint"><span>${u.length ? `u ${u.length} ${u.length === 1 ? "sorti" : "sorte"}: ${esc(u.slice(0, 3).join(", "))}${u.length > 3 ? "…" : ""}` : "nije dodijeljena nijednoj sorti"}</span></div>
+        <div class="hint"><span>${im.w}×${im.h} px${im.createdAt ? " · " + esc(fmtDate(im.createdAt)) : ""}</span></div></div>
+    </div>`;
+  }).join("") : `<p class="empty">${q ? "Nema slika s tim opisom." : "Još nema slika dodanih kroz panel. Starije slike sa sajta vide se kod svake sorte."}</p>`;
+}
+function screenSlike() {
+  setTimeout(() => {
+    libList();
+    checkWebp();
+    $("#libQ").addEventListener("input", (e) => { S.ui.libQ = e.target.value; libList(); });
+  });
+  const opts = keysSorted().map((k) => `<option value="${esc(k)}">${esc(V(k).name)}</option>`).join("");
+  return `
+    ${head("Slike", "Biblioteka slika dodanih kroz panel, najnovije prve.")}
+    <div class="card uploader">
+      <h2>Dodaj slike</h2>
+      <div class="warnbox nowebp" hidden>${esc(NO_WEBP_MSG)}</div>
+      <div class="field"><label for="libSorta">Za koju sortu?</label>
+        <select id="libSorta" class="search"><option value="">Izaberi sortu…</option>${opts}</select></div>
+      <label class="btn primary wide upbtn" style="margin-top:12px" aria-disabled="true"><input type="file" id="libFile" data-upload="" accept="${ACCEPT}" multiple hidden disabled>＋ Dodaj slike</label>
+      <p class="hint"><span>Uvoz mnogo slika odjednom po imenu fajla dolazi uskoro.</span></p>
+      <div class="uplist" aria-live="polite"></div>
+    </div>
+    <input id="libQ" class="search" type="search" placeholder="Pretraži po opisu slike…" aria-label="Pretraži slike" value="${esc(S.ui.libQ || "")}">
+    <p class="count" id="libCount"></p>
+    <div class="libgrid" id="libList"></div>`;
+}
+
 // ------------------------------------------------------------------ usmjeravanje
 function route() {
   flushLater();
@@ -574,7 +815,7 @@ function route() {
     case "sorta": { const key = decodeURIComponent(parts[1] || ""); html = screenEdit(key); nav = "sorte"; after = () => bindEdit(key); break; }
     case "cijene": html = screenCijene(params); nav = "cijene"; break;
     case "postavke": html = screenPostavke(); after = () => ($("#out3").onclick = () => S.db.signOut()); break;
-    case "slike": html = screenSoon("Slike", "Dodavanje slika, i mnogo njih odjednom po imenu fajla, dolazi uskoro. Do tada sorte koriste slike koje su već na sajtu."); nav = "slike"; break;
+    case "slike": html = screenSlike(); nav = "slike"; break;
     case "objavi": html = screenSoon("Objavi", "Dugme Objavi dolazi uskoro. Do tada novu verziju sajta pokreće Žarko ručno u Netlifyju (Deploys, Trigger deploy, Deploy site). Sve izmjene iz panela su snimljene u nacrt i ulaze u sljedeću objavu."); nav = "objavi"; break;
     case "dodaj": html = screenSoon("Dodaj sortu", "Dodavanje nove sorte korak po korak dolazi uskoro."); nav = "pocetna"; break;
     default: html = `${head("Stranica ne postoji")}<p><a class="btn outline" href="#/">Na početnu</a></p>`;
@@ -596,8 +837,9 @@ async function startApp(user) {
       S.db.load(),
       fetch("manifest.json", { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).catch(() => null),
     ]);
-    S.data = { ...data, settings: data.settings || {}, varieties: data.varieties || {} };
+    S.data = { ...data, settings: data.settings || {}, varieties: data.varieties || {}, images: data.images || {} };
     if (manifest) S.manifest = { images: manifest.images || {}, published: manifest.published || [] };
+    S.oldFiles = new Set(Object.values(S.manifest.images).flat().map((p) => String(p).split("/").pop()));
   } catch (e) {
     view().innerHTML = `<div class="card"><h1>Podaci se ne mogu učitati</h1><p class="lead">Provjeri vezu s internetom i osvježi stranicu.</p><p class="muted small">${esc(e && (e.code || e.message))}</p></div>`;
     return;
@@ -609,8 +851,9 @@ async function startApp(user) {
     for (const [k, v] of Object.entries(val)) if (!S.data.varieties[k] || !debounced.size) S.data.varieties[k] = v;
     const typing = document.activeElement && view().contains(document.activeElement) && /INPUT|TEXTAREA/.test(document.activeElement.tagName);
     const h = location.hash;
-    if (!typing && (h === "" || h === "#/" || h.startsWith("#/sorte"))) route();
+    if (!typing && !uploading && (h === "" || h === "#/" || h.startsWith("#/sorte"))) route();
   });
+  S.db.watch("images", (val) => { S.data.images = val || {}; });
   route();
 }
 
