@@ -88,7 +88,7 @@ function validate(db) {
     if (isStr(s.phoneIntl) && !/^\d{8,15}$/.test(s.phoneIntl)) E.push("settings.phoneIntl: samo cifre, bez + i bez vodećih nula (npr. 38765592120)");
     if (isStr(s.email) && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.email)) E.push(`settings.email: "${s.email}" nije ispravna adresa`);
     if (s.mapUrl && !/^https:\/\//.test(s.mapUrl)) E.push("settings.mapUrl: mora počinjati sa https://");
-    if (s.siteUrl && !/^https:\/\/[^\s/]+(\/[^\s]*)?$/.test(s.siteUrl)) E.push(`settings.siteUrl: "${s.siteUrl}" mora biti puna adresa, npr. https://primjer.vercel.app`);
+    if (s.siteUrl && !/^https:\/\/[^\s/]+(\/[^\s]*)?$/.test(s.siteUrl)) E.push(`settings.siteUrl: "${s.siteUrl}" mora biti puna adresa, npr. https://primjer.netlify.app`);
   }
 
   // images
