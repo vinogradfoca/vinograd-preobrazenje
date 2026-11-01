@@ -1,0 +1,182 @@
+/* Panel: iste boje i naslovi kao sajt. Telefon prvo, jedna kolona, donja navigacija. */
+:root{--green:#193d2b;--green2:#2f6a49;--wine:#891f3d;--cream:#f5f3ec;--ink:#17241d;--muted:#68736d;--line:#dfe5e0;--gold:#e8c88e;--ok:#2f6a49;--warn:#a05a00;--bad:#891f3d}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:var(--cream);line-height:1.45;padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+body.nonav{padding-bottom:0}
+h1,h2,h3{font-family:Georgia,"Times New Roman",serif;line-height:1.15;margin:0}
+h1{font-size:26px}h2{font-size:20px}h3{font-size:17px}
+a{color:var(--green2)}
+button,input,select,textarea{font:inherit;font-size:16px;color:inherit}
+button{cursor:pointer}
+[hidden]{display:none!important}
+.view{max-width:720px;margin:0 auto;padding:16px 16px 24px}
+.loading{color:var(--muted);text-align:center;padding:40px 0}
+
+/* probni režim */
+.mockbar{position:sticky;top:0;z-index:30;background:#ffd84d;color:#3a2a00;text-align:center;font-weight:800;letter-spacing:.04em;padding:8px 12px;border-bottom:2px solid #c9a400}
+
+/* zaglavlje */
+.top{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 12px;min-height:56px}
+body.mock .top{top:38px}
+.brand{font:700 19px Georgia,serif;color:var(--green);text-decoration:none;display:flex;flex-direction:column;line-height:1.1}
+.brand span{font:400 12px Inter,system-ui,sans-serif;color:var(--muted)}
+.top-actions{display:flex;align-items:center;gap:4px}
+.icon{display:inline-grid;place-items:center;min-width:44px;min-height:44px;font-size:22px;text-decoration:none;color:var(--green);border-radius:10px}
+.link{background:none;border:0;color:var(--wine);font-weight:700;min-height:44px;padding:0 10px;border-radius:10px}
+
+/* status snimanja */
+.savebar{position:sticky;top:57px;z-index:19;max-width:720px;margin:8px auto 0;padding:0 16px}
+body.mock .savebar{top:95px}
+.savebar>div{display:flex;align-items:center;justify-content:space-between;gap:8px;border-radius:12px;padding:8px 12px;font-weight:700;font-size:15px;box-shadow:0 4px 14px #14251a14}
+.savebar .ok{background:#e6f1e7;color:var(--green)}
+.savebar .busy{background:#fff;color:var(--muted)}
+.savebar .bad{background:#fbe9ee;color:var(--bad)}
+.savebar button{min-height:40px;border:0;border-radius:10px;background:var(--wine);color:#fff;font-weight:800;padding:0 14px}
+
+/* donja navigacija */
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:20;background:#fff;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);padding-bottom:env(safe-area-inset-bottom)}
+.nav a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:64px;text-decoration:none;color:var(--muted);font-size:12px;font-weight:700}
+.nav a i{font-style:normal;font-size:20px;line-height:1}
+.nav a.on{color:var(--wine)}
+@media(min-width:760px){.nav{left:50%;right:auto;width:720px;transform:translateX(-50%);border:1px solid var(--line);border-bottom:0;border-radius:16px 16px 0 0}}
+
+/* kartice i dugmad */
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0}
+.muted{color:var(--muted)}
+.small{font-size:14px}
+.lead{color:var(--muted);margin:6px 0 14px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 18px;border-radius:12px;border:1px solid transparent;font-weight:800;text-decoration:none;text-align:center}
+.btn.primary{background:var(--wine);color:#fff}
+.btn.green{background:var(--green);color:#fff}
+.btn.outline{background:#fff;color:var(--green);border-color:var(--green)}
+.btn.ghost{background:#f0f3f1;color:var(--ink)}
+.btn.wide{width:100%}
+.btn:disabled,.btn[aria-disabled="true"]{opacity:.55}
+.big{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+.big a,.big button{display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;gap:10px;min-height:112px;padding:16px;border-radius:16px;border:0;text-align:left;text-decoration:none;font-weight:800;font-size:17px;color:#fff;background:var(--green)}
+.big a:nth-child(2){background:var(--wine)}
+.big a:nth-child(3){background:var(--green2)}
+.big a:nth-child(4){background:#10281c}
+.big i{font-style:normal;font-size:26px;line-height:1}
+.big small{display:block;font-weight:600;font-size:13px;opacity:.85}
+.soon{display:inline-block;background:var(--gold);color:var(--green);font-size:12px;font-weight:800;border-radius:999px;padding:2px 8px}
+
+/* "Šta još fali" */
+.fali a{display:block;text-decoration:none;color:inherit;padding:12px 0;border-top:1px solid var(--line);min-height:44px}
+.fali a:first-of-type{border-top:0}
+.fali .row{display:flex;justify-content:space-between;gap:8px;font-weight:700}
+.fali .row b{color:var(--wine)}
+.bar{height:8px;border-radius:99px;background:#eceee9;margin-top:8px;overflow:hidden}
+.bar span{display:block;height:100%;background:var(--green2);border-radius:99px}
+
+/* pretraga i filteri */
+.search{width:100%;min-height:48px;border:1px solid #c9d3cc;border-radius:12px;padding:10px 14px;background:#fff}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:10px 0 4px;margin:0 -16px;padding-left:16px;padding-right:16px;scrollbar-width:none}
+.chips button{flex:0 0 auto;min-height:40px;border-radius:999px;border:1px solid #c9d3cc;background:#fff;padding:0 14px;font-weight:700;font-size:15px}
+.chips button[aria-pressed="true"]{background:var(--green);color:#fff;border-color:var(--green)}
+.count{color:var(--muted);font-size:14px;margin:6px 0}
+
+/* lista sorti */
+.vlist{display:grid;gap:10px;margin-top:8px}
+.vcard{display:grid;grid-template-columns:64px 1fr auto;gap:12px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px}
+.vcard>a{display:contents;color:inherit;text-decoration:none}
+.thumb{width:64px;height:64px;border-radius:10px;object-fit:cover;background:#e9efe9;display:grid;place-items:center;font:700 18px Georgia,serif;color:var(--muted);overflow:hidden}
+.thumb.b{background:var(--green);color:#fff}.thumb.r{background:var(--wine);color:#fff}.thumb.w{background:var(--cream);color:var(--green)}
+.vname{font:700 17px Georgia,serif}
+.vmeta{color:var(--muted);font-size:14px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.dot{display:inline-block;width:12px;height:12px;border-radius:50%;box-shadow:0 0 0 1px #0003;flex:0 0 auto}
+.dot.w{background:#d8dc7a}.dot.b{background:#2c2f56}.dot.r{background:#c0425e}.dot.x{background:#b9c2bc}
+.badges{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
+.badge{font-size:12px;font-weight:700;border-radius:999px;padding:2px 8px;background:#f0f3f1;color:var(--muted)}
+.badge.warn{background:#fff3df;color:var(--warn)}
+.badge.hid{background:#fbe9ee;color:var(--bad)}
+.badge.ft{background:#e6f1e7;color:var(--green)}
+.share{min-width:44px;min-height:44px;border-radius:12px;border:1px solid var(--line);background:#fff;font-size:18px;color:var(--green)}
+.share[aria-disabled="true"]{opacity:.45}
+
+/* uređivanje */
+.ehead{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-top:4px}
+.back{display:inline-flex;align-items:center;min-height:44px;font-weight:700;text-decoration:none}
+.meta-line{color:var(--muted);font-size:14px;margin:4px 0 0}
+.strip{display:flex;gap:8px;overflow-x:auto;margin:12px -16px 0;padding:0 16px}
+.strip img,.strip .thumb{flex:0 0 auto;width:84px;height:84px;border-radius:12px;object-fit:cover}
+.strip img:first-child{outline:3px solid var(--wine);outline-offset:-3px}
+details.sec{background:#fff;border:1px solid var(--line);border-radius:16px;margin:12px 0;overflow:hidden}
+details.sec>summary{list-style:none;display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:56px;padding:0 16px;cursor:pointer;font:700 18px Georgia,serif}
+details.sec>summary::-webkit-details-marker{display:none}
+details.sec>summary::after{content:"▾";font-family:system-ui;color:var(--muted);transition:transform .2s}
+details.sec[open]>summary::after{transform:rotate(180deg)}
+details.sec>summary small{font:600 13px Inter,system-ui,sans-serif;color:var(--muted);margin-left:auto}
+.secbody{padding:0 16px 16px}
+.field{margin:14px 0 0}
+.field>label,.field>.lbl{display:block;font-weight:700;font-size:15px;margin-bottom:6px}
+.field input[type=text],.field input[type=email],.field input[type=password],.field input[inputmode],.field textarea{width:100%;min-height:48px;border:1px solid #c9d3cc;border-radius:12px;padding:10px 12px;background:#fff}
+.field textarea{min-height:120px;resize:vertical;line-height:1.45}
+.field input:focus,.field textarea:focus,.search:focus{outline:3px solid #2f6a4955;border-color:var(--green2)}
+.field.err input,.field.err textarea{border-color:var(--bad);background:#fff7f9}
+.hint{font-size:13px;color:var(--muted);margin-top:4px;display:flex;justify-content:space-between;gap:8px}
+.error{color:var(--bad);font-weight:700;font-size:14px;margin-top:4px}
+.warnbox{background:#fff6e6;border-radius:10px;padding:8px 12px;font-size:14px;margin-bottom:6px}
+.seg{display:flex;flex-wrap:wrap;gap:8px}
+.seg button{min-height:44px;padding:0 14px;border-radius:12px;border:1px solid #c9d3cc;background:#fff;font-weight:700;display:inline-flex;align-items:center;gap:6px}
+.seg button[aria-checked="true"]{background:var(--green);border-color:var(--green);color:#fff}
+.switch{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:52px;border-top:1px solid var(--line);margin-top:14px;padding-top:10px;font-weight:700}
+.switch input{appearance:none;-webkit-appearance:none;width:52px;height:32px;border-radius:99px;background:#c9d3cc;position:relative;flex:0 0 auto;margin:0;cursor:pointer;transition:.2s}
+.switch input::after{content:"";position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 1px 3px #0004;transition:.2s}
+.switch input:checked{background:var(--green2)}
+.switch input:checked::after{left:23px}
+.switch input:focus-visible{outline:3px solid #2f6a4955}
+.switch small{display:block;font-weight:500;color:var(--muted);font-size:13px}
+.kinds{display:grid;gap:12px}
+.kind{border:1px solid var(--line);border-radius:14px;padding:12px}
+.kind h3{margin-bottom:4px}
+.money{position:relative}
+.money input{padding-right:46px!important}
+.money span{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-weight:700;pointer-events:none}
+.stepper{display:grid;grid-template-columns:48px 1fr 48px;gap:6px;align-items:center}
+.stepper button{min-height:48px;border-radius:12px;border:1px solid #c9d3cc;background:#f0f3f1;font-size:22px;font-weight:700}
+.stepper input{text-align:center}
+.endbtns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0}
+.files{margin:0;padding-left:18px}
+.files li{padding:4px 0;word-break:break-all}
+
+/* cijene i količine */
+.pcard{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:10px}
+.pcard h3{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.pcard h3 a{color:inherit;text-decoration:none}
+.pcols{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pcols .field{margin:0}
+.pcols .lbl{font-size:14px!important;margin-bottom:4px!important}
+.pcols .stepper{grid-template-columns:40px 1fr 40px;margin-top:6px}
+.pcols .stepper button{min-height:44px}
+.pcols input{min-height:44px!important}
+
+/* prijava i prazna stanja */
+.auth{max-width:420px;margin:7vh auto 0;padding:0 16px}
+.auth .card{padding:20px}
+.notice{border-radius:12px;padding:10px 12px;font-weight:600;margin-top:12px}
+.notice.ok{background:#e6f1e7;color:var(--green)}
+.notice.bad{background:#fbe9ee;color:var(--bad)}
+.empty{text-align:center;color:var(--muted);padding:28px 8px}
+
+.toast{position:fixed;left:50%;bottom:calc(88px + env(safe-area-inset-bottom));transform:translate(-50%,20px);background:var(--green);color:#fff;padding:12px 18px;border-radius:999px;opacity:0;pointer-events:none;transition:.25s;z-index:40;max-width:90vw;text-align:center;font-weight:700}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
+@media(min-width:760px){
+  .big{grid-template-columns:repeat(4,1fr)}
+  h1{font-size:30px}
+}
+
+/* najmanje 44 px za dodir */
+.brand{min-height:44px;justify-content:center}
+.chips button{min-height:44px}
+.pcols .stepper{grid-template-columns:44px 1fr 44px}
+.pcard h3 a{display:flex;align-items:center;min-height:44px;flex:1}
+/* prekidač je 52×32, ali dodir hvata cijeli red (label) visok najmanje 52 px */
+/* uža polja za količinu na ekranu Cijene: "na upit" mora stati */
+.pcols .stepper{gap:4px}
+.pcols .stepper input{padding-left:4px!important;padding-right:4px!important}
+/* status snimanja u jednom redu na telefonu */
+.savebar>div{flex-wrap:wrap;row-gap:0}
+.savebar .ok .small{font-weight:500;font-size:13px;opacity:.85}
