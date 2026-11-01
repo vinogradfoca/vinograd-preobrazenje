@@ -6,7 +6,8 @@
   <div class="ptable">
     <div class="prow phead"><b>Sorta</b><b>Sadnica</b><b>Reznica</b></div>
     <div id="priceList">
-    {{#each varieties}}<a class="prow" href="{{url}}" data-name="{{search}}"><span><i class="dot {{colorClass}}"></i> {{name}}</span><span>{{priceSapling}}</span><span>{{priceCutting}}</span></a>
+    {{#each priced}}<a class="prow" href="{{url}}" data-name="{{search}}"><span><i class="dot {{colorClass}}"></i> {{name}}</span><span>{{priceSapling}}</span><span>{{priceCutting}}</span></a>
     {{/each}}</div>
   </div>
+  {{#if unpricedCount}}<p class="muted small">Za ostale sorte ({{unpricedCount}}) cijena je na upit. Sve sorte su u <a href="/sorte/">katalogu</a>.</p>{{/if}}
 </section>
