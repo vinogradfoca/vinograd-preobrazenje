@@ -269,6 +269,13 @@ function buildModel(db) {
     cutting: { enabled: v.cutting.enabled, price: v.cutting.price, qty: v.cutting.qty },
   }));
 
+  // logo (assets/logo.webp): heš sadržaja u imenu, dimenzije iz WebP zaglavlja
+  const logoSrc = path.join(ROOT, "assets", "logo.webp");
+  if (!fs.existsSync(logoSrc)) throw new BuildError(["assets/logo.webp ne postoji"]);
+  let logoSize;
+  try { logoSize = webpSize(logoSrc); } catch (e) { throw new BuildError([`assets/logo.webp: ${e.message}`]); }
+  const logo = { file: logoSrc, src: `/assets/logo.${hash(fs.readFileSync(logoSrc))}.webp`, w: logoSize.w, h: logoSize.h };
+
   const localBusiness = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
@@ -277,15 +284,16 @@ function buildModel(db) {
     email: s.email,
     address: s.address,
     image: abs(hero.src),
+    logo: abs(logo.src),
     ...(siteUrl ? { url: siteUrl + "/" } : {}),
     ...(s.mapUrl ? { hasMap: s.mapUrl } : {}),
   };
 
   return {
-    s, siteUrl, abs, hero, varieties, featured, hasPrices, nav, cartData, localBusiness,
+    s, siteUrl, abs, hero, logo, varieties, featured, hasPrices, nav, cartData, localBusiness,
     options: { color: options("color"), ripen: options("ripen"), type: options("type") },
     common: {
-      hero, varieties,
+      hero, varieties, logo,
       site: {
         name: s.name, phone: s.phone, tel: telHref(s.phone), email: s.email, address: s.address,
         mapUrl: s.mapUrl || "", wa: "https://wa.me/" + s.phoneIntl, phoneIntl: s.phoneIntl,
@@ -402,6 +410,8 @@ function finishImages(html, route) {
       if (!new RegExp(`\\s${a}="`).test(attrs)) throw new BuildError([`${route}: <img> bez atributa ${a}: ${all}`]);
     }
     if (/\sloading=/.test(attrs)) throw new BuildError([`${route}: loading se postavlja u buildu, ne u šablonu: ${all}`]);
+    // logo u zaglavlju: učitava se odmah, ali ne dobija fetchpriority/preload (to ostaje prvoj slici sadržaja)
+    if (/\sdata-logo\b/.test(attrs)) return `<img${attrs.replace(/\sdata-logo\b/, "")} loading="eager" decoding="async">`;
     const extra = i++ === 0 ? ' fetchpriority="high" loading="eager"' : ' loading="lazy" decoding="async"';
     if (!first) first = attrs.match(/\ssrc="([^"]+)"/)[1];
     return `<img${attrs}${extra}>`;
@@ -462,6 +472,7 @@ function main() {
     writeFile(path.join(tmp, "assets", name), buf);
     assets[key] = "/assets/" + name;
   }
+  writeFile(path.join(tmp, m.logo.src), fs.readFileSync(m.logo.file));
 
   // podaci za korpu: jedan keširan fajl umjesto kopije u svakoj od 150+ stranica
   {

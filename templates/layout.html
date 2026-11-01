@@ -24,7 +24,8 @@
 
 <header>
   <button class="icon-btn" id="menuBtn" aria-label="Otvori meni" aria-controls="drawer" aria-expanded="false">☰ <span>Meni</span></button>
-  <a class="brand nologo" href="/" aria-label="{{site.name}}">
+  <a class="brand" href="/">
+    <img class="logo" data-logo src="{{logo.src}}" width="{{logo.w}}" height="{{logo.h}}" alt="Vinograd Preobraženje" onerror="this.parentNode.classList.add('nologo')">
     <span class="wordmark">Vinograd <b>Preobraženje</b></span>
   </a>
   <button class="icon-btn" id="cartBtn" aria-label="Korpa" aria-controls="cart" aria-expanded="false">🛒 <b id="cartCount" class="badge">0</b></button>
