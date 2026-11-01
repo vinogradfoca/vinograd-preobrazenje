@@ -36,6 +36,21 @@ function slugify(name) {
 }
 
 const str = (v) => (typeof v === "string" ? v.trim() : "");
+const capFirst = (t) => t.charAt(0).toLocaleUpperCase("sr") + t.slice(1);
+const endDot = (t) => (/[.!?…]$/.test(t) ? t : t + ".");
+
+// Dijelovi opisa sa "kod mene" su lično iskustvo: premještaju se iz desc u exp.
+// Opis se dijeli na "; " i na ". " ispred velikog slova (pa "5. septembra" ostaje cijelo).
+function splitPersonal(desc) {
+  const parts = desc.split(/;\s+|(?<=[.!?])\s+(?=[A-ZČĆŠĐŽ])/u).map((t) => t.trim().replace(/[;.]+$/, "")).filter(Boolean);
+  const mine = parts.filter((t) => /kod mene/i.test(t));
+  if (!mine.length) return { desc, personal: "" };
+  const rest = parts.filter((t) => !/kod mene/i.test(t));
+  return {
+    desc: rest.length ? endDot(capFirst(rest.join("; "))) : "",
+    personal: mine.map((t) => endDot(capFirst(t))).join(" "),
+  };
+}
 const price = (v) => (typeof v === "number" && v > 0 ? v : null);
 
 // 1. katalog
@@ -62,6 +77,7 @@ const varieties = {};
 const images = {};
 if (heroId && ov.images && ov.images[heroId]) images[heroId] = ov.images[heroId];
 const seen = new Map();
+const moved = [];
 
 catalog.forEach((x, i) => {
   const name = str(x.name);
@@ -71,13 +87,20 @@ catalog.forEach((x, i) => {
   if (seen.has(slug)) fail(`slug "${slug}" imaju i "${seen.get(slug)}" i "${name}"`);
   seen.set(slug, name);
 
-  const desc = str(x.desc);
+  let desc = str(x.desc);
   // exp je lično iskustvo samo ako nije automatska kopija kratkog reda:
   // - isto kao desc: kopija (kratki red je i opis)
   // - isto kao kratki red, a bez "kod mene"/"na mom terenu": kopija opšteg opisa
   let exp = str(x.exp);
   if (exp === desc) exp = "";
   else if (exp && exp === shortRows[i] && !PERSONAL.test(exp)) exp = "";
+  // "kod mene" iz opisa ide u lično iskustvo (na kraj, ako exp već postoji)
+  const sp = splitPersonal(desc);
+  if (sp.personal) {
+    desc = sp.desc;
+    exp = exp ? exp + " " + sp.personal : sp.personal;
+    moved.push({ name, desc, exp });
+  }
 
   const facts = {};
   for (const k of FACT_KEYS) if (str(x[k])) facts[k] = str(x[k]);
@@ -123,4 +146,6 @@ console.log(`Uvezeno ${list.length} sorti u data/seed.json`);
 console.log(`  s cijenom: ${list.filter((v) => v.sapling.price != null || v.cutting.price != null).length}`);
 console.log(`  s ličnim iskustvom (exp): ${list.filter((v) => v.exp).length}`);
 console.log(`  izdvojene (featured, iz starog seeda): ${list.filter((v) => v.featured).map((v) => v.name).join(", ") || "nijedna"}`);
+console.log(`  "kod mene" premješteno iz opisa u lično iskustvo (${moved.length}):`);
+for (const m of moved) console.log(`    ${m.name}: desc "${m.desc}" | exp "${m.exp}"`);
 console.log(`  slika u katalogu: ${Object.keys(images).length - (heroId ? 1 : 0)}`);

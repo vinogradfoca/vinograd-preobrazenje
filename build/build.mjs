@@ -351,7 +351,7 @@ function pages(m, db) {
       description: v.seoDescription || clip(v.desc || fallbackDesc),
       schema: [product],
       ogType: "product",
-      // stranica bez ijedne slike ostaje u sitemapi i katalogu, ali je noindex dok ne dobije sliku
+      // stranica bez ijedne slike ostaje u katalogu, ali je noindex i nije u sitemapi dok ne dobije sliku
       noindex: !v.hasImage,
     }, { v });
   }
@@ -506,7 +506,8 @@ function main() {
 
   // sitemap.xml, robots.txt, build.json
   const now = new Date().toISOString();
-  const urls = list.filter((p) => p.route.endsWith("/")).map((p) => `  <url><loc>${escapeHtml(m.abs(p.route))}</loc></url>`);
+  // u sitemapi su samo indeksabilne stranice; sorta bez slike je noindex dok ne dobije sliku
+  const urls = list.filter((p) => p.route.endsWith("/") && !p.seo.noindex).map((p) => `  <url><loc>${escapeHtml(m.abs(p.route))}</loc></url>`);
   writeFile(path.join(tmp, "sitemap.xml"), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join("\n")}\n</urlset>\n`);
   writeFile(path.join(tmp, "robots.txt"), `User-agent: *\nAllow: /\n${m.siteUrl ? `\nSitemap: ${m.siteUrl}/sitemap.xml\n` : ""}`);
   writeFile(path.join(tmp, "build.json"), JSON.stringify({ builtAt: now }) + "\n");
