@@ -219,3 +219,5 @@ header{display:grid;grid-template-columns:1fr auto 1fr}
 #cartBtn{justify-self:end}
 /* logo ima bijelu pozadinu: zaglavlje mora biti potpuno bijelo, inače se pri skrolovanju vidi rub slike */
 header{background:#fff}
+/* od 900 px naviše logo je viši (64 px); unutrašnji razmak zaglavlja se smanji da visina zaglavlja ostane 76 px */
+@media(min-width:900px){header{padding-top:6px;padding-bottom:6px}.logo{height:64px}}
