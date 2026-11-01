@@ -1,0 +1,17 @@
+<section id="kontakt" class="page wrap">
+  <p class="eyebrow">O NAMA</p>
+  <h1>{{site.name}}</h1>
+  <div class="contact-grid">
+    <div>
+      <h2>{{kontakt.title}}</h2>
+      <p>{{kontakt.about}}</p>
+    </div>
+    <div class="contact-card">
+      <a href="{{site.tel}}">☎ {{site.phone}}</a>
+      <a href="{{site.wa}}" target="_blank" rel="noopener">💬 WhatsApp</a>
+      <a href="mailto:{{site.email}}">✉ {{site.email}}</a>
+      <p>⌖ {{site.address}}</p>
+      {{#if site.mapUrl}}<a href="{{site.mapUrl}}" target="_blank" rel="noopener">Prikaži na mapi →</a>{{/if}}
+    </div>
+  </div>
+</section>

@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{seo.title}}</title>
+{{#if seo.description}}<meta name="description" content="{{seo.description}}">
+{{/if}}{{#if seo.noindex}}<meta name="robots" content="noindex">
+{{/if}}{{#if seo.canonical}}<link rel="canonical" href="{{seo.canonical}}">
+<meta property="og:url" content="{{seo.canonical}}">
+{{/if}}<meta property="og:type" content="{{seo.ogType}}">
+<meta property="og:site_name" content="{{site.name}}">
+<meta property="og:title" content="{{seo.title}}">
+{{#if seo.description}}<meta property="og:description" content="{{seo.description}}">
+{{/if}}<meta property="og:image" content="{{seo.ogImage}}">
+<meta property="og:image:width" content="{{seo.ogImageW}}">
+<meta property="og:image:height" content="{{seo.ogImageH}}">
+<meta name="theme-color" content="#193d2b">
+<link rel="stylesheet" href="{{assets.css}}">
+<!--PRELOAD-->
+{{#each seo.schema}}<script type="application/ld+json">{{{this}}}</script>
+{{/each}}</head>
+<body>
+
+<header>
+  <button class="icon-btn" id="menuBtn" aria-label="Otvori meni" aria-controls="drawer" aria-expanded="false">☰ <span>Meni</span></button>
+  <a class="brand nologo" href="/" aria-label="{{site.name}}">
+    <span class="wordmark">Vinograd <b>Preobraženje</b></span>
+  </a>
+  <button class="icon-btn" id="cartBtn" aria-label="Korpa" aria-controls="cart" aria-expanded="false">🛒 <b id="cartCount" class="badge">0</b></button>
+</header>
+
+<aside id="drawer" aria-label="Meni">
+  <button class="close" id="closeMenu" aria-label="Zatvori">×</button>
+  <nav>
+{{#each nav}}    <a href="{{href}}"{{#if on}} class="on" aria-current="page"{{/if}}>{{label}}</a>
+{{/each}}  </nav>
+  <a class="drawer-call" href="{{site.tel}}">☎ {{site.phone}}</a>
+</aside>
+<div id="overlay"></div>
+
+<main>
+{{{content}}}
+</main>
+
+<footer>
+  <b>{{site.name}}</b> · {{site.address}} · <a href="{{site.tel}}">{{site.phone}}</a> · <a href="mailto:{{site.email}}">{{site.email}}</a>
+</footer>
+
+<aside id="cart" class="cart" aria-label="Korpa">
+  <button class="close" id="cartClose" aria-label="Zatvori">×</button>
+  <h2>Vaša korpa</h2>
+  <div id="cartItems"><div class="empty">Korpa je prazna.<br><a href="/sorte/" class="btn outline">Pogledajte sorte</a></div></div>
+  <div id="cartFoot" hidden>
+    <div class="cart-total">Ukupno <b id="total">0,00 KM</b></div>
+    <p id="totalNote" class="muted small"></p>
+    <label>Ime i prezime<input id="cName" autocomplete="name"></label>
+    <label>Telefon<input id="cPhone" type="tel" autocomplete="tel"></label>
+    <label>Napomena<textarea id="cNote" rows="2"></textarea></label>
+    <p id="cartErr" class="err" role="alert"></p>
+    <a id="sendWa" class="btn primary wide" href="{{site.wa}}" target="_blank" rel="noopener">Pošalji upit na WhatsApp</a>
+    <a id="sendMail" class="btn outline wide" href="mailto:{{site.email}}">Pošalji upit e-mailom</a>
+    <a class="btn ghost wide" href="{{site.tel}}">☎ Radije zovem</a>
+  </div>
+</aside>
+
+<div id="toast" role="status"></div>
+
+<script type="application/json" id="vp-data">{{{cartJson}}}</script>
+<script src="{{assets.js}}" defer></script>
+</body>
+</html>
