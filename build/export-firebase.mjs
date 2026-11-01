@@ -22,7 +22,10 @@ const SEED = path.join(ROOT, "data", "seed.json");
 const OUT = path.join(ROOT, "data", "firebase-import.json");
 
 // Admini (UID nije tajna). Novi admin se dodaje u konzoli: admins/<uid> = true.
-const ADMIN_UIDS = ["aXWKivZS0ANh0T3CaXp9vvY5Nt42"];
+const ADMIN_UIDS = [
+  "aXWKivZS0ANh0T3CaXp9vvY5Nt42", // Žarko
+  "heBoYKs5KBe5VUoqZhhVyMtXNNB3", // vlasnik (vinogradfoca@gmail.com)
+];
 
 function fail(msg) {
   console.error("IZVOZ NIJE USPIO: " + msg);
@@ -84,5 +87,5 @@ const out = {
 fs.writeFileSync(OUT, JSON.stringify(out, null, 2) + "\n");
 
 const n = Object.keys(out.vinograd.varieties).length;
-console.log(`Izvezeno u data/firebase-import.json: ${n} sorti, ${ADMIN_UIDS.length} admin, ${(fs.statSync(OUT).size / 1024).toFixed(0)} KB`);
+console.log(`Izvezeno u data/firebase-import.json: ${n} sorti, ${ADMIN_UIDS.length} ${ADMIN_UIDS.length === 1 ? "admin" : "admina"}, ${(fs.statSync(OUT).size / 1024).toFixed(0)} KB`);
 console.log("Uvoz: Firebase konzola → Realtime Database → ⋮ → Import JSON (na korijenu baze). Uvoz zamjenjuje sve što je u bazi.");
