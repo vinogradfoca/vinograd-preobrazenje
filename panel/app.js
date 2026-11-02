@@ -1,8 +1,10 @@
-// Panel Vinograda Preobraženje (Koraci 3a i 4a).
+// Panel Vinograda Preobraženje (Koraci 3a, 3b, 4a, 4b, 4c i 5).
 // Ekrani: prijava, Početna, Sorte, Uređivanje sorte (sa slikama), Cijene i količine,
-// Slike (biblioteka i dodavanje), Promijeni lozinku. Objavi i Dodaj sortu su "Uskoro".
+// Slike (biblioteka, dodavanje, uvoz po imenu), Objavi, Dodaj sortu (čarobnjak),
+// Podešavanja (kontakt, tekstovi stranica, promjena lozinke).
 import { createDb } from "./db.js";
-import { convertImage, canMakeWebp, storagePaths, ACCEPT, NO_WEBP_MSG, WIDTHS } from "./images.js";
+import { similarVarieties, uniqueSlug, matchFile, findOldSlot } from "./match.js";
+import { convertImage, canMakeWebp, storagePaths, sha256Hex, ACCEPT, NO_WEBP_MSG, WIDTHS } from "./images.js";
 
 // ------------------------------------------------------------------ konstante
 const COLORS = ["Bijela", "Crna", "Crvena", "Za provjeru"];
@@ -192,6 +194,9 @@ function commitInput(input) {
 }
 function onViewChange(e) {
   const el = e.target;
+  if (location.hash.startsWith("#/uvoz") && impOnChange(el)) return;
+  if (el.matches("[data-sp]")) return commitSP(el);
+  if (el.id === "showNoImg") return commitShowNoImg(el);
   if (el.matches("input[type=file][data-upload]")) return onFilesChosen(el);
   if (el.matches("input[data-imgalt]")) return commitAlt(el);
   if (el.id === "libSorta") { const f = $("#libFile"); f.disabled = !el.value || !S.webp; f.closest("label").setAttribute("aria-disabled", String(f.disabled)); return; }
@@ -204,12 +209,16 @@ function onViewChange(e) {
 }
 function onViewInput(e) {
   const el = e.target;
+  if (el.matches && el.matches("[data-impname]")) return impOnInput(el);
+  if (el.id === "wName") { WIZ.name = el.value; WIZ.allowSimilar = false; const w = $("#wizSimilar"); if (w) w.innerHTML = ""; fieldError(el, ""); return; }
   const c = el.closest(".field")?.querySelector("[data-count]");
-  if (c && (el.tagName === "TEXTAREA" || el.dataset.max)) c.textContent = `${el.value.length} znakova` + (el.dataset.max ? ` (preporuka do ${el.dataset.max})` : "");
+  if (c && (el.tagName === "TEXTAREA" || el.dataset.max || el.dataset.sp)) c.textContent = `${el.value.length} znakova` + (el.dataset.max ? ` (preporuka do ${el.dataset.max})` : "");
 }
 function onViewClick(e) {
   const b = e.target.closest("button");
   if (!b) return;
+  if (location.hash.startsWith("#/dodaj") && wizClick(b)) return;
+  if (location.hash.startsWith("#/uvoz") && impOnClick(b)) return;
   if (b.dataset.seg) { // izbor iz liste (boja, zrenje, vrsta)
     const key = b.closest("[data-key]").dataset.key, f = b.dataset.seg;
     const r = V8[f](b.dataset.val);
@@ -231,6 +240,9 @@ function onViewClick(e) {
   else if (b.dataset.imgmove || b.dataset.imgdel) imgAction(b);
   else if (b.dataset.retry) retryUpload(b.dataset.retry);
   else if (b.dataset.attach) attachExisting(b);
+  else if (b.hasAttribute("data-pub-retry")) { PUB.phase = ""; doPublish(); }
+  else if (b.dataset.delimg) deleteImageDialog(b.dataset.delimg);
+  else if (b.id === "backupBtn") downloadBackup(b);
 }
 
 // ------------------------------------------------------------------ dijeljenje
@@ -329,10 +341,10 @@ function screenHome() {
   return `
     ${head("Šta želiš uraditi?")}
     <div class="big">
-      <a href="#/dodaj"><i>＋</i><span>Dodaj sortu <small><span class="soon">Uskoro</span></small></span></a>
+      <a href="#/dodaj"><i>＋</i><span>Dodaj sortu</span></a>
       <a href="#/cijene"><i>KM</i><span>Cijene i količine</span></a>
       <a href="#/slike"><i>▣</i><span>Dodaj slike</span></a>
-      <a href="#/objavi"><i>↑</i><span>Objavi na sajt <small><span class="soon">Uskoro</span></small></span></a>
+      <a href="#/objavi"><i>↑</i><span>Objavi na sajt</span></a>
     </div>
     <div class="card fali">
       <h2>Šta još fali</h2>
@@ -377,6 +389,7 @@ function sorteList() {
 function screenSorte(params) {
   if (params.has("f")) S.ui.sorteFilter = params.get("f");
   setTimeout(() => {
+    if (!$("#q") || !$("#list")) return; // ekran je u međuvremenu zamijenjen
     sorteList();
     $("#q").addEventListener("input", (e) => { S.ui.sorteQ = e.target.value; sorteList(); });
     $$("#chips button").forEach((b) => (b.onclick = () => {
@@ -387,8 +400,8 @@ function screenSorte(params) {
     }));
   });
   return `
-    ${head("Sorte")}
-    <input id="q" class="search" type="search" placeholder="Pretraži po nazivu…" aria-label="Pretraži sorte" value="${esc(S.ui.sorteQ)}">
+    <div class="ehead"><h1>Sorte</h1><a class="btn primary" href="#/dodaj">＋ Dodaj sortu</a></div>
+    <input id="q" class="search" style="margin-top:12px" type="search" placeholder="Pretraži po nazivu…" aria-label="Pretraži sorte" value="${esc(S.ui.sorteQ)}">
     <div class="chips" id="chips" role="group" aria-label="Filteri">
       ${SORTE_FILTERS.map(([f, l]) => `<button type="button" data-f="${f}" aria-pressed="${S.ui.sorteFilter === f}">${l}</button>`).join("")}
     </div>
@@ -482,11 +495,13 @@ function screenEdit(key) {
       <button type="button" class="btn ghost" id="hideBtn">${v.visible !== false ? "Sakrij sortu" : "Prikaži sortu"}</button>
       <a class="btn green" href="#/sorte">Gotovo</a>
     </div>
+    <button type="button" class="btn danger wide" id="delBtn">Obriši sortu</button>
   </div>`;
 }
 function bindEdit(key) {
   const hb = $("#hideBtn");
   if (!hb) return;
+  const delb = $("#delBtn"); if (delb) delb.onclick = () => deleteVarietyDialog(key);
   hb.onclick = () => {
     const show = V(key).visible === false;
     if (!show && !confirm(`Sakriti sortu "${V(key).name}"? Neće se vidjeti na sajtu poslije sljedeće objave. Može se ponovo prikazati.`)) return;
@@ -514,6 +529,7 @@ function cijeneList() {
 function screenCijene(params) {
   if (params.has("f")) S.ui.cijeneFilter = params.get("f");
   setTimeout(() => {
+    if (!$("#q") || !$("#list")) return;
     cijeneList();
     $("#q").addEventListener("input", (e) => { S.ui.cijeneQ = e.target.value; cijeneList(); });
     $$("#chips button").forEach((b) => (b.onclick = () => {
@@ -558,7 +574,11 @@ function screenPostavke() {
     };
   });
   return `
-    ${head("Podešavanja")}
+    ${head("Podešavanja", "Kontakt i tekstovi stranica. Snima se čim napustiš polje, a posjetioci izmjene vide poslije objave.")}
+    ${settingsSectionsHtml()}
+    <div class="card"><h2>Prikaz na sajtu</h2>
+      <label class="switch"><span>Prikaži na sajtu sorte bez slike<small>Kad je isključeno, sorte bez slike nisu u katalogu, na početnoj ni u cjenovniku. Stranica sorte i dalje postoji.</small></span><input type="checkbox" id="showNoImg"${getIn(S.data, "settings/showWithoutImage") !== false ? " checked" : ""}></label>
+    </div>
     <div class="card">
       <h2>Promijeni lozinku</h2>
       ${S.mock ? `<p class="muted small">U probnom režimu promjena se samo glumi. "pogresna-lozinka" kao trenutna lozinka glumi grešku.</p>` : ""}
@@ -571,13 +591,11 @@ function screenPostavke() {
       </form>
       <div id="pwMsg" role="alert"></div>
     </div>
-    <div class="card"><h2>Prijavljen</h2><p class="muted">${esc(S.user.email)}</p><button type="button" class="btn ghost wide" id="out3">Odjava</button></div>
-    <div class="card"><h2>Kontakt i tekstovi stranica</h2><p class="muted">Uređivanje kontakta i tekstova stranica dolazi uskoro.</p></div>`;
+    <div class="card"><h2>Kopija podataka</h2><p class="muted small">Sve sorte, tekstovi i podešavanja u jednom fajlu (JSON), za čuvanje na sigurnom mjestu.</p>
+      <button type="button" class="btn outline wide" id="backupBtn">Preuzmi kopiju podataka</button></div>
+    <div class="card"><h2>Prijavljen</h2><p class="muted">${esc(S.user.email)}</p><button type="button" class="btn ghost wide" id="out3">Odjava</button></div>`;
 }
 
-function screenSoon(title, text) {
-  return `${head(title)}<div class="card"><p><span class="soon">Uskoro</span></p><p>${text}</p></div><p><a class="btn outline" href="#/">Nazad na početnu</a></p>`;
-}
 
 // ------------------------------------------------------------------ slike (Korak 4a)
 let uploading = 0; // dok traje upload, liste se ne iscrtavaju ponovo
@@ -597,7 +615,7 @@ function renderImgBox(key) {
   const box = $("#imgBox"); if (!box) return;
   const v = V(key), list = imgList(v);
   if (!list.length) { box.innerHTML = `<p class="muted">Sorta još nema slika.</p>`; return; }
-  box.innerHTML = `<p class="hint"><span>Prva slika je naslovna. Strelicama mijenjaš redoslijed. "Ukloni" sklanja sliku samo sa ove sorte, a slika ostaje u biblioteci.</span></p>` +
+  box.innerHTML = (list.length > 8 ? `<p class="warnbox" id="manyImg">Mnogo slika usporava sajt i troši promet. Razmisli da neke ukloniš.</p>` : "") + `<p class="hint"><span>Prva slika je naslovna. Strelicama mijenjaš redoslijed. "Ukloni" sklanja sliku samo sa ove sorte, a slika ostaje u biblioteci.</span></p>` +
     list.map((ref, i) => {
       const src = imgSrc(ref), isNew = isNewImg(ref), im = isNew ? S.data.images[ref] : null;
       return `<div class="imrow">
@@ -715,6 +733,24 @@ async function processUpload(id) {
     return;
   }
 
+  try {
+    const sum = await storeImage(conv, key, { onProgress: (f, msg) => setRow(id, 0.1 + 0.85 * f, msg) });
+    uploadJobs.delete(id);
+    const kb = (b) => Math.round(b / 1024) + " KB";
+    setRow(id, 1, `✓ Snimljeno (${kb(file.size)} → ${kb(sum)} za sve 4 veličine)` + (conv.warnings.length ? `<br><span class="warntext">${esc(conv.warnings.join(" "))}</span>` : ""), "ok");
+    refreshImages(key);
+    refreshMeta(key);
+    if (location.hash.startsWith("#/slike")) libList();
+  } catch (e) {
+    setRow(id, 0, `Slika nije snimljena: veza je prekinuta. <button type="button" class="link" data-retry="${id}">Pokušaj ponovo</button>`, "err");
+  }
+}
+
+// Zajedničko jezgro (4a, uvoz po imenu): 4 fajla u Storage, pa zapis slike i niz sorte u
+// jednom upisu. Pri grešci briše poslane fajlove i (ako je upis krenuo) zapis, pa baca grešku.
+// Slika ide na kraj niza images sorte, osim kad je zadan replace (stari naziv fajla iz
+// seeda u tom nizu): tada nova slika zauzima njegovo mjesto. Vraća ukupnu veličinu 4 fajla.
+async function storeImage(conv, key, { source = "own", webApproved = false, replace = "", onProgress = () => {} } = {}) {
   const imageId = S.db.newImageId();
   const paths = storagePaths(imageId);
   const parts = [...WIDTHS.map(String), "og"];
@@ -726,20 +762,21 @@ async function processUpload(id) {
     let before = 0;
     for (let i = 0; i < parts.length; i++) {
       const p = parts[i], vv = conv.variants[p];
-      setRow(id, 0.1 + 0.85 * (before / sum), `Šaljem ${i + 1} od 4…`);
-      await S.db.uploadFile(paths[p], vv.blob, vv.type, (f) => setRow(id, 0.1 + 0.85 * ((before + f * sizes[i]) / sum)));
+      onProgress(before / sum, `Šaljem ${i + 1} od 4…`);
+      await S.db.uploadFile(paths[p], vv.blob, vv.type, (f) => onProgress((before + f * sizes[i]) / sum));
       uploaded.push(paths[p]);
       before += sizes[i];
     }
-    // tek kad su sva četiri fajla gore: zapis slike i niz slika sorte u jednom upisu
     const v = V(key);
     const record = {
       alt: "Grozd sorte " + v.name, w: conv.w, h: conv.h,
       variants: Object.fromEntries(parts.map((p) => [p, { path: paths[p], w: conv.variants[p].w, h: conv.variants[p].h }])),
-      hash: conv.hash, source: "own", webApproved: false,
+      hash: conv.hash, source, webApproved: source === "web" ? !!webApproved : false,
       createdAt: S.db.TIMESTAMP, createdBy: S.user.uid,
     };
-    const list = [...imgList(v), imageId];
+    const list = [...imgList(v)];
+    const at = replace ? list.indexOf(replace) : -1;
+    if (at >= 0) list[at] = imageId; else list.push(imageId);
     dbTried = true;
     await S.db.update({
       [`images/${imageId}`]: record,
@@ -749,18 +786,12 @@ async function processUpload(id) {
     });
     S.data.images[imageId] = { ...record, createdAt: Date.now() };
     V(key).images = list; V(key).updatedAt = Date.now(); V(key).updatedBy = S.user.uid;
-    uploadJobs.delete(id);
-    const kb = (b) => Math.round(b / 1024) + " KB";
-    setRow(id, 1, `✓ Snimljeno (${kb(file.size)} → ${kb(sum)} za sve 4 veličine)` + (conv.warnings.length ? `<br><span class="warntext">${esc(conv.warnings.join(" "))}</span>` : ""), conv.warnings.length ? "ok" : "ok");
-    refreshImages(key);
-    refreshMeta(key);
-    if (location.hash.startsWith("#/slike")) libList();
+    return sum;
   } catch (e) {
     console.warn("Upload nije uspio:", e && (e.code || e.message));
-    // ništa ne smije ostati na pola: obriši poslane fajlove i (ako je upis krenuo) zapis u bazi
     for (const p of uploaded) { try { await S.db.deleteFile(p); } catch { /* ostaje za ručno čišćenje */ } }
     if (dbTried) S.db.update({ [`images/${imageId}`]: null, [`varieties/${key}/images`]: oldList.length ? oldList : null }).catch(() => {});
-    setRow(id, 0, `Slika nije snimljena: veza je prekinuta. <button type="button" class="link" data-retry="${id}">Pokušaj ponovo</button>`, "err");
+    throw e;
   }
 }
 
@@ -794,14 +825,17 @@ function libList() {
       <img src="${esc(imgSrc(id))}" alt="" loading="lazy">
       <div><div class="libalt">${esc(im.alt || "(bez opisa)")}</div>
         <div class="hint"><span>${u.length ? `u ${u.length} ${u.length === 1 ? "sorti" : "sorte"}: ${esc(u.slice(0, 3).join(", "))}${u.length > 3 ? "…" : ""}` : "nije dodijeljena nijednoj sorti"}</span></div>
-        <div class="hint"><span>${im.w}×${im.h} px${im.createdAt ? " · " + esc(fmtDate(im.createdAt)) : ""}</span></div></div>
+        <div class="hint"><span>${im.w}×${im.h} px${im.createdAt ? " · " + esc(fmtDate(im.createdAt)) : ""}</span></div>
+        <button type="button" class="btn ghost sm delimgbtn" data-delimg="${esc(id)}">Obriši sliku trajno</button></div>
     </div>`;
   }).join("") : `<p class="empty">${q ? "Nema slika s tim opisom." : "Još nema slika dodanih kroz panel. Starije slike sa sajta vide se kod svake sorte."}</p>`;
 }
 function screenSlike() {
   setTimeout(() => {
+    if (!$("#libQ")) return;
     libList();
     checkWebp();
+    offerResume();
     $("#libQ").addEventListener("input", (e) => { S.ui.libQ = e.target.value; libList(); });
   });
   const opts = keysSorted().map((k) => `<option value="${esc(k)}">${esc(V(k).name)}</option>`).join("");
@@ -813,17 +847,712 @@ function screenSlike() {
       <div class="field"><label for="libSorta">Za koju sortu?</label>
         <select id="libSorta" class="search"><option value="">Izaberi sortu…</option>${opts}</select></div>
       <label class="btn primary wide upbtn" style="margin-top:12px" aria-disabled="true"><input type="file" id="libFile" data-upload="" accept="${ACCEPT}" multiple hidden disabled>＋ Dodaj slike</label>
-      <p class="hint"><span>Uvoz mnogo slika odjednom po imenu fajla dolazi uskoro.</span></p>
+      <p class="hint"><span>Za mnogo slika odjednom koristi uvoz po imenu fajla.</span></p>
       <div class="uplist" aria-live="polite"></div>
     </div>
+    <div class="card"><h2>Uvoz po imenu</h2><p class="muted small">Mnogo slika odjednom: sorta se nađe po imenu fajla (npr. viktor-2.jpg).</p>
+      <a class="btn green wide" href="#/uvoz">Uvoz po imenu</a><div id="impResume" style="margin-top:8px"></div></div>
     <input id="libQ" class="search" type="search" placeholder="Pretraži po opisu slike…" aria-label="Pretraži slike" value="${esc(S.ui.libQ || "")}">
     <p class="count" id="libCount"></p>
     <div class="libgrid" id="libList"></div>`;
 }
 
+// ------------------------------------------------------------------ Objavi (Dio 1)
+// Klik šalje Firebase ID token na /api/publish (Netlify Function), koja provjeri admina i
+// pozove build hook. Panel zatim upiše publish/last i publish/history i prati /build.json.
+const PUB_TIMEOUT_MS = 6 * 60 * 1000; // poslije 6 minuta bez nove izgradnje: poruka o neuspjehu
+const PUB_POLL_MS = 10 * 1000;
+const PUB_MONTH_WARN = 12;
+const PUB = { phase: "", requestedAt: 0, builtAt: 0, error: "", timer: null, mockBuiltAt: 0 };
+
+const hhmm = (ts) => { const d = new Date(ts), p = (x) => String(x).padStart(2, "0"); return `${p(d.getHours())}:${p(d.getMinutes())}`; };
+const izmjena = (n) => (n % 10 === 1 && n % 100 !== 11 ? "izmjena" : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? "izmjene" : "izmjena");
+const objava = (n) => (n % 10 === 1 && n % 100 !== 11 ? "objava" : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? "objave" : "objava");
+
+// Sorte, stranice i podešavanja čiji je updatedAt noviji od zadnje objave.
+function pendingChanges() {
+  const last = num(getIn(S.data, "publish/last/requestedAt"));
+  const items = [
+    ...Object.values(S.data.varieties || {}).map((v) => num(v && v.updatedAt)),
+    ...["home", "kako", "kontakt"].map((p) => num(getIn(S.data, `pages/${p}/updatedAt`))),
+    num(getIn(S.data, "settings/updatedAt")),
+  ];
+  return { last, n: (last == null ? items.length : items.filter((t) => t != null && t > last).length) + pendingDeletions(last) };
+}
+function pubHistory() {
+  const h = getIn(S.data, "publish/history") || {};
+  return Object.values(h).filter((x) => x && num(x.requestedAt)).sort((a, b) => b.requestedAt - a.requestedAt);
+}
+function monthCount() {
+  const now = new Date();
+  return pubHistory().filter((x) => { const d = new Date(x.requestedAt); return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth(); }).length;
+}
+async function readBuiltAt() {
+  if (S.mock && PUB.mockBuiltAt) return PUB.mockBuiltAt;
+  try {
+    const r = await fetch("/build.json?t=" + Date.now(), { cache: "no-store" });
+    const j = await r.json();
+    return Date.parse(j.builtAt) || 0;
+  } catch { return 0; }
+}
+function stopPoll() { clearInterval(PUB.timer); PUB.timer = null; }
+async function checkBuild() {
+  PUB.builtAt = await readBuiltAt();
+  if (PUB.phase === "building") {
+    if (PUB.builtAt >= PUB.requestedAt) { PUB.phase = "done"; stopPoll(); }
+    else if (Date.now() - PUB.requestedAt > PUB_TIMEOUT_MS) { PUB.phase = "failed"; stopPoll(); }
+  }
+  renderPubStatus();
+}
+function startPoll() { stopPoll(); PUB.timer = setInterval(checkBuild, PUB_POLL_MS); }
+
+function renderPubStatus() {
+  const box = $("#pubStatus"); if (!box) return;
+  const btn = $("#pubBtn");
+  let html = "";
+  if (PUB.phase === "sending") html = `<div class="notice busy">Šaljem zahtjev za objavu…</div>`;
+  else if (PUB.phase === "building") html = `<div class="notice busy"><b>Objavljuje se…</b><br><span class="small">Pokrenuto u ${hhmm(PUB.requestedAt)}. Obično traje 1 do 3 minute.</span></div>`;
+  else if (PUB.phase === "done") html = `<div class="notice ok"><b>Objavljeno u ${hhmm(PUB.builtAt)}</b></div>`;
+  else if (PUB.phase === "failed") html = `<div class="notice bad"><b>Izgradnja nije uspjela ili još traje. Sajt ostaje na prethodnoj verziji.</b><br><button type="button" class="btn primary" data-pub-retry style="margin-top:8px">Pokušaj ponovo</button></div>`;
+  else if (PUB.phase === "error") html = `<div class="notice bad"><b>${esc(PUB.error)}</b><br><button type="button" class="btn primary" data-pub-retry style="margin-top:8px">Pokušaj ponovo</button></div>`;
+  else if (PUB.builtAt) html = `<div class="notice ok">Zadnja objava: ${esc(fmtDate(PUB.builtAt))}</div>`;
+  box.innerHTML = html;
+  const q = $("#pubQty"); if (q) q.textContent = PUB.builtAt ? `Količine na sajtu su od ${fmtDate(PUB.builtAt)}.` : "";
+  if (btn) { const busy = PUB.phase === "sending" || PUB.phase === "building"; btn.disabled = busy; btn.textContent = busy ? "Objavljuje se…" : "Objavi na sajt"; }
+}
+
+const PUB_ERR = {
+  401: "Prijava je istekla. Odjavi se pa se prijavi ponovo.",
+  403: "Nemaš dozvolu za objavu.",
+  429: "Objava je upravo pokrenuta. Pričekaj pola minute pa pokušaj ponovo.",
+  500: "Objava nije podešena na serveru (Netlify). Javi Žarku.",
+  502: "Netlify ili Google trenutno ne odgovaraju. Pokušaj ponovo za minut.",
+};
+async function doPublish() {
+  if (PUB.phase === "sending" || PUB.phase === "building") return;
+  flushLater();
+  PUB.phase = "sending"; PUB.error = ""; renderPubStatus();
+  let requestedAt;
+  if (S.mock) {
+    await new Promise((r) => setTimeout(r, 400));
+    requestedAt = Date.now();
+  } else {
+    try {
+      const token = await S.db.getIdToken();
+      const res = await fetch("/api/publish", { method: "POST", headers: { authorization: "Bearer " + token }, signal: AbortSignal.timeout(20000) });
+      let body = {}; try { body = await res.json(); } catch { /* prazno */ }
+      if (!res.ok || !body.ok) { PUB.phase = "error"; PUB.error = PUB_ERR[res.status] || "Objava nije pokrenuta. Pokušaj ponovo."; renderPubStatus(); return; }
+      requestedAt = num(body.requestedAt) || Date.now();
+    } catch (e) {
+      PUB.phase = "error";
+      PUB.error = e && (e.name === "TimeoutError" || e.name === "AbortError") ? "Sporo je i nismo dobili odgovor. Pokušaj ponovo." : "Nema veze s internetom. Pokušaj ponovo.";
+      renderPubStatus(); return;
+    }
+  }
+  // zapis o objavi (javni čvor, samo UID, bez imena i mejla)
+  const rec = { requestedAt, requestedBy: S.user.uid };
+  const hk = S.db.newKey("publish/history");
+  setIn(S.data, "publish/last", rec);
+  setIn(S.data, "publish/history/" + hk, rec);
+  send({ "publish/last": rec, ["publish/history/" + hk]: rec });
+  PUB.requestedAt = requestedAt; PUB.phase = "building";
+  renderPubStatus(); renderPubInfo();
+  if (S.mock) setTimeout(() => { PUB.mockBuiltAt = Date.now(); checkBuild(); }, 4000); // simulirana izgradnja
+  startPoll();
+}
+
+function renderPubInfo() {
+  const p = pendingChanges(), m = monthCount();
+  const pi = $("#pubPending");
+  if (pi) pi.innerHTML = p.n
+    ? `<b>${p.n} ${izmjena(p.n)}</b> ${p.n % 10 >= 2 && p.n % 10 <= 4 && (p.n % 100 < 12 || p.n % 100 > 14) ? "čekaju" : "čeka"} objavu${p.last == null ? " (još nema objave iz panela, pa se broje sve sorte i stranice)" : ""}.`
+    : `Nema izmjena od zadnje objave.`;
+  const mi = $("#pubMonth");
+  if (mi) mi.innerHTML = `Objava ovog mjeseca: <b>${m}</b>` + (m >= PUB_MONTH_WARN ? `<div class="warnbox" style="margin-top:8px">Netlify besplatni paket dozvoljava oko 20 objava mjesečno. Skupi više izmjena pa objavi jednom.</div>` : "");
+  const hl = $("#pubHist");
+  if (hl) {
+    const h = pubHistory().slice(0, 5);
+    hl.innerHTML = h.length ? h.map((x) => `<li><span>${esc(fmtDate(x.requestedAt))}</span><b>${esc(NAMES[x.requestedBy] || "nepoznat korisnik")}</b></li>`).join("") : `<li class="muted">Još nema objava iz panela.</li>`;
+  }
+}
+function screenObjavi() {
+  setTimeout(async () => {
+    renderPubInfo();
+    const last = num(getIn(S.data, "publish/last/requestedAt"));
+    PUB.builtAt = await readBuiltAt();
+    if (!PUB.phase || PUB.phase === "done") {
+      // vraćanje na ekran: ako zadnja objava još nije izgrađena, nastavi praćenje
+      if (last && PUB.builtAt < last) { PUB.requestedAt = last; PUB.phase = Date.now() - last > PUB_TIMEOUT_MS ? "failed" : "building"; }
+    }
+    if (PUB.phase === "building") startPoll();
+    renderPubStatus();
+  });
+  return `
+    ${head("Objavi")}
+    <div class="card">
+      <p id="pubPending" class="pubpending"></p>
+      <button type="button" class="btn primary wide pubbtn" id="pubBtn">Objavi na sajt</button>
+      <div id="pubStatus" role="status" aria-live="polite"></div>
+      <p class="muted small" id="pubQty"></p>
+      <p class="muted small">Sve što upišeš u panelu snima se u nacrt. Posjetioci to vide tek kad pritisneš Objavi i izgradnja se završi.</p>
+    </div>
+    <div class="card"><p id="pubMonth" style="margin:0"></p></div>
+    <div class="card"><h2>Zadnje objave</h2><ul class="pubhist" id="pubHist"></ul></div>`;
+}
+
+// ------------------------------------------------------------------ Dodaj sortu (Dio 2)
+// Pet koraka. Sorta se pravi u bazi čim se prođe korak 1 (skrivena, visible:false), a
+// ostali koraci snimaju u istu sortu putanjama do polja (isto autosnimanje kao uređivanje).
+const WIZ = { key: "", name: "", color: "", allowSimilar: false };
+const WIZ_STEPS = ["Naziv i boja", "Slike", "Cijena i količina", "Opis i iskustvo", "Pregled"];
+
+function wizHead(step) {
+  return `<a class="back" href="#/sorte">← Sorte</a>
+    <h1>Dodaj sortu</h1>
+    <p class="lead">Korak ${step} od 5: ${WIZ_STEPS[step - 1]}</p>
+    <div class="bar wizbar" aria-hidden="true"><span style="width:${step * 20}%"></span></div>`;
+}
+function wizNav(step, nextLabel = "Dalje") {
+  return `<div class="endbtns wiznav">
+    ${step > 1 ? `<button type="button" class="btn ghost" data-wiz-back="${step}">← Nazad</button>` : `<a class="btn ghost" href="#/sorte">Odustani</a>`}
+    <button type="button" class="btn ${step === 5 ? "primary" : "green"}" data-wiz-next="${step}">${nextLabel}</button>
+  </div>`;
+}
+function screenWizard(parts) {
+  const key = decodeURIComponent(parts[1] || "");
+  const step = Math.min(5, Math.max(1, +parts[2] || 1));
+  if (key && !V(key)) return `${head("Sorta nije pronađena")}<p><a class="btn outline" href="#/dodaj">Dodaj novu sortu</a></p>`;
+  if (!key) { // korak 1, sorta još ne postoji
+    if (!parts[1] && !WIZ.key) { /* nova */ }
+    const unfinished = WIZ.key && V(WIZ.key) ? `<div class="notice busy">Nedovršeno dodavanje: <b>${esc(V(WIZ.key).name)}</b>. <a href="#/dodaj/${encodeURIComponent(WIZ.key)}/2">Nastavi</a></div>` : "";
+    return `${wizHead(1)}${unfinished}
+      <div class="card" id="wiz1">
+        <div class="field"><label for="wName">Naziv sorte</label><input id="wName" type="text" maxlength="120" value="${esc(WIZ.name)}" autocomplete="off"></div>
+        <div class="field"><span class="lbl" id="lbl-wcolor">Boja</span>
+          <div class="seg" role="radiogroup" aria-labelledby="lbl-wcolor">
+            ${COLORS.map((c) => `<button type="button" role="radio" data-wcolor="${esc(c)}" aria-checked="${WIZ.color === c}"><span class="dot ${CC[c]}"></span>${esc(c)}</button>`).join("")}
+          </div></div>
+        <p class="hint"><span>Obavezni su samo naziv i boja. Sve ostalo možeš dodati poslije.</span></p>
+        <div id="wizSimilar"></div>
+      </div>${wizNav(1)}`;
+  }
+  const v = V(key);
+  let body = "";
+  if (step === 1) {
+    body = `<div class="card" data-key="${esc(key)}">
+      ${fieldText("name", "Naziv sorte", v.name, { v: "name" })}
+      <p class="hint"><span>Adresa stranice: /sorte/${esc(v.slug || key)}/ (ne mijenja se kad se promijeni naziv)</span></p>
+      ${seg("color", "Boja", COLORS, v.color)}</div>`;
+  } else if (step === 2) {
+    setTimeout(() => renderImgBox(key));
+    body = `<div class="card" data-key="${esc(key)}"><p class="hint"><span>Neobavezno. Sliku možeš dodati i kasnije. Prva slika je naslovna.</span></p>
+      <div id="imgBox"></div>${uploaderHtml(key)}</div>`;
+  } else if (step === 3) {
+    body = `<div class="card" data-key="${esc(key)}"><p class="hint"><span>Neobavezno. Prazno polje znači "na upit". Količina 0 znači "nema na stanju".</span></p>
+      <div class="kinds">${KINDS.map(([k, label]) => `<div class="kind"><h3>${label}</h3>${priceField(k, v, false, key)}${qtyField(k, v, false, key)}</div>`).join("")}</div></div>`;
+  } else if (step === 4) {
+    body = `<div class="card" data-key="${esc(key)}"><p class="hint"><span>Neobavezno.</span></p>
+      ${seg("ripen", "Vrijeme zrenja", RIPEN, v.ripen)}
+      ${seg("type", "Vrsta", TYPES, v.type)}
+      ${fieldText("desc", "Opis", str(v.desc), { area: true })}
+      ${fieldText("exp", "Lično iskustvo", str(v.exp), { area: true })}
+      ${fieldText("flaws", "Nedostaci", str(v.flaws), { area: true, warn: "Unesite samo provjerene nedostatke sorte." })}</div>`;
+  } else {
+    const imgs = imgList(v), k = (kk) => kind(v, kk);
+    const pr = (kk) => { const o = k(kk); return `${num(o.price) != null ? fmtPrice(o.price) + " KM" : "cijena na upit"}, ${num(o.qty) != null ? o.qty + " kom." : "količina na upit"}`; };
+    const row = (l, val) => `<tr><th scope="row">${l}</th><td>${val}</td></tr>`;
+    body = `<div class="card" data-key="${esc(key)}">
+      <div class="strip" id="strip" style="margin:0 0 12px">${stripHtml(key)}</div>
+      <table class="props"><tbody>
+        ${row("Naziv", esc(v.name))}${row("Boja", `<span class="dot ${CC[v.color] || "x"}"></span> ${esc(v.color || "")}`)}
+        ${row("Vrijeme zrenja", esc(v.ripen || "nije upisano"))}${row("Vrsta", esc(v.type || "nije upisano"))}
+        ${row("Slike", imgs.length ? String(imgs.length) : "nema")}
+        ${row("Sadnica", pr("sapling"))}${row("Reznica", pr("cutting"))}
+        ${row("Tekstovi", ["desc", "exp", "flaws"].filter((f) => str(v[f]).trim()).length + " od 3 popunjeno")}
+        ${row("Adresa", `/sorte/${esc(v.slug || key)}/`)}
+      </tbody></table>
+      <label class="switch">Vidljiva na sajtu<input type="checkbox" data-f="visible"${v.visible === true ? " checked" : ""}></label>
+      <p class="warnbox" style="margin-top:12px">Nova sorta se ne vidi na sajtu dok je ne uključiš i ne pritisneš Objavi.</p></div>`;
+  }
+  return `${wizHead(step)}<p class="muted small" style="margin-top:-6px">Sorta: <b class="js-name">${esc(v.name)}</b></p>${body}${wizNav(step, step === 5 ? "Spremi sortu" : "Dalje")}`;
+}
+
+function wizValidateStep1() {
+  const nameEl = $("#wName");
+  const r = V8.name(nameEl.value);
+  if (r.error) { fieldError(nameEl, r.error); nameEl.focus(); return null; }
+  fieldError(nameEl, "");
+  if (!COLORS.includes(WIZ.color)) { toast("Izaberi boju sorte."); return null; }
+  return r.value;
+}
+async function wizCreate() {
+  const name = wizValidateStep1(); if (!name) return;
+  WIZ.name = name;
+  if (!WIZ.allowSimilar) {
+    const sim = similarVarieties(name, S.data.varieties).slice(0, 3);
+    if (sim.length) {
+      $("#wizSimilar").innerHTML = `<div class="warnbox" role="alert"><b>Već postoji sorta sa sličnim nazivom:</b>
+        ${sim.map((x) => `<div class="simrow"><span>${esc(x.name)}</span><a class="btn outline" href="#/sorta/${encodeURIComponent(x.key)}">Otvori postojeću</a></div>`).join("")}
+        <button type="button" class="btn ghost wide" data-wiz-force style="margin-top:8px">Ipak dodaj novu</button></div>`;
+      return;
+    }
+  }
+  // prvi upis: sorta s obaveznim poljima, skrivena; slug je ključ i poslije se ne mijenja
+  const taken = new Set([...Object.keys(S.data.varieties), ...Object.values(S.data.varieties).map((v) => v && v.slug).filter(Boolean)]);
+  const slug = uniqueSlug(name, taken);
+  const maxOrder = Math.max(0, ...Object.values(S.data.varieties).map((v) => num(v && v.order) ?? 0));
+  const v = { name, slug, color: WIZ.color, visible: false, featured: false, order: maxOrder + 1, updatedAt: S.db.TIMESTAMP, updatedBy: S.user.uid };
+  S.data.varieties[slug] = { ...v, updatedAt: Date.now() };
+  send({ [`varieties/${slug}`]: v });
+  WIZ.key = slug; WIZ.allowSimilar = false;
+  location.hash = `#/dodaj/${encodeURIComponent(slug)}/2`;
+}
+function wizClick(b) {
+  if (b.dataset.wcolor) {
+    WIZ.color = b.dataset.wcolor;
+    $$("button[data-wcolor]").forEach((x) => x.setAttribute("aria-checked", String(x === b)));
+    return true;
+  }
+  if (b.hasAttribute("data-wiz-force")) { WIZ.allowSimilar = true; wizCreate(); return true; }
+  if (b.dataset.wizNext || b.dataset.wizBack) {
+    const step = +(b.dataset.wizNext || b.dataset.wizBack);
+    const key = decodeURIComponent((location.hash.split("/")[2] || "").split("?")[0]);
+    document.activeElement && document.activeElement.blur && document.activeElement.blur(); // snimi polje koje je u fokusu
+    flushLater();
+    if (b.dataset.wizBack) { location.hash = step - 1 === 1 && !key ? "#/dodaj" : `#/dodaj/${encodeURIComponent(key)}/${step - 1}`; return true; }
+    if (!key) { wizCreate(); return true; }
+    if ($("#view .field.err")) { toast("Ispravi označeno polje."); return true; }
+    if (step < 5) location.hash = `#/dodaj/${encodeURIComponent(key)}/${step + 1}`;
+    else { toast(`Sorta "${V(key).name}" je spremljena.`); WIZ.key = ""; WIZ.name = ""; WIZ.color = ""; location.hash = `#/sorta/${encodeURIComponent(key)}`; }
+    return true;
+  }
+  return false;
+}
+
+// ------------------------------------------------------------------ Uvoz slika po imenu (Dio 3)
+// Isti konvertor (images.js) i isti upload (storeImage) kao 4a. Ništa se ne snima dok se
+// ne potvrdi pregled. Spisak preostalih slika čuva se u IndexedDB za nastavak poslije prekida.
+const IMP = { items: [], phase: "pick", prep: 0, seq: 0, total: 0, done: 0, summary: null, resumed: false };
+const THUMB = 160;
+
+// IndexedDB: baza "vinograd-panel", spremište "uvoz" (jedan zapis po slici)
+function idb() {
+  return new Promise((res, rej) => {
+    const r = indexedDB.open("vinograd-panel", 1);
+    r.onupgradeneeded = () => r.result.createObjectStore("uvoz", { keyPath: "id" });
+    r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+  });
+}
+async function idbDo(mode, fn) {
+  const db = await idb();
+  return new Promise((res, rej) => {
+    const tx = db.transaction("uvoz", mode), st = tx.objectStore("uvoz");
+    const out = fn(st);
+    tx.oncomplete = () => { db.close(); res(out && "result" in out ? out.result : undefined); };
+    tx.onerror = () => { db.close(); rej(tx.error); }; tx.onabort = () => { db.close(); rej(tx.error); };
+  });
+}
+const idbAll = () => idbDo("readonly", (st) => st.getAll()).catch(() => []);
+const idbPut = (rec) => idbDo("readwrite", (st) => st.put(rec));
+const idbDel = (id) => idbDo("readwrite", (st) => st.delete(id)).catch(() => {});
+const idbClear = () => idbDo("readwrite", (st) => st.clear()).catch(() => {});
+
+async function makeThumb(file) {
+  try {
+    const bm = await createImageBitmap(file, { resizeWidth: THUMB, resizeQuality: "medium", imageOrientation: "from-image" });
+    const c = document.createElement("canvas"); c.width = bm.width; c.height = bm.height;
+    c.getContext("2d").drawImage(bm, 0, 0); bm.close();
+    const b = await new Promise((r) => c.toBlob(r, "image/jpeg", 0.7));
+    c.width = 0; c.height = 0;
+    return b ? URL.createObjectURL(b) : "";
+  } catch { return ""; }
+}
+function impMatch(it) {
+  const r = matchFile(it.name, S.data.varieties);
+  it.match = r; it.web = r.web; it.order = r.order;
+  if (!it.manualKey) it.key = r.status === "matched" ? r.key : "";
+  impOld(it);
+}
+// stara slika (naziv fajla iz seeda) koju ova slika zamjenjuje na istom mjestu u nizu sorte
+function impOld(it) {
+  const refs = it.key && V(it.key) ? imgList(V(it.key)) : [];
+  const i = findOldSlot(it.name, refs);
+  it.oldRef = i >= 0 ? refs[i] : "";
+  // ista stara slika ne može biti zamijenjena dvaput u istom uvozu: zamjenjuje prva, ostale idu na kraj
+  if (it.oldRef && IMP.items.some((o) => o !== it && o.oldRef === it.oldRef && o.key === it.key && impGroup(o) === "ok" && IMP.items.indexOf(o) < IMP.items.indexOf(it))) it.oldRef = "";
+}
+const impGroup = (it) => (it.dup || it.exclude ? "skip" : it.key ? "ok" : "none");
+
+async function impChoose(input) {
+  const files = [...input.files]; input.value = "";
+  if (!files.length) return;
+  if (!S.webp) return toast(NO_WEBP_MSG);
+  IMP.items.forEach((it) => it.thumb && URL.revokeObjectURL(it.thumb));
+  IMP.items = []; IMP.phase = "prep"; IMP.summary = null; IMP.resumed = false;
+  for (const file of files) IMP.items.push({ id: "imp" + ++IMP.seq, file, fname: file.name, name: file.name, approved: false, exclude: false, dup: "", manualKey: false });
+  await impPrepare();
+}
+// hash, sličica, poklapanje i provjera duplikata, jedna po jedna slika
+async function impPrepare() {
+  renderImport();
+  const seen = new Map();
+  for (let i = 0; i < IMP.items.length; i++) {
+    const it = IMP.items[i];
+    IMP.prep = i + 1; const pr = $("#impPrep"); if (pr) pr.textContent = `Pripremam pregled: ${i + 1} od ${IMP.items.length}…`;
+    if (!it.file) { it.dup = ""; continue; }
+    if (!it.hash) it.hash = await sha256Hex(await it.file.arrayBuffer());
+    if (!it.thumb) it.thumb = await makeThumb(it.file);
+    if (!it.key || !it.manualKey) impMatch(it);
+    if (seen.has(it.hash)) it.dup = "Isti fajl je izabran dva puta.";
+    else {
+      seen.set(it.hash, it.id);
+      try { const d = await S.db.findImageByHash(it.hash); if (d) it.dup = "Već je u biblioteci."; } catch { /* bez veze: provjera se ponavlja pri snimanju */ }
+    }
+  }
+  IMP.phase = "preview"; renderImport();
+}
+
+function impStatus(it) {
+  const m = it.match || { status: "none", candidates: [] }, nm = (k) => esc((V(k) || {}).name || k);
+  if (it.dup) return `<span class="warntext">${esc(it.dup)} Preskočena.</span>`;
+  if (it.key) return `<span class="oktext">✓ ${it.manualKey ? "Izabrano" : "Uparena"}: ${nm(it.key)}</span>` + (it.oldRef ? ` <span class="badge ft">zamjenjuje staru sliku ${esc(it.oldRef)}</span>` : "");
+  if (m.status === "suggest") return `Mislili ste: <b>${nm(m.key)}</b>? <button type="button" class="btn outline sm" data-impyes="${it.id}">Da, ${nm(m.key)}</button>`;
+  if (m.status === "ambiguous") return `<span class="warntext">Odgovara sortama ${m.candidates.map(nm).join(" i ")}. Izaberi iz liste.</span>`;
+  return `<span class="warntext">Nije pronađena sorta. Ispravi ime ili izaberi iz liste.</span>`;
+}
+function impCard(it, opts) {
+  const oldSrc = it.oldRef ? imgSrc(it.oldRef) : "";
+  const pics = `<div class="imppics">${it.thumb ? `<img src="${esc(it.thumb)}" alt="Nova slika" width="${THUMB}" height="${THUMB}">` : `<span class="imthumb thumb x" aria-hidden="true">?</span>`}${it.oldRef
+    ? `<figure class="impold">${oldSrc ? `<img src="${esc(oldSrc)}" alt="Stara slika ${esc(it.oldRef)}" loading="lazy">` : `<span class="imthumb thumb x" aria-hidden="true">?</span>`}<figcaption>stara${oldSrc ? "" : " (fajla nema)"}</figcaption></figure>` : ""}</div>`;
+  return `<div class="impcard${it.oldRef ? " replaces" : ""}" data-imp="${it.id}">
+    ${pics}
+    <div class="impbody">
+      <div class="field"><label for="in-${it.id}">Ime fajla</label><input id="in-${it.id}" type="text" data-impname="${it.id}" value="${esc(it.name)}" autocomplete="off"></div>
+      <div class="field"><label for="ik-${it.id}">Sorta</label><select id="ik-${it.id}" class="search" data-impkey="${it.id}"><option value="">— izaberi sortu —</option>${opts.replace(`value="${esc(it.key)}"`, `value="${esc(it.key)}" selected`)}</select></div>
+      <div class="impstat small" id="is-${it.id}">${impStatus(it)}</div>
+      ${it.web ? `<div class="impweb"><span class="badge warn">sa interneta</span><label class="check"><input type="checkbox" data-impok="${it.id}"${it.approved ? " checked" : ""}> Provjereno da smijem koristiti</label>${it.approved ? "" : `<div class="hint"><span>Bez kvačice slika se snima, ali se ne objavljuje na sajtu.</span></div>`}</div>` : ""}
+      ${it.dup ? "" : `<label class="check"><input type="checkbox" data-impskip="${it.id}"${it.exclude ? " checked" : ""}> Preskoči ovu sliku</label>`}
+      ${it.state ? `<div class="bar"><span style="width:${Math.round((it.pct || 0) * 100)}%"></span></div><div class="upmsg small">${it.msg || ""}</div>` : ""}
+    </div></div>`;
+}
+function renderImport() {
+  const box = $("#impBox"); if (!box) return;
+  if (IMP.phase === "pick") { box.innerHTML = ""; return; }
+  if (IMP.phase === "prep") { box.innerHTML = `<p class="notice busy" id="impPrep">Pripremam pregled…</p>`; return; }
+  const opts = keysSorted().map((k) => `<option value="${esc(k)}">${esc(V(k).name)}</option>`).join("");
+  const g = { ok: [], none: [], skip: [] };
+  for (const it of IMP.items) g[impGroup(it)].push(it);
+  const needFile = IMP.items.filter((it) => !it.file);
+  const sec = (title, list, open) => `<details class="sec" ${open ? "open" : ""}><summary>${title} <small>${list.length}</small></summary><div class="secbody impgrid">${list.map((it) => impCard(it, opts)).join("") || `<p class="muted">Nema.</p>`}</div></details>`;
+  const n = g.ok.filter((it) => it.file && it.state !== "ok").length;
+  box.innerHTML = `
+    ${needFile.length ? `<div class="warnbox">Za ${needFile.length} slika sadržaj nije sačuvan. Izaberi ih ponovo (ista imena fajlova):
+      <label class="btn outline wide upbtn" style="margin-top:8px"><input type="file" data-impre accept="${ACCEPT}" multiple hidden>Izaberi ponovo</label></div>` : ""}
+    ${IMP.summary ? `<div class="notice ok" id="impSum"><b>${esc(IMP.summary)}</b><br><a class="btn primary" href="#/objavi" style="margin-top:8px">Objavi</a></div>` : ""}
+    ${IMP.phase === "saving" ? `<div class="uptotal"><div class="row"><b>Ukupno</b><span>snimljeno ${IMP.done} od ${IMP.total}</span></div><div class="bar"><span style="width:${IMP.total ? (IMP.done / IMP.total) * 100 : 0}%"></span></div><div class="small muted" id="impSizes">${esc(IMP.sizes || "")}</div></div>` : ""}
+    ${sec("Uparene", g.ok, true)}${sec("Neuparene", g.none, true)}${sec("Preskočene", g.skip, false)}
+    ${IMP.phase === "preview" ? `<div class="wiznav"><button type="button" class="btn primary wide" id="impSave"${n ? "" : " disabled"}>Snimi ${n} ${n % 10 === 1 && n % 100 !== 11 ? "sliku" : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? "slike" : "slika"}</button></div>` : ""}`;
+  const sv = $("#impSave"); if (sv) sv.onclick = impSave;
+}
+function impItem(el, attr) { return IMP.items.find((x) => x.id === el.getAttribute(attr)); }
+function impOnInput(el) { // ime se mijenja: ishod se odmah osvježi
+  const it = impItem(el, "data-impname"); if (!it) return;
+  it.name = el.value; it.manualKey = false; impMatch(it);
+  const st = $("#is-" + it.id); if (st) st.innerHTML = impStatus(it);
+  const sel = $("#ik-" + it.id); if (sel) sel.value = it.key || "";
+}
+function impOnChange(el) {
+  if (el.matches("[data-impname]")) { renderImport(); return true; }
+  if (el.matches("[data-impkey]")) { const it = impItem(el, "data-impkey"); it.key = el.value; it.manualKey = !!el.value; impOld(it); renderImport(); return true; }
+  if (el.matches("[data-impok]")) { const it = impItem(el, "data-impok"); it.approved = el.checked; renderImport(); return true; }
+  if (el.matches("[data-impskip]")) { const it = impItem(el, "data-impskip"); it.exclude = el.checked; renderImport(); return true; }
+  if (el.matches("[data-impre]")) { impReselect(el); return true; }
+  if (el.matches("[data-import]")) { impChoose(el); return true; }
+  return false;
+}
+function impOnClick(b) {
+  if (b.dataset.impyes) { const it = IMP.items.find((x) => x.id === b.dataset.impyes); it.key = it.match.key; it.manualKey = true; impOld(it); renderImport(); return true; }
+  if (b.id === "impDiscard") { idbClear(); IMP.items = []; IMP.phase = "pick"; route(); return true; }
+  return false;
+}
+function impReselect(input) {
+  const files = [...input.files]; input.value = "";
+  for (const f of files) { const it = IMP.items.find((x) => !x.file && x.fname === f.name); if (it) it.file = f; }
+  impPrepare();
+}
+
+async function impSave() {
+  const list = IMP.items.filter((it) => impGroup(it) === "ok" && it.file && it.state !== "ok" && !it.dup)
+    .sort((a, b) => a.key.localeCompare(b.key) || (a.order ?? 1e9) - (b.order ?? 1e9) || a.fname.localeCompare(b.fname));
+  if (!list.length) return;
+  IMP.phase = "saving"; IMP.total = list.length; IMP.done = 0; IMP.summary = null; uploading++;
+  // spisak preostalih u IndexedDB (sa sadržajem fajla; ako ne stane, samo ime)
+  for (const it of list) {
+    const rec = { id: it.id, fname: it.fname, name: it.name, key: it.key, web: !!it.web, approved: !!it.approved, order: it.order ?? null, hash: it.hash, oldRef: it.oldRef || "" };
+    try { await idbPut({ ...rec, blob: it.file }); } catch { try { await idbPut(rec); } catch { /* bez nastavka */ } }
+  }
+  let before = 0, after = 0;
+  const kb = (b) => (b > 1048576 ? (b / 1048576).toFixed(1) + " MB" : Math.round(b / 1024) + " KB");
+  renderImport();
+  for (const it of list) {
+    const upd = () => { const c = $(`.impcard[data-imp="${it.id}"]`); if (c) { const bar = c.querySelector(".bar span"); if (bar) bar.style.width = Math.round((it.pct || 0) * 100) + "%"; const mm = c.querySelector(".upmsg"); if (mm) mm.innerHTML = it.msg || ""; } };
+    it.state = "busy"; it.pct = 0.02; it.msg = "Pretvaram…"; renderImport();
+    try {
+      const conv = await convertImage(it.file);
+      const dupNow = await S.db.findImageByHash(conv.hash);
+      if (dupNow) { it.state = "ok"; it.dup = "Već je snimljena."; it.pct = 1; it.msg = "Već je u biblioteci, preskočena."; await idbDel(it.id); IMP.done++; renderImport(); continue; }
+      const sum = await storeImage(conv, it.key, { source: it.web ? "web" : "own", webApproved: it.approved, replace: it.oldRef || "", onProgress: (f, msg) => { it.pct = 0.1 + 0.9 * f; if (msg) it.msg = msg; upd(); } });
+      before += it.file.size; after += sum;
+      it.state = "ok"; it.pct = 1; it.msg = `<span class="oktext">✓ Snimljeno (${kb(it.file.size)} → ${kb(sum)})${it.oldRef ? `, umjesto ${esc(it.oldRef)}` : ""}</span>`;
+      await idbDel(it.id);
+    } catch (e) {
+      it.state = "err"; it.pct = 0; it.msg = `<span class="error">${esc(e && e.code === "no-webp" ? e.message : "Nije snimljeno: veza je prekinuta. Ostaje za nastavak.")}</span>`;
+    }
+    IMP.done++; IMP.sizes = `Veličina: ${kb(before)} prije, ${kb(after)} poslije (sve 4 veličine).`; renderImport();
+  }
+  uploading--;
+  const saved = IMP.items.filter((it) => it.state === "ok" && !it.dup).length;
+  const skipped = IMP.items.filter((it) => impGroup(it) === "skip").length;
+  const unmatched = IMP.items.filter((it) => impGroup(it) === "none").length;
+  const failed = IMP.items.filter((it) => it.state === "err").length;
+  const f3 = (n, one, few, many) => (n % 10 === 1 && n % 100 !== 11 ? one : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? few : many);
+  IMP.summary = `${saved} snimljeno, ${skipped} ${f3(skipped, "preskočena", "preskočena", "preskočeno")}, ${unmatched} ${f3(unmatched, "neuparena", "neuparene", "neuparenih")}` + (failed ? `, ${failed} nije snimljeno (pritisni Snimi za nastavak)` : "");
+  IMP.phase = failed ? "preview" : "done";
+  IMP.items.forEach((it) => { if (it.state === "err") it.state = "retry"; }); // poruka ostaje, slika se nudi ponovo
+  renderImport();
+}
+
+async function screenUvozAfter(params) {
+  await checkWebp();
+  if (params.get("nastavi") === "1" && !IMP.items.length) {
+    const recs = await idbAll();
+    IMP.items = recs.map((r) => ({ id: r.id, file: r.blob || null, fname: r.fname, name: r.name, key: r.key, manualKey: true, web: r.web, approved: r.approved, order: r.order, hash: r.hash, oldRef: r.oldRef || "", exclude: false, dup: "" }));
+    IMP.seq = Math.max(IMP.seq, ...IMP.items.map((x) => +String(x.id).replace(/\D/g, "") || 0));
+    IMP.resumed = true;
+    if (IMP.items.length) await impPrepare();
+  }
+  renderImport();
+}
+function screenUvoz(params) {
+  setTimeout(() => screenUvozAfter(params));
+  return `<a class="back" href="#/slike">← Slike</a>
+    ${head("Uvoz slika po imenu", "Izaberi više slika odjednom. Panel po imenu fajla nađe sortu (npr. viktor-2.jpg ide sorti Viktor, kao druga slika). Ništa se ne snima dok ne pregledaš i potvrdiš.")}
+    <div class="card uploader">
+      <div class="warnbox nowebp" hidden>${esc(NO_WEBP_MSG)}</div>
+      <label class="btn primary wide upbtn"><input type="file" data-import data-upload="" accept="${ACCEPT}" multiple hidden>Izaberi slike</label>
+      <p class="hint"><span>Prefiks "web-" znači slika sa interneta. Broj na kraju imena određuje redoslijed.</span></p>
+      ${IMP.resumed ? `<button type="button" class="btn ghost wide" id="impDiscard" style="margin-top:8px">Odbaci nedovršen uvoz</button>` : ""}
+    </div>
+    <div id="impBox"></div>`;
+}
+async function offerResume() {
+  const box = $("#impResume"); if (!box) return;
+  const recs = await idbAll();
+  box.innerHTML = recs.length ? `<a class="btn outline wide" href="#/uvoz?nastavi=1">Nastavi uvoz (${recs.length} preostalo)</a>` : "";
+}
+
+// ------------------------------------------------------------------ Kontakt i tekstovi stranica (Dio 4)
+// Samo polja koja već postoje u bazi (settings, pages/home, pages/kako, pages/kontakt).
+// Snimanje kao i ostatak panela: po polju, uz updatedAt/updatedBy čvora (settings ili pages/<p>).
+// "req": polje koje sajt mora imati (build bez njega pada), pa se ne smije isprazniti.
+const SP_SECTIONS = () => {
+  const steps = (getIn(S.data, "pages/kako/steps") || []);
+  const stepList = Array.isArray(steps) ? steps : Object.keys(steps).sort((a, b) => a - b).map((k) => steps[k]);
+  return [
+    { id: "settings", title: "Kontakt", root: "settings", fields: [
+      ["settings/phone", "Telefon", "req", "Kako se prikazuje na sajtu, npr. 065/592-120."],
+      ["settings/phoneIntl", "WhatsApp broj", "phoneIntl", "Samo cifre, bez + i bez nule na početku, npr. 38765592120."],
+      ["settings/email", "Mejl", "email"],
+      ["settings/address", "Adresa", "req"],
+      ["settings/mapUrl", "Link na mapu", "url", "Počinje sa https://. Prazno znači bez linka."],
+      ["settings/siteUrl", "Adresa sajta", "readonly", "Samo za čitanje. Mijenja se u bazi."],
+    ] },
+    { id: "home", title: "Početna stranica", root: "pages/home", fields: [
+      ["pages/home/eyebrow", "Natpis iznad naslova", "opt"],
+      ["pages/home/title", "Naslov", "reqArea", "Novi red u naslovu je i novi red na sajtu."],
+      ["pages/home/text", "Tekst ispod naslova", "reqArea"],
+      ["pages/home/heroAlt", "Opis naslovne slike", "req", "Za čitače ekrana i Google."],
+      ["pages/home/seoTitle", "Naslov za Google", "opt", "", 60],
+      ["pages/home/seoDescription", "Opis za Google", "optArea", "", 155],
+    ] },
+    { id: "kako", title: "Kako naručiti", root: "pages/kako", fields: [
+      ["pages/kako/title", "Naslov stranice", "req"],
+      ["pages/kako/intro", "Uvodni tekst", "optArea", "Prazno znači bez uvoda."],
+      ...stepList.flatMap((_, i) => [[`pages/kako/steps/${i}/title`, `Korak ${i + 1}: naslov`, "req"], [`pages/kako/steps/${i}/text`, `Korak ${i + 1}: tekst`, "reqArea"]]),
+      ["pages/kako/seoTitle", "Naslov za Google", "opt", "Prazno znači automatski.", 60],
+      ["pages/kako/seoDescription", "Opis za Google", "optArea", "Prazno znači automatski.", 155],
+    ] },
+    { id: "kontakt", title: "O nama i kontakt (stranica)", root: "pages/kontakt", fields: [
+      ["pages/kontakt/title", "Naslov odjeljka", "req"],
+      ["pages/kontakt/about", "Tekst o vinogradu", "reqArea"],
+      ["pages/kontakt/seoTitle", "Naslov za Google", "opt", "Prazno znači automatski.", 60],
+      ["pages/kontakt/seoDescription", "Opis za Google", "optArea", "Prazno znači automatski.", 155],
+    ] },
+  ];
+};
+const SP_CHECK = {
+  req: (t) => (t ? { value: t } : { error: "Ovo polje ne smije biti prazno, sajt ga prikazuje." }),
+  reqArea: (t) => SP_CHECK.req(t),
+  opt: (t) => ({ value: t || null }),
+  optArea: (t) => ({ value: t || null }),
+  phoneIntl: (t) => (!t ? { error: "WhatsApp broj ne smije biti prazan." } : !/^\d+$/.test(t) ? { error: "Upiši samo cifre, bez +, razmaka i crtica. Npr. 38765592120." }
+    : t.startsWith("0") ? { error: "Bez nule na početku: počni pozivnim brojem države, npr. 387." } : t.length < 8 || t.length > 15 ? { error: "Broj mora imati od 8 do 15 cifara." } : { value: t }),
+  email: (t) => (!t ? { error: "Mejl ne smije biti prazan." } : !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(t) ? { error: "Mejl nije ispravan. Npr. ime@gmail.com." } : { value: t }),
+  url: (t) => (!t ? { value: null } : !/^https:\/\/\S+$/.test(t) ? { error: "Link mora počinjati sa https:// (kopiraj ga iz Google mapa)." } : { value: t }),
+};
+function spSummary(sec) {
+  const f = sec.fields.filter((x) => x[2] !== "readonly");
+  const n = f.filter((x) => str(getIn(S.data, x[0])).trim()).length;
+  return n === f.length ? "popunjeno" : n === 0 ? "prazno" : `popunjeno ${n} od ${f.length}`;
+}
+function spField([path, label, kind, hint = "", max = 0]) {
+  const id = "sp-" + path.replace(/\//g, "-"), val = str(getIn(S.data, path));
+  const area = /Area$/.test(kind);
+  const input = kind === "readonly"
+    ? `<input id="${id}" type="text" value="${esc(val)}" readonly aria-readonly="true" class="ro">`
+    : area ? `<textarea id="${id}" data-sp="${path}" data-spk="${kind}"${max ? ` data-max="${max}"` : ""}>${esc(val)}</textarea>`
+      : `<input id="${id}" type="${kind === "email" ? "email" : kind === "url" ? "url" : "text"}"${kind === "phoneIntl" ? ' inputmode="numeric"' : ""} data-sp="${path}" data-spk="${kind}" value="${esc(val)}"${max ? ` data-max="${max}"` : ""} autocomplete="off">`;
+  return `<div class="field"><label for="${id}">${label}${/^req|phoneIntl|email/.test(kind) ? "" : kind === "readonly" ? "" : ' <span class="muted small">(neobavezno)</span>'}</label>${input}
+    ${hint || max || area ? `<div class="hint"><span>${hint}</span>${max || area ? `<span data-count>${val.length} znakova${max ? ` (preporuka do ${max})` : ""}</span>` : ""}</div>` : ""}</div>`;
+}
+function commitSP(el) {
+  const path = el.dataset.sp, kind = el.dataset.spk;
+  const t = el.value.trim();
+  const r = SP_CHECK[kind](t);
+  if (r.error) { fieldError(el, r.error); return; }
+  fieldError(el, "");
+  const cur = getIn(S.data, path) ?? null;
+  if ((cur === "" ? null : cur) === r.value) { if (el.value !== (r.value ?? "")) el.value = r.value ?? ""; return; }
+  el.value = r.value ?? "";
+  const root = path.startsWith("settings/") ? "settings" : path.split("/").slice(0, 2).join("/");
+  setIn(S.data, path, r.value);
+  setIn(S.data, root + "/updatedAt", Date.now()); setIn(S.data, root + "/updatedBy", S.user.uid);
+  send({ [path]: r.value, [root + "/updatedAt"]: S.db.TIMESTAMP, [root + "/updatedBy"]: S.user.uid });
+  const sec = SP_SECTIONS().find((s) => s.root === root);
+  const sm = $(`#sum-${sec.id}`); if (sm) sm.textContent = spSummary(sec);
+}
+// settings/showWithoutImage: kad polja nema, build ga tretira kao uključeno (true)
+function commitShowNoImg(el) {
+  const v = el.checked;
+  setIn(S.data, "settings/showWithoutImage", v);
+  setIn(S.data, "settings/updatedAt", Date.now()); setIn(S.data, "settings/updatedBy", S.user.uid);
+  send({ "settings/showWithoutImage": v, "settings/updatedAt": S.db.TIMESTAMP, "settings/updatedBy": S.user.uid });
+}
+function spMeta(root) {
+  const at = num(getIn(S.data, root + "/updatedAt")), by = getIn(S.data, root + "/updatedBy");
+  return at ? `Zadnja izmjena: ${NAMES[by] || "nepoznat korisnik"}, ${fmtDate(at)}` : "";
+}
+function settingsSectionsHtml() {
+  return SP_SECTIONS().map((sec, i) => `<details class="sec" data-spsec="${sec.id}"${i === 0 ? " open" : ""}><summary>${sec.title} <small id="sum-${sec.id}">${spSummary(sec)}</small></summary>
+    <div class="secbody">${spMeta(sec.root) ? `<p class="hint"><span>${esc(spMeta(sec.root))}</span></p>` : ""}${sec.fields.map(spField).join("")}</div></details>`).join("");
+}
+
+// ------------------------------------------------------------------ Brisanje (Dio 5)
+// Prozor za potvrdu (isti izgled kao kartice panela). Esc i klik van prozora ga zatvaraju.
+function openModal(html, onOpen) {
+  closeModal();
+  const wrap = document.createElement("div");
+  wrap.className = "modalwrap"; wrap.id = "modal";
+  wrap.innerHTML = `<div class="modalbox card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">${html}</div>`;
+  wrap.addEventListener("click", (e) => { if (e.target === wrap || e.target.closest("[data-modal-close]")) closeModal(); });
+  document.body.appendChild(wrap); document.body.classList.add("modalopen");
+  if (onOpen) onOpen(wrap);
+  const f = wrap.querySelector("input,button:not([disabled])"); if (f) f.focus();
+}
+function closeModal() { const m = $("#modal"); if (m) m.remove(); document.body.classList.remove("modalopen"); }
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && $("#modal")) closeModal(); });
+
+// Brisanja koja čekaju objavu: svako brisanje sorte upiše publish/deletions/<ključ> = {at, by, ref}.
+// Brojač na ekranu Objavi broji one novije od zadnje objave. (Brisanje slike iz biblioteke se ne broji:
+// takva slika ne koristi nijedna sorta, pa ni sajt.)
+function pendingDeletions(last) {
+  const d = getIn(S.data, "publish/deletions") || {};
+  return Object.values(d).filter((x) => x && num(x.at) && (last == null || x.at > last)).length;
+}
+
+function deleteVarietyDialog(key) {
+  const v = V(key); if (!v) return;
+  openModal(`<h2 id="modalTitle">Obriši sortu "${esc(v.name)}"</h2>
+    <p class="warnbox" style="margin-top:10px">Ovo se ne može vratiti. Linkovi koje si već slao (/sorte/${esc(v.slug || key)}/) prestaju raditi poslije sljedeće objave. Ako nisi siguran, sakrij sortu.</p>
+    <p class="muted small">Slike ove sorte ostaju u biblioteci.</p>
+    <div class="field"><label for="delName">Upiši naziv sorte: <b>${esc(v.name)}</b></label><input id="delName" type="text" autocomplete="off"></div>
+    <div class="endbtns"><button type="button" class="btn ghost" data-modal-close>Odustani</button><button type="button" class="btn primary" id="delGo" disabled>Obriši sortu</button></div>
+    <div id="delMsg" role="alert"></div>`, (m) => {
+    const inp = m.querySelector("#delName"), go = m.querySelector("#delGo");
+    const same = () => inp.value.trim().toLowerCase() === String(v.name).trim().toLowerCase();
+    inp.addEventListener("input", () => { go.disabled = !same(); });
+    go.addEventListener("click", async () => {
+      if (!same()) return;
+      go.disabled = true; go.textContent = "Brišem…";
+      const dk = S.db.newKey("publish/deletions");
+      const rec = { at: S.db.TIMESTAMP, by: S.user.uid, ref: key };
+      try {
+        await S.db.update({ [`varieties/${key}`]: null, [`publish/deletions/${dk}`]: rec });
+      } catch {
+        m.querySelector("#delMsg").innerHTML = `<div class="notice bad">Nema veze, sorta nije obrisana. Pokušaj ponovo.</div>`;
+        go.disabled = false; go.textContent = "Obriši sortu"; return;
+      }
+      delete S.data.varieties[key];
+      setIn(S.data, `publish/deletions/${dk}`, { ...rec, at: Date.now() });
+      if (WIZ.key === key) WIZ.key = "";
+      closeModal();
+      location.hash = "#/sorte";
+      toast("Sorta je obrisana");
+    });
+  });
+}
+
+function imageUsers(id) {
+  return Object.entries(S.data.varieties).filter(([, v]) => imgList(v).includes(id)).map(([k, v]) => ({ key: k, name: v.name || k }));
+}
+function deleteImageDialog(id) {
+  const im = S.data.images[id]; if (!im) return;
+  const users = imageUsers(id);
+  openModal(`<h2 id="modalTitle">Obriši sliku trajno</h2>
+    <div class="delimg"><img src="${esc(imgSrc(id))}" alt=""><div><div class="libalt">${esc(im.alt || "(bez opisa)")}</div><div class="hint"><span>${im.w}×${im.h} px</span></div></div></div>
+    ${users.length
+      ? `<p class="warnbox">Prvo je ukloni sa sorti: ${users.map((u) => `<a href="#/sorta/${encodeURIComponent(u.key)}" data-modal-close>${esc(u.name)}</a>`).join(", ")}</p>`
+      : `<p class="warnbox">Ovo se ne može vratiti. Slika se briše iz biblioteke i sa servera (sve 4 veličine).</p>`}
+    <div class="endbtns"><button type="button" class="btn ghost" data-modal-close>Odustani</button><button type="button" class="btn primary" id="delImgGo"${users.length ? " disabled" : ""}>Obriši sliku</button></div>
+    <div id="delMsg" role="alert"></div>`, (m) => {
+    const go = m.querySelector("#delImgGo");
+    go.addEventListener("click", async () => {
+      if (imageUsers(id).length) return;
+      go.disabled = true; go.textContent = "Brišem…";
+      const paths = Object.values(im.variants || {}).map((x) => x && x.path).filter(Boolean);
+      try {
+        for (const p of paths) await S.db.deleteFile(p); // nepostojeći fajl nije greška
+        await S.db.update({ [`images/${id}`]: null }); // zapis tek kad su svi fajlovi obrisani
+      } catch {
+        m.querySelector("#delMsg").innerHTML = `<div class="notice bad">Nije obrisano do kraja, pokušaj ponovo.</div>`;
+        go.disabled = false; go.textContent = "Pokušaj ponovo"; return;
+      }
+      delete S.data.images[id];
+      closeModal(); libList(); toast("Slika je obrisana");
+    });
+  });
+}
+
+async function downloadBackup(btn) {
+  btn.disabled = true; const t = btn.textContent; btn.textContent = "Preuzimam…";
+  try {
+    const text = await S.db.exportData();
+    const d = new Date(), p = (x) => String(x).padStart(2, "0");
+    const name = `vinograd-kopija-${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}.json`;
+    const url = URL.createObjectURL(new Blob([text], { type: "application/json" }));
+    const a = document.createElement("a"); a.href = url; a.download = name; a.hidden = true;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    toast("Kopija je preuzeta: " + name);
+  } catch {
+    toast("Kopija nije preuzeta: nema veze. Pokušaj ponovo.");
+  } finally { btn.disabled = false; btn.textContent = t; }
+}
+
 // ------------------------------------------------------------------ usmjeravanje
 function route() {
   flushLater();
+  if (!location.hash.startsWith("#/objavi")) stopPoll();
   const [path, query] = (location.hash.replace(/^#/, "") || "/").split("?");
   const params = new URLSearchParams(query || "");
   const parts = path.split("/").filter(Boolean);
@@ -835,8 +1564,9 @@ function route() {
     case "cijene": html = screenCijene(params); nav = "cijene"; break;
     case "postavke": html = screenPostavke(); after = () => ($("#out3").onclick = () => S.db.signOut()); break;
     case "slike": html = screenSlike(); nav = "slike"; break;
-    case "objavi": html = screenSoon("Objavi", "Dugme Objavi dolazi uskoro. Do tada novu verziju sajta pokreće Žarko ručno u Netlifyju (Deploys, Trigger deploy, Deploy site). Sve izmjene iz panela su snimljene u nacrt i ulaze u sljedeću objavu."); nav = "objavi"; break;
-    case "dodaj": html = screenSoon("Dodaj sortu", "Dodavanje nove sorte korak po korak dolazi uskoro."); nav = "pocetna"; break;
+    case "uvoz": html = screenUvoz(params); nav = "slike"; break;
+    case "objavi": html = screenObjavi(); nav = "objavi"; after = () => ($("#pubBtn").onclick = doPublish); break;
+    case "dodaj": html = screenWizard(parts); nav = "sorte"; break;
     default: html = `${head("Stranica ne postoji")}<p><a class="btn outline" href="#/">Na početnu</a></p>`;
   }
   view().innerHTML = html;
@@ -868,11 +1598,13 @@ async function startApp(user) {
   S.db.watch("varieties", (val) => {
     if (!val) return;
     for (const [k, v] of Object.entries(val)) if (!S.data.varieties[k] || !debounced.size) S.data.varieties[k] = v;
+    for (const k of Object.keys(S.data.varieties)) if (!(k in val) && !debounced.size) delete S.data.varieties[k]; // obrisao drugi admin
     const typing = document.activeElement && view().contains(document.activeElement) && /INPUT|TEXTAREA/.test(document.activeElement.tagName);
     const h = location.hash;
     if (!typing && !uploading && (h === "" || h === "#/" || h.startsWith("#/sorte"))) route();
   });
   S.db.watch("images", (val) => { S.data.images = val || {}; });
+  S.db.watch("publish", (val) => { S.data.publish = val || {}; if (location.hash.startsWith("#/objavi")) renderPubInfo(); });
   route();
 }
 

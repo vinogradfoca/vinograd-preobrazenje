@@ -24,11 +24,11 @@
         "steps": [
           {
             "title": "Izaberite sortu.",
-            "text": "U katalogu otvorite sortu, izaberite sadnicu ili reznicu i količinu, pa dodajte u korpu."
+            "text": "U katalogu otvorite sortu, izaberite sadnicu ili reznicu i količinu, pa dodajte u upit."
           },
           {
             "title": "Pošaljite upit.",
-            "text": "U korpi upišite ime i telefon. Poruka se složi sama, a vi je šaljete preko WhatsApp-a ili e-maila."
+            "text": "U upitu upišite ime i telefon. Poruka se složi sama, a vi je šaljete preko WhatsApp-a ili e-maila."
           },
           {
             "title": "Dogovor.",

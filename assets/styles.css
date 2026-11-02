@@ -82,6 +82,7 @@ header{height:76px;display:flex;align-items:center;justify-content:space-between
 .tag{font-size:12px;font-weight:800;letter-spacing:.08em;color:var(--green2);text-transform:uppercase}
 .cb h3{font-size:23px;margin:5px 0 3px}
 .cb small{color:var(--muted)}
+.cb .cline{margin:0 0 2px;color:var(--muted);font-size:14px}
 
 /* filteri */
 .filters{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px;align-items:center}
@@ -146,7 +147,7 @@ footer a{color:#fff}
 .oprice{font-weight:800;color:var(--wine);text-align:right}
 .orow .add{padding:10px 18px;min-height:44px}
 .stepper{display:inline-flex;align-items:center;border:1px solid #c9d3cc;border-radius:10px;overflow:hidden;width:max-content}
-.stepper button{width:42px;height:42px;border:0;background:#f0f3f1;font-size:20px}
+.stepper button{width:44px;height:44px;border:0;background:#f0f3f1;font-size:20px}
 .stepper span{min-width:38px;text-align:center;font-weight:700}
 .ask{display:block;margin-top:12px;font-size:14px}
 
@@ -223,3 +224,10 @@ header{background:#fff}
 @media(min-width:900px){header{padding-top:6px;padding-bottom:6px}.logo{height:64px}}
 /* atribut height (zbog CLS) ne smije postati visina glavne slike sorte: omjer daje aspect-ratio */
 #mainImg{height:auto}
+
+/* traka za kontakt pri dnu ekrana */
+body{padding-bottom:76px}
+.cbar{position:fixed;left:0;right:0;bottom:0;height:76px;background:#fff;border-top:1px solid var(--line);z-index:30;display:flex;align-items:center;gap:10px;padding:0 clamp(14px,4vw,64px)}
+.cbar .btn{flex:1;min-height:48px;padding:10px 12px;white-space:nowrap}
+.cbar3 .btn.primary{flex:1.6}
+@media(min-width:900px){.cbar{justify-content:center}.cbar .btn{flex:0 1 240px}.cbar3 .btn.primary{flex:0 1 300px}}

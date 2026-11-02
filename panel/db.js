@@ -16,10 +16,13 @@
 //                              (npr. "varieties/viktor/sapling/price"), null briše polje
 //   TIMESTAMP                  vrijednost za "vrijeme na serveru" (updatedAt)
 //   newImageId()               novi push-ključ iz vinograd/images
+//   newKey(path)               novi push-ključ ispod vinograd/<path> (npr. publish/history)
+//   getIdToken()               Firebase ID token prijavljenog korisnika (za /api/publish)
 //   findImageByHash(hash)      imageId slike s istim SHA-256 ili null
 //   uploadFile(path, blob, contentType, onProgress)   upload u Storage (onProgress(0..1))
 //   deleteFile(path)           brisanje iz Storagea (nepostojeći fajl nije greška)
 //   fileUrl(path)              javna adresa fajla iz Storagea
+//   exportData()               cijeli čvor vinograd kao JSON tekst (GET <databaseURL>/vinograd.json)
 //
 // Snimanje uvijek ide putanjama do polja, nikad cijeli objekat sorte.
 
@@ -80,6 +83,8 @@ async function createFirebase() {
     },
     update: (paths) => withTimeout(update(ref(db, "vinograd"), paths)),
     newImageId: () => push(ref(db, "vinograd/images")).key,
+    newKey: (path) => push(ref(db, "vinograd/" + path)).key,
+    getIdToken: () => (auth.currentUser ? auth.currentUser.getIdToken() : Promise.reject(Object.assign(new Error("odjavljen"), { code: "auth/no-current-user" }))),
     async findImageByHash(hash) {
       const snap = await get(query(ref(db, "vinograd/images"), orderByChild("hash"), equalTo(hash)));
       const v = snap.val();
@@ -99,6 +104,11 @@ async function createFirebase() {
       catch (e) { if (e && e.code !== "storage/object-not-found") throw e; }
     },
     fileUrl: (path) => `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(path)}?alt=media`,
+    async exportData() {
+      const r = await fetch(cfg.databaseURL.replace(/\/+$/, "") + "/vinograd.json", { cache: "no-store", signal: AbortSignal.timeout(30000) });
+      if (!r.ok) throw Object.assign(new Error("HTTP " + r.status), { code: "http-" + r.status });
+      return await r.text();
+    },
   };
 }
 
@@ -146,6 +156,8 @@ async function createMock() {
     watch(path, cb) { listeners.push({ path, cb }); return () => {}; },
     // Storage u memoriji: blob URL-ovi, ništa ne ide na server
     newImageId: () => "-probna" + Date.now().toString(36) + (idCounter++).toString(36),
+    newKey: () => "-probni" + Date.now().toString(36) + (idCounter++).toString(36),
+    getIdToken: async () => "probni-token",
     async findImageByHash(hash) {
       const imgs = data.images || {};
       return Object.keys(imgs).find((k) => imgs[k] && imgs[k].hash === hash) || null;
@@ -163,10 +175,13 @@ async function createMock() {
       onProgress(1);
     },
     async deleteFile(path) {
+      // failDelete = "og.jpg": brisanje tog fajla padne (provjera "Nije obrisano do kraja")
+      if (ctl.failDelete && path.endsWith("/" + ctl.failDelete)) { ctl.failDelete = null; throw Object.assign(new Error("mock: brisanje palo"), { code: "storage/unknown" }); }
       const f = ctl.files.get(path);
       if (f) { URL.revokeObjectURL(f.url); ctl.files.delete(path); }
     },
     fileUrl: (path) => (ctl.files.get(path) || {}).url || "",
+    exportData: async () => JSON.stringify(data),
     async update(paths) {
       await wait(150);
       if (ctl.failNext) { ctl.failNext = false; throw Object.assign(new Error("mock: nema veze"), { code: "timeout" }); }
