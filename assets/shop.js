@@ -178,6 +178,7 @@
   var main = $("#mainImg");
   $$(".thumbs button").forEach(function (b) {
     b.addEventListener("click", function () {
+      if (b.dataset.srcset) main.srcset = b.dataset.srcset; else main.removeAttribute("srcset");
       main.src = b.dataset.src; main.width = +b.dataset.w; main.height = +b.dataset.h; main.alt = b.dataset.alt;
       $$(".thumbs button").forEach(function (o) { o.classList.toggle("on", o === b); });
     });

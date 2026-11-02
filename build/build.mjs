@@ -5,7 +5,8 @@
 //   node build/build.mjs --db       čita Firebase bazu (GET <databaseURL>/vinograd.json, bez prijave)
 //
 // Adresa baze je u firebase-config.json (databaseURL). Za provjeru se može dati
-// druga adresa: --db-url=<adresa koja vraća isti JSON kao /vinograd.json>.
+// druga adresa: --db-url=<adresa koja vraća isti JSON kao /vinograd.json>, a za
+// Storage --storage-url=<adresa umjesto https://firebasestorage.googleapis.com>.
 //
 // Čist Node, bez npm paketa. Pri bilo kojoj grešci u podacima izlazi s kodom 1
 // i ne ostavlja polovičan dist/.
@@ -74,13 +75,15 @@ const hash = (buf) => crypto.createHash("sha256").update(buf).digest("hex").slic
 // ---------------------------------------------------------------- ulaz
 function readArgs() {
   const args = process.argv.slice(2);
-  const unknown = args.filter((a) => a !== "--seed" && a !== "--db" && !a.startsWith("--db-url="));
+  const unknown = args.filter((a) => a !== "--seed" && a !== "--db" && !a.startsWith("--db-url=") && !a.startsWith("--storage-url="));
   if (unknown.length) throw new BuildError([`Nepoznata opcija: ${unknown.join(" ")}`]);
   const seed = args.includes("--seed"), db = args.includes("--db");
   if (seed === db) throw new BuildError(["Izaberite izvor podataka: node build/build.mjs --seed (data/seed.json) ili --db (Firebase baza)"]);
   const urlArg = args.find((a) => a.startsWith("--db-url="));
   if (urlArg && !db) throw new BuildError(["--db-url ide samo uz --db"]);
-  return { source: db ? "db" : "seed", dbUrl: urlArg ? urlArg.slice("--db-url=".length) : null };
+  const stArg = args.find((a) => a.startsWith("--storage-url="));
+  if (stArg && !db) throw new BuildError(["--storage-url ide samo uz --db"]);
+  return { source: db ? "db" : "seed", dbUrl: urlArg ? urlArg.slice("--db-url=".length) : null, storageUrl: stArg ? stArg.slice("--storage-url=".length).replace(/\/+$/, "") : null };
 }
 
 // ---------------------------------------------------------------- čitanje baze
@@ -158,6 +161,28 @@ function normalizeDb(raw) {
     kontakt: { title: txt(c.title), about: txt(c.about), seoTitle: txt(c.seoTitle), seoDescription: txt(c.seoDescription) },
   };
 
+  // Stavka niza slika sorte je ili imageId iz vinograd/images (nova slika iz panela, u Storageu)
+  // ili stari naziv fajla iz data/seed-img (npr. "viktor-3.webp"). Redoslijed ostaje kakav je u nizu.
+  const varietyImages = (key, name, refs) => {
+    const out = [];
+    for (const r of refs) {
+      const dbi = dbImages[r];
+      if (dbi && typeof dbi === "object" && !/\.webp$/i.test(r)) {
+        if (dbi.source === "web" && dbi.webApproved !== true) {
+          warn(`varieties/${key}: slika ${r} je sa interneta (source "web") i nije odobrena (webApproved), pa se ne objavljuje.`);
+          continue;
+        }
+        if (!images[r]) images[r] = { remote: true, alt: txt(dbi.alt) || "Grozd sorte " + name, w: num(dbi.w), h: num(dbi.h), variants: obj(dbi.variants) };
+        out.push(r);
+      } else if (/\.webp$/i.test(r)) {
+        out.push(imageId(r, "Grozd sorte " + name));
+      } else {
+        warn(`varieties/${key}: slika "${r}" ne postoji u vinograd/images (možda je obrisana), pa je preskočena.`);
+      }
+    }
+    return out;
+  };
+
   const kind = (o) => ({ enabled: obj(o).enabled !== false, price: num(obj(o).price), qty: num(obj(o).qty) });
   const entries = Object.entries(obj(raw.varieties))
     .sort((a, b) => (num(obj(a[1]).order) ?? Infinity) - (num(obj(b[1]).order) ?? Infinity));
@@ -174,7 +199,7 @@ function normalizeDb(raw) {
       visible: v.visible !== false, // nedostaje = vidljiva; samo visible:false sakriva
       desc: txt(v.desc), exp: txt(v.exp), flaws: txt(v.flaws),
       facts,
-      images: arr(v.images).filter(isStr).map((f) => imageId(f, "Grozd sorte " + name)),
+      images: varietyImages(key, name, arr(v.images).filter(isStr)),
       sapling: kind(v.sapling), cutting: kind(v.cutting),
       seoTitle: txt(v.seoTitle), seoDescription: txt(v.seoDescription),
       updatedAt: v.updatedAt ?? null,
@@ -217,6 +242,16 @@ function validate(db) {
   for (const [id, im] of Object.entries(images)) {
     const w = `images/${id}`;
     if (!im || typeof im !== "object") { E.push(`${w}: nije objekat`); continue; }
+    if (im.remote) { // nova slika iz panela: provjera zapisa, fajlovi se preuzimaju iz Storagea
+      const bad = [];
+      if (!/^[A-Za-z0-9_-]+$/.test(id)) bad.push("neispravan imageId");
+      for (const k of ["400", "800", "1600"]) {
+        const vv = im.variants[k];
+        if (!vv || !isStr(vv.path) || !(Number.isInteger(vv.w) && vv.w > 0) || !(Number.isInteger(vv.h) && vv.h > 0)) bad.push(`variants.${k} nema path, w i h`);
+      }
+      if (bad.length) { im._bad = true; warn(`${w}: ${bad.join(", ")}; slika je preskočena.`); }
+      continue;
+    }
     if (!isStr(im.alt)) E.push(`${w}.alt: obavezan opis slike (alt)`);
     if (!isStr(im.file)) { E.push(`${w}.file: nedostaje ime fajla`); continue; }
     if (im.file.includes("/") || im.file.includes("\\") || !/\.webp$/i.test(im.file)) { E.push(`${w}.file: "${im.file}" mora biti ime .webp fajla, bez foldera`); continue; }
@@ -291,7 +326,7 @@ function validate(db) {
   // sorte bez ijedne postojeće slike i fajlovi koji nedostaju (build ne pada)
   const missing = [...new Set(Object.values(vars).filter((v) => v && v.visible && Array.isArray(v.images))
     .flatMap((v) => v.images).filter((id) => images[id] && images[id]._missing).map((id) => images[id].file))].sort();
-  const noImg = Object.values(vars).filter((v) => v && v.visible && Array.isArray(v.images) && !v.images.some((id) => images[id] && !images[id]._missing));
+  const noImg = Object.values(vars).filter((v) => v && v.visible && Array.isArray(v.images) && !v.images.some((id) => images[id] && !images[id]._missing && !images[id]._bad));
   if (noImg.length) warn(`${noImg.length} ${noImg.length % 10 === 1 && noImg.length % 100 !== 11 ? "sorta nema" : "sorti nema"} nijednu sliku (placeholder + noindex): ${noImg.map((v) => v.name).join(", ")}`);
   if (missing.length) warn(`Nedostaje ${missing.length} fajlova u data/seed-img/ (kad ih dodate, sljedeći build ih sam koristi):\n    ${missing.join("\n    ")}`);
 
@@ -307,7 +342,15 @@ function buildModel(db) {
 
   const img = (id, altOverride) => {
     const im = db.images[id];
-    return { id, src: "/img/" + im.file, file: im.file, w: im._w, h: im._h, alt: altOverride ?? im.alt };
+    const alt = altOverride ?? im.alt;
+    if (im.remote) {
+      // nova slika: src je 800, srcset 400/800/1600 (iste širine se ne ponavljaju), width/height iz 1600
+      const v = im._v, seen = new Set();
+      const srcset = ["400", "800", "1600"].map((k) => v[k]).filter((x) => !seen.has(x.w) && seen.add(x.w)).map((x) => `${x.src} ${x.w}w`).join(", ");
+      return { id, src: v["800"].src, big: v["1600"].src, thumb: v["400"].src, srcset, w: v["1600"].w, h: v["1600"].h, alt, og: v.og || null };
+    }
+    const src = "/img/" + im.file;
+    return { id, src, big: src, thumb: src, srcset: "", file: im.file, w: im._w, h: im._h, alt, og: null };
   };
 
   const list = Object.entries(db.varieties)
@@ -322,7 +365,7 @@ function buildModel(db) {
     const kinds = Object.keys(KIND).filter((k) => v[k].enabled);
     const prices = kinds.filter((k) => orderable(v[k])).map((k) => v[k].price).filter((n) => n != null);
     const available = kinds.some((k) => orderable(v[k]));
-    const images = v.images.filter((id) => !db.images[id]._missing)
+    const images = v.images.filter((id) => !db.images[id]._missing && !db.images[id]._bad)
       .map((id, i) => ({ ...img(id), index: i, on: i === 0, label: `Fotografija ${i + 1}` }));
     const ripen = v.ripen || "", type = v.type || "";
     const facts = v.facts || {};
@@ -455,7 +498,7 @@ function pages(m, db) {
       "@context": "https://schema.org",
       "@type": "Product",
       name: v.name,
-      ...(v.hasImage ? { image: v.images.map((i) => m.abs(i.src)) } : {}),
+      ...(v.hasImage ? { image: v.images.map((i) => m.abs(i.big)) } : {}),
       ...(v.desc ? { description: clip(v.desc, 500) } : {}),
       ...(offers.length ? { offers: offers.length === 1 ? offers[0] : offers } : {}),
     };
@@ -466,6 +509,8 @@ function pages(m, db) {
       description: v.seoDescription || clip(v.desc || fallbackDesc),
       schema: [product],
       ogType: "product",
+      // pregled linka: og varijanta prve slike, ako je prva slika nova (iz panela); inače slika sa početne
+      og: v.cover && v.cover.og ? v.cover.og : null,
       // stranica bez ijedne slike ostaje u katalogu, ali je noindex i nije u sitemapi dok ne dobije sliku
       noindex: !v.hasImage,
     }, { v });
@@ -538,6 +583,66 @@ function writeFile(file, content) {
   fs.writeFileSync(file, content);
 }
 
+// ---------------------------------------------------------------- slike iz Storagea
+// Nove slike (iz panela) su u Firebase Storageu. Build preuzima varijante koje koriste vidljive
+// sorte, javnim URL-om, jednu po jednu, uz do 3 pokušaja, i snima ih u dist/img/ s hešom
+// sadržaja u imenu (zato smiju biti immutable). Ako preuzimanje ne uspije, build pada.
+async function fetchRetry(url, label) {
+  let last;
+  for (let i = 1; i <= 3; i++) {
+    try {
+      const res = await fetch(url, { signal: AbortSignal.timeout(60000) });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const buf = Buffer.from(await res.arrayBuffer());
+      if (!buf.length) throw new Error("prazan fajl");
+      return buf;
+    } catch (e) {
+      last = e;
+      if (i < 3) await new Promise((r) => setTimeout(r, 500 * 2 ** (i - 1)));
+    }
+  }
+  const why = last && last.cause ? last.cause.code || last.cause.message : last && last.message;
+  throw new BuildError([`Slika ${label} se ne može preuzeti iz Storagea poslije 3 pokušaja (${why}). Sajt ostaje na prethodnoj verziji.`]);
+}
+
+async function fetchRemoteImages(db, opts, tmp) {
+  const ids = new Set();
+  for (const v of Object.values(db.varieties)) if (v.visible) for (const id of v.images) if (db.images[id].remote && !db.images[id]._bad) ids.add(id);
+  if (!ids.size) return 0;
+  let cfg;
+  try { cfg = JSON.parse(fs.readFileSync(FIREBASE_CONFIG, "utf8")); } catch (e) { throw new BuildError([`Ne mogu pročitati firebase-config.json: ${e.message}`]); }
+  if (!isStr(cfg.storageBucket)) throw new BuildError(["firebase-config.json: storageBucket nedostaje"]);
+  const base = opts.storageUrl || "https://firebasestorage.googleapis.com";
+  fs.mkdirSync(path.join(tmp, "img"), { recursive: true });
+  let n = 0;
+  for (const id of ids) {
+    const im = db.images[id];
+    im._v = {};
+    for (const k of ["400", "800", "1600", "og"]) {
+      const vv = im.variants[k];
+      if (!vv || !isStr(vv.path)) continue; // og nije obavezan: tada se koristi slika sa početne
+      const url = `${base}/v0/b/${cfg.storageBucket}/o/${encodeURIComponent(vv.path)}?alt=media`;
+      const buf = await fetchRetry(url, `${id}/${k} (${vv.path})`);
+      const isOg = k === "og";
+      const ext = isOg ? "jpg" : "webp";
+      if (isOg ? !(buf[0] === 0xff && buf[1] === 0xd8) : buf.toString("ascii", 0, 4) !== "RIFF" || buf.toString("ascii", 8, 12) !== "WEBP") {
+        throw new BuildError([`Slika ${id}/${k} (${vv.path}) nije ${isOg ? "JPEG" : "WebP"} fajl. Sajt ostaje na prethodnoj verziji.`]);
+      }
+      const name = `${id}-${k}.${hash(buf)}.${ext}`;
+      const file = path.join(tmp, "img", name);
+      fs.writeFileSync(file, buf);
+      let w = vv.w, h = vv.h;
+      if (!isOg) {
+        const d = webpSize(file);
+        if (d.w !== w || d.h !== h) { warn(`images/${id}/variants/${k}: u bazi piše ${w}×${h}, a fajl je ${d.w}×${d.h}. Koristim dimenzije iz fajla.`); w = d.w; h = d.h; }
+      }
+      im._v[k] = { src: "/img/" + name, w, h };
+      n++;
+    }
+  }
+  return n;
+}
+
 // Provjera da svaki interni link i src u izlazu pokazuje na postojeći fajl.
 function checkLinks(outDir) {
   const E = [];
@@ -550,7 +655,9 @@ function checkLinks(outDir) {
   const walk = (d) => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(path.join(d, e.name)) : [path.join(d, e.name)]));
   for (const file of walk(outDir).filter((f) => f.endsWith(".html"))) {
     const html = fs.readFileSync(file, "utf8");
-    for (const [, attr, url] of html.matchAll(/\s(href|src)="([^"]*)"/g)) {
+    const refs = [...html.matchAll(/\s(href|src)="([^"]*)"/g)].map(([, a, u]) => [a, u]);
+    for (const [, set] of html.matchAll(/\s(?:data-)?srcset="([^"]*)"/g)) for (const part of set.split(",")) refs.push(["srcset", part.trim().split(/\s+/)[0]]);
+    for (const [attr, url] of refs) {
       if (!url.startsWith("/") || url.startsWith("//")) continue;
       if (!exists(url)) E.push(`${path.relative(outDir, file)}: ${attr}="${url}" ne postoji u dist/`);
     }
@@ -564,12 +671,14 @@ async function main() {
   const db = opts.source === "db" ? await loadDb(opts.dbUrl) : loadSeed();
   console.log(`Izvor podataka: ${opts.source === "db" ? "Firebase baza" : "data/seed.json"}`);
   validate(db);
-  const m = buildModel(db);
 
   // pripremi sve u privremeni folder, pa ga zamijeni s dist/ tek kad sve uspije
   const tmp = DIST + ".tmp";
   fs.rmSync(tmp, { recursive: true, force: true });
   fs.mkdirSync(tmp, { recursive: true });
+
+  const remoteFiles = await fetchRemoteImages(db, opts, tmp);
+  const m = buildModel(db);
 
   // assets s hešom sadržaja u imenu (zato smiju biti immutable)
   const assets = {};
@@ -605,7 +714,7 @@ async function main() {
   const copied = new Set();
   const copyImg = (id) => {
     const im = db.images[id];
-    if (copied.has(im.file)) return;
+    if (im.remote || copied.has(im.file)) return; // nove slike su već preuzete iz Storagea
     fs.mkdirSync(path.join(tmp, "img"), { recursive: true });
     fs.copyFileSync(path.join(SEED_IMG, im.file), path.join(tmp, "img", im.file));
     copied.add(im.file);
@@ -619,7 +728,7 @@ async function main() {
   if (fs.existsSync(PANEL)) {
     const manifest = { images: {}, published: m.varieties.map((v) => v.id) };
     for (const [key, v] of Object.entries(db.varieties)) {
-      const ids = (Array.isArray(v && v.images) ? v.images : []).filter((id) => db.images[id] && !db.images[id]._missing);
+      const ids = (Array.isArray(v && v.images) ? v.images : []).filter((id) => db.images[id] && db.images[id].file && !db.images[id]._missing);
       ids.forEach(copyImg);
       if (ids.length) manifest.images[key] = ids.map((id) => "/img/" + db.images[id].file);
     }
@@ -628,7 +737,6 @@ async function main() {
 
   const engine = createEngine((name) => fs.readFileSync(path.join(TPL, name), "utf8"));
   const list = pages(m, db);
-  const ogImage = m.abs(m.hero.src);
 
   for (const pg of list) {
     const isPage = pg.route.endsWith("/");
@@ -638,7 +746,9 @@ async function main() {
       description: pg.seo.description,
       canonical: m.siteUrl && isPage && !pg.seo.noindex ? m.siteUrl + pg.route : "",
       ogType: pg.seo.ogType || "website",
-      ogImage, ogImageW: m.hero.w, ogImageH: m.hero.h,
+      ogImage: m.abs(pg.seo.og ? pg.seo.og.src : m.hero.src),
+      ogImageW: pg.seo.og ? pg.seo.og.w : m.hero.w,
+      ogImageH: pg.seo.og ? pg.seo.og.h : m.hero.h,
       noindex: !!pg.seo.noindex,
       schema: (pg.seo.schema || []).map(jsonForScript),
     };
@@ -661,7 +771,7 @@ async function main() {
   fs.rmSync(DIST, { recursive: true, force: true });
   fs.renameSync(tmp, DIST);
 
-  console.log(`Izgrađeno ${list.length} stranica, ${copied.size} slika, za ${Date.now() - t0} ms:`);
+  console.log(`Izgrađeno ${list.length} stranica, ${copied.size} slika${remoteFiles ? ` + ${remoteFiles} fajlova iz Storagea` : ""}, za ${Date.now() - t0} ms:`);
   const vp = list.filter((p) => p.route.startsWith("/sorte/") && p.route !== "/sorte/");
   for (const p of list) if (!vp.includes(p)) console.log("  " + p.route);
   console.log(`  /sorte/<slug>/ × ${vp.length} (${vp.filter((p) => p.seo.noindex).length} noindex, bez slike)`);
