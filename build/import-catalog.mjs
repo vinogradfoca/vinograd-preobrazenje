@@ -19,7 +19,7 @@ const CATALOG = path.join(ROOT, "nacrt", "stari-sajt", "catalog.js");
 const SEED = path.join(ROOT, "data", "seed.json");
 
 // Adresa sajta: ako u postojećem seedu nije upisana, uvoz je postavlja (i nikad je ne briše)
-const SITE_URL = "https://vinograd-preobrazenje.netlify.app";
+const SITE_URL = "https://vinograd-preobrazenje.pages.dev";
 
 const FACT_KEYS = ["origin", "author", "maturity", "clusterWeight", "berryWeight", "berrySize", "frost", "disease", "taste"];
 

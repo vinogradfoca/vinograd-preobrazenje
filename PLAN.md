@@ -7,31 +7,38 @@ Pravila rada: grane i PR-ovi (nikad direktno u `main`), vanilla HTML/CSS/JS, tek
 
 ## 1. Otvorene odluke (preporuke, provjereno 30.10.2026)
 
-### 1.1 Hosting: Vercel (odlučeno)
-Novi nalozi na jednom novom Gmail-u: Gmail, pa GitHub, pa Vercel (prijava preko tog GitHub-a), pa Firebase (isti Google nalog).
+### 1.1 Hosting: Cloudflare Pages, besplatni plan (odlučeno)
+Hosting je bio planiran na Vercelu, pa je radio na Netlifyju. Od Dijela 7 sajt i panel su na Cloudflare Pages, a Netlify se više ne koristi.
 
-Provjereno 31.10.2026. u Vercelovoj dokumentaciji:
-- **Deploy hook:** URL koji prima POST (ili GET) i pokreće build zadnjeg commita zadate grane. Nema autorizacije, pa je URL lozinka: živi samo u Vercel varijabli okruženja (`DEPLOY_HOOK_URL`), nikad u repou ni u pregledaču. Najviše 5 hookova po projektu i 60 okidanja na sat po projektu. Ponovljeni zahtjevi za istu verziju otkazuju prethodni deploy.
-- **Odluka vlasnika: ostaje Hobby, bez prelaska na Pro.** Hobby je po Vercelovim pravilima samo za nekomercijalnu ličnu upotrebu, a sajt je komercijalan. To je svjesno prihvaćen rizik: Vercel može pauzirati projekat. Zato su obavezne mjere iz 1.1a.
-- **Na Hobbyju samo vlasnik naloga može okidati deploy.** Git autor commita mora biti vlasnik Vercel naloga, inače deploy ne prolazi ("Git author must have access to the project on Vercel"). Zato svi commitovi i PR-ovi moraju ići pod istim GitHub nalogom koji je vlasnik Vercel naloga. Nema drugih članova na Hobbyju. Provjeriti na prvom PR-u pod kojim identitetom Code piše.
-- **Greške pri pauziranju:** ako se projekat pauzira, posjetioci vide 503 DEPLOYMENT_PAUSED ili 402 DEPLOYMENT_DISABLED, a Vercel šalje mejl na adresu naloga. Taj mejl mora biti na adresi koju neko čita.
-- Adresa je `….vercel.app` dok nema vlastitog domena. Adresa sajta je samo u `settings/siteUrl` i mijenja se na jednom mjestu. Vlastiti domen je preporuka čim bude moguće.
-- Fallback: Cloudflare Pages (uslovi pročitani 30.10.2026.: komercijalna upotreba na free planu dozvoljena, 500 buildova mjesečno, preview buildovi se broje). Pošto je sajt čist statički `dist/`, selidba je jeftina.
+- **Projekat:** `vinograd-preobrazenje`, povezan s GitHub repoom i gradi granu `main`. Adresa je `vinograd-preobrazenje.pages.dev` dok nema vlastitog domena.
+- **Build:** komanda `node build/build.mjs --db`, izlazni folder `dist`, `NODE_VERSION=20`. U korijenu repoa je i `.node-version` sa `20`.
+- **Zaglavlja:** fajl `_headers` u korijenu repoa. Build ga kopira u `dist/_headers`, jer Cloudflare čita zaglavlja iz izlaznog foldera.
+- **Objava:** dugme "Objavi" ide na Pages Function `functions/api/publish.js` (putanja `/api/publish`), koja pozove deploy hook (vidi 4.5).
+- **Deploy hook:** URL koji na POST pokreće izgradnju grane `main`. Nema autorizacije, pa je URL lozinka. Živi samo u tajnoj varijabli projekta (`DEPLOY_HOOK_URL`), nikad u repou ni u pregledaču.
+- **Besplatni plan:**
+  - 500 izgradnji mjesečno, a broje se i pregledi grana i PR-ova;
+  - statika nema limit prometa;
+  - komercijalna upotreba je dozvoljena (uslovi pročitani 30.10.2026.).
+- **Adresa sajta** je samo u `settings/siteUrl` i mijenja se na jednom mjestu. Vlastiti domen je preporuka čim bude moguće.
 
-### 1.1a Mjere zbog Hobbyja (obavezne)
-1. Mejl Vercel naloga je adresa koju neko stvarno čita: Vercel o pauzi obavještava mejlom.
+### 1.1a Mjere (obavezne)
+1. Mejl Cloudflare naloga je adresa koju neko stvarno čita.
 2. Besplatan uptime monitor na adresi sajta, koji šalje poruku kad sajt padne.
-3. Repo je potpuna kopija sajta. Build mora raditi bez ičega Vercel-specifičnog osim `vercel.json` i `api/publish.js`, da bi selidba na Cloudflare Pages bila stvar sat vremena: povezati repo, isti build command i output, funkciju "Objavi" prepisati u Pages Function, promijeniti `DEPLOY_HOOK_URL`.
-4. Periodičan izvoz Firebase baze, da sadržaj nije samo na jednom mjestu.
-5. Ne praviti nepotrebne deployove: svaki "Objavi" je jedan.
+3. Repo je potpuna kopija sajta. Build ne zavisi od hostinga: jedino što je vezano za Cloudflare su `_headers` i `functions/api/publish.js`. Selidba na drugi statički hosting znači:
+   - povezati repo;
+   - isti build command i izlaz;
+   - prepisati funkciju "Objavi";
+   - promijeniti `DEPLOY_HOOK_URL`.
+4. Periodičan izvoz Firebase baze (panel: Podešavanja → Kopija podataka), da sadržaj nije samo na jednom mjestu.
+5. Ne praviti nepotrebne izgradnje: svaki "Objavi" je jedna, a svaki push na granu ili PR je još jedna. Panel upozorava od 300 objava mjesečno.
 
 ### 1.2 Firebase: Blaze plan je obavezan zbog Storagea
 - Od 3.2.2026. Cloud Storage za Firebase traži Blaze plan (vezana kartica) čak i bez potrošnje. Bez kartice nema bucketa.
 - Besplatna kvota ostaje: 5 GB pohrane i 100 GB prenosa mjesečno. Za ovaj sajt trošak je praktično nula.
 - **Blaze nema tvrdi limit potrošnje.** Obavezno postaviti budget alert (npr. 5 €) u Google Cloud Billing. Pitanje čija je kartica na Blaze planu odlučuje se prije otvaranja projekta (vidi 7).
-- Slike posjetioci ne vuku iz Storagea: build ih kopira u `dist/img/`, pa saobraćaj ide preko Vercela.
+- Slike posjetioci ne vuku iz Storagea: build ih kopira u `dist/img/`, pa saobraćaj ide preko Cloudflare Pages.
 - Standardna Firebase prijava (mejl i lozinka) je besplatna.
-- Cloud Functions traže Blaze i nisu potrebne: funkcija "Objavi" ide kao Vercel Function (vidi 4.5).
+- Cloud Functions traže Blaze i nisu potrebne: funkcija "Objavi" ide kao Cloudflare Pages Function (vidi 4.5).
 - Fallback ako ne bude kartice: slike kao base64 u bazi ili u repou. Lošije, bira se samo ako Blaze otpadne.
 
 ### 1.3 Baza: Realtime Database
@@ -128,7 +135,7 @@ Napomena: baza se čita javno, pa je i neobjavljeni nacrt tehnički čitljiv ono
 - Čitanje javno za `vinograd/img/**`.
 - Upis samo ta dva uid-a, samo `image/webp`, najviše 5 MB po fajlu.
 
-UID-ovi nisu tajne i mogu biti u pravilima. Hook, API ključevi i sve ostalo tajno idu samo u Vercel varijable okruženja.
+UID-ovi nisu tajne i mogu biti u pravilima. Hook, API ključevi i sve ostalo tajno idu samo u varijable (tajne) Cloudflare Pages projekta.
 
 ---
 
@@ -138,18 +145,18 @@ UID-ovi nisu tajne i mogu biti u pravilima. Hook, API ključevi i sve ostalo taj
 1. Admin uređuje sadržaj u panelu, koji piše u bazu.
 2. Dugme "Objavi" šalje zahtjev na `/api/publish`.
 3. Funkcija provjeri prijavu i uid, pa pozove deploy hook.
-4. Vercel pokreće `node build/build.mjs` (Framework Preset: Other, Build Command: `node build/build.mjs`, Output Directory: `dist`).
+4. Cloudflare Pages pokreće `node build/build.mjs --db` (izlazni folder `dist`, `NODE_VERSION=20`).
 5. Skripta čita bazu, pravi stranice i slike u `dist/`.
-6. Ako izgradnja padne (izlaz različit od 0), Vercel ne mijenja produkciju i prethodna verzija ostaje.
+6. Ako izgradnja padne (izlaz različit od 0), Cloudflare ne mijenja produkciju i prethodna verzija ostaje.
 
-Dok ne postoji dugme Objavi u panelu, nova verzija sajta se pravi ručno: Netlify, Deploys, Trigger deploy, Deploy site.
+Ručno se nova verzija pravi u Cloudflare Pages projektu ponovnim pokretanjem zadnje izgradnje (retry deployment) ili pushom na `main`.
 
 ### 4.2 Skripta za izgradnju (`build/build.mjs`)
 - Čist Node, bez vanjskih biblioteka. Čita `vinograd.json` GET-om, bez prijave.
 - Mali vlastiti šablonski mehanizam (`{{var}}`, petlje, HTML escaping svega).
 - Prije pisanja provjerava podatke: obavezna polja, slike koje postoje, jedinstveni slug-ovi. Pri grešci prekida izgradnju s jasnom porukom.
 - Preuzima varijante slika iz Storagea u `dist/img/` (posjetioci ne diraju Firebase).
-- Piše `build.json` (`{ builtAt }`). Zaglavlja su u `vercel.json` u korijenu repoa: duga keširanost (`immutable`) za `/img/*` i `no-cache` za `/build.json`, uz `cleanUrls` i `trailingSlash`.
+- Piše `build.json` (`{ builtAt }`) i kopira `_headers` iz korijena repoa u `dist/_headers`: duga keširanost (`immutable`) za `/img/*` i `/assets/*`, `no-cache` za `/build.json`, `X-Robots-Tag: noindex` za `/panel/*`. Stranice su u folderima s `index.html`, pa čisti URL-ovi ne trebaju posebna podešavanja.
 - Opcija `--seed` čita lokalni `data/seed.json` umjesto baze, za razvoj bez mreže.
 
 ### 4.3 Šta mora biti u HTML-u (bez prepisivanja JavaScriptom)
@@ -167,12 +174,14 @@ Build ne piše u bazu. Panel dobija stanje preko `build.json` na samom sajtu:
 - Do tada piše "Objavljuje se…".
 - Ako za ~5 minuta nema promjene: "Izgradnja nije uspjela ili još traje. Sajt ostaje na prethodnoj verziji."
 
-### 4.5 Funkcija "Objavi" (`api/publish.js`, Vercel Function, Node)
+### 4.5 Funkcija "Objavi" (`functions/api/publish.js`, Cloudflare Pages Function)
+- `export async function onRequestPost(context)`: zahtjev je `context.request`, a varijable su u `context.env` (`DEPLOY_HOOK_URL`, `ADMIN_UIDS`, `FIREBASE_API_KEY`).
 - Prima ID token iz zaglavlja.
 - Token provjerava preko Google Identity Toolkit (`accounts:lookup`) i ne piše vlastitu kriptografiju.
 - Poredi `localId` sa listom `ADMIN_UIDS` iz varijable okruženja.
 - Samo ako je uid na listi, šalje POST na `DEPLOY_HOOK_URL`. Inače vraća 401 ili 403.
-- Ne vraća hook URL ni tajne. Vercel dozvoljava 60 okidanja na sat po projektu, pa funkcija odbija zahtjeve češće od jednog na 30 sekundi.
+- Ne vraća hook URL ni tajne i ne ispisuje ih. Odbija zahtjeve češće od jednog na 30 sekundi (u okviru jedne instance funkcije).
+- Testovi: `node tests/publish.test.mjs` (lažni Identity Toolkit i lažni hook).
 
 ---
 
@@ -193,14 +202,14 @@ Build ne piše u bazu. Panel dobija stanje preko `build.json` na samom sajtu:
 Svaki korak je jedna grana i jedan PR. Ja pregledam preview i spajam.
 
 **Korak 0: priprema (ja, ručno, bez Codea)**
-- Novi Gmail, pa GitHub nalog s tim mejlom, pa Vercel (prijava preko tog GitHub-a), pa Firebase (isti Google nalog).
+- Novi Gmail, pa GitHub nalog s tim mejlom, pa Cloudflare (Pages povezan s tim GitHub-om), pa Firebase (isti Google nalog).
 - Firebase: Blaze plan i budget alert, Auth (mejl i lozinka) i dva korisnika, RTDB u `europe-west1`, Storage bucket.
-- Novi GitHub repo (privatan). Vercel projekat povezan s repoom, deploy hook (Settings, Git, Deploy Hooks, grana `main`), varijable `DEPLOY_HOOK_URL`, `ADMIN_UIDS`, Firebase web API ključ.
+- Novi GitHub repo (privatan). Cloudflare Pages projekat povezan s repoom, deploy hook za granu `main`, varijable `DEPLOY_HOOK_URL` (tajna), `ADMIN_UIDS`, `FIREBASE_API_KEY`.
 - Code dobija javne vrijednosti (Firebase config, adresa baze). Tajne nikad.
 
 **Korak 1: skelet i šabloni** (`skelet`)
 - Struktura repoa, `build.mjs --seed`, šabloni iz nacrta, `data/seed.json` s 26 sorti (naziv, boja, slike, sve ostalo prazno).
-- Cilj: prvi preview na `vercel.app` s pravim izgledom, bez Firebasea. Rana vizuelna potvrda.
+- Cilj: prvi preview na `pages.dev` s pravim izgledom, bez Firebasea. Rana vizuelna potvrda.
 
 **Korak 2: baza i pravila** (`baza`)
 - `database.rules.json`, `storage.rules`.
@@ -215,10 +224,10 @@ Svaki korak je jedna grana i jedan PR. Ja pregledam preview i spajam.
 - Konvertor (sekcija 5), upload, biblioteka slika, dodjela slika sortama i redoslijed.
 
 **Korak 5: objava** (`objavi`)
-- Vercel Function, dugme "Objavi", prikaz stanja (4.4), test sa dva naloga.
+- Pages Function, dugme "Objavi", prikaz stanja (4.4), test sa dva naloga.
 
 **Korak 6: SEO i brzina** (`seo-brzina`)
-- Schema, canonical, og, sitemap, robots, `vercel.json` zaglavlja, Lighthouse prolaz na telefonu, CLS 0.
+- Schema, canonical, og, sitemap, robots, `_headers` zaglavlja, Lighthouse prolaz na telefonu, CLS 0.
 
 **Korak 7: sadržaj** (ja i vlasnik)
 - Fotografije kroz panel, cijene, količine, opisi. Zamijeniti `web-dikson` i `web-nadezda-azos` (tuđi potpis na slikama) vlastitim fotografijama prije puštanja u rad.
@@ -229,7 +238,7 @@ Svaki korak je jedna grana i jedan PR. Ja pregledam preview i spajam.
 ---
 
 ## 7. Potrebno od vlasnika i od mene
-- Novi Gmail (predloženo `vinogradpreobrazenjefoca@gmail.com`, provjeriti da nije greška `.co`) kao nalog za GitHub, Vercel i Firebase. Dva korisnika u Firebase Auth: moj i vlasnikov mejl.
+- Novi Gmail (predloženo `vinogradpreobrazenjefoca@gmail.com`, provjeriti da nije greška `.co`) kao nalog za GitHub, Cloudflare i Firebase. Dva korisnika u Firebase Auth: moj i vlasnikov mejl.
 - Odluka čija je kartica na Firebase Blaze planu.
 - Cijene, količine, zrenje, opisi i iskustva po sortama. Do tada sajt piše "Cijena na upit".
 - Potvrda da WhatsApp radi na broju 065/592-120.

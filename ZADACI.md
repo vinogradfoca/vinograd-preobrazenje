@@ -8,25 +8,25 @@
 - Radiš redom: **Dio 1, Dio 2, Dio 3, Dio 4**. Poslije svakog dijela: provjeri u mock režimu, **commit i push na istu granu** s jasnom porukom ("Dio 1: Objavi", ...), pa dodaj kratak komentar u PR (šta je gotovo, šta nisi mogao provjeriti). PR otvori odmah poslije prvog dijela.
 - Ako neki dio ne uspiješ završiti, ostavi ga pošteno označenog u PR-u i nastavi na sljedeći. Nemoj ostaviti polovičan kod koji kvari ostale dijelove.
 - **Pravila baze i Storagea ne diraj** u ovom PR-u, ako ne postoji razlog bez kojeg nešto ne može raditi (tada obrazloži u PR-u). Pravila ista kao do sada: vanilla, bez npm paketa, bez tajni u kodu ni u repou, ništa ne izmišljaj, ijekavica, isti izgled panela (bijele kartice, krem pozadina, zelena #193d2b i bordo #891f3d, Georgia naslovi), cilj za dodir najmanje 44 px, polja najmanje 16 px. Ne diraj `build/` osim ako dio to izričito traži.
-- Firebase i Netlify nisu dostupni iz tvog okruženja. Sve provjeravaj u mock režimu (`/panel/?mock=1`) i lažnim serverima, a u opisu PR-a navedi šta je ostalo neprovjereno.
-- Kad završiš sve, opis PR-a neka sadrži: listu dijelova, šta ja ručno radim (ništa, osim varijabli u Netlifyju za Dio 1; pravila baze i Storagea se ne mijenjaju), kako se svaki dio isprobava na preview adresi (`/panel/`, prijava, pa konkretni koraci).
+- Firebase i Cloudflare nisu dostupni iz tvog okruženja. Sve provjeravaj u mock režimu (`/panel/?mock=1`) i lažnim serverima, a u opisu PR-a navedi šta je ostalo neprovjereno.
+- Kad završiš sve, opis PR-a neka sadrži: listu dijelova, šta ja ručno radim (ništa, osim varijabli u Cloudflare Pages projektu za Dio 1; pravila baze i Storagea se ne mijenjaju), kako se svaki dio isprobava na preview adresi (`/panel/`, prijava, pa konkretni koraci).
 
 ---
 
 ## Dio 1: Objavi (Korak 5 iz PANEL.md)
 
-Hosting je Netlify. Funkcija ide u `netlify/functions/publish.mjs` (moderna sintaksa: `export default async (req) => new Response(...)` i `export const config = { path: "/api/publish" }`; ako imaš pristup Netlify dokumentaciji, provjeri, ako ne, ovo je sintaksa za koju vjerujem da je tačna).
+Hosting je Cloudflare Pages (od Dijela 7; ranije Netlify). Funkcija je Pages Function `functions/api/publish.js` (`export async function onRequestPost(context)`, zahtjev u `context.request`, varijable u `context.env`), a putanju `/api/publish` daje sam fajl.
 
-1. **Funkcija:** prima POST sa zaglavljem `Authorization: Bearer <Firebase ID token>`. Token provjerava preko `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=<FIREBASE_API_KEY>` (POST sa `{"idToken": token}`), uzme `localId` i poredi ga s listom `ADMIN_UIDS` iz `process.env` (odvojeno zarezom). Samo ako je na listi, pošalje POST na `process.env.DEPLOY_HOOK_URL`, pa vrati `{ok:true, requestedAt}` (vrijeme servera). Inače 401 (nema ili loš token) ili 403 (nije admin). Hook URL i tajne se nigdje ne vraćaju ni ne ispisuju.
+1. **Funkcija:** prima POST sa zaglavljem `Authorization: Bearer <Firebase ID token>`. Token provjerava preko `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=<FIREBASE_API_KEY>` (POST sa `{"idToken": token}`), uzme `localId` i poredi ga s listom `ADMIN_UIDS` iz `context.env` (odvojeno zarezom). Samo ako je na listi, pošalje POST na `context.env.DEPLOY_HOOK_URL`, pa vrati `{ok:true, requestedAt}` (vrijeme servera). Inače 401 (nema ili loš token) ili 403 (nije admin). Hook URL i tajne se nigdje ne vraćaju ni ne ispisuju.
 2. **Ekran Objavi** (zamijeni "Uskoro"): jedno veliko dugme "Objavi na sajt". Iznad broj izmjena koje čekaju (sorte i stranice čiji je `updatedAt` noviji od zadnje objave `publish/last/requestedAt`; ako zadnje objave nema, broji sve). Status: "Objavljuje se…", "Objavljeno u HH:MM", ili "Izgradnja nije uspjela ili još traje. Sajt ostaje na prethodnoj verziji." (poslije 6 minuta bez promjene). Status čita sa `/build.json` (`builtAt`, uz cache-bust parametar) svakih 10 sekundi dok traje objava. Pri kliku: pošalji ID token na `/api/publish`, pa upiši `vinograd/publish/last = {requestedAt, requestedBy (UID)}` i `vinograd/publish/history/<push-ključ> = {requestedAt, requestedBy}`. Ispod prikaži zadnjih pet objava (vrijeme i ime po mapi UID → ime koja već postoji u panelu).
-3. **Brojač za Netlify:** besplatni paket ima 300 kredita mjesečno, a svaka objava košta 15 kredita (plus promet), pa je granica oko 20 objava mjesečno (dijeli se s ostalim deployima). Prikaži "Objava ovog mjeseca: N" (iz `publish/history`) i upozorenje "Netlify besplatni paket dozvoljava oko 20 objava mjesečno. Skupi više izmjena pa objavi jednom." kad je N ≥ 12.
+3. **Brojač za Cloudflare:** besplatni Cloudflare Pages dozvoljava 500 izgradnji mjesečno (računaju se i pregledi grana i PR-ova). Prikaži "Objava ovog mjeseca: N" (iz `publish/history`) i upozorenje "Cloudflare besplatni paket dozvoljava 500 izgradnji mjesečno. Skupi više izmjena pa objavi jednom." kad je N ≥ 300.
 4. **Pravila baze se NE mijenjaju.** Pravilo `vinograd/.write` već dozvoljava adminima upis na svaku putanju ispod `vinograd` (uključujući `publish`), a `.read` je javan. Ne dodaji nove `.validate` za ovaj dio.
 5. **Mock režim:** dugme radi bez poziva funkcije, uz simulirano "Objavljuje se…" pa "Objavljeno u HH:MM", i traku "PROBNI REŽIM".
 6. **Greške** na bosanskom (nema veze, nema dozvole, sporo), s dugmetom "Pokušaj ponovo".
 
 Provjera: test funkcije lokalno u Nodeu s lažnim Identity Toolkitom i lažnim hookom (nema tokena, loš token, nije admin, admin, hook vrati grešku). Panel u mocku (Playwright).
 
-Ja u Netlifyju podešavam varijable `DEPLOY_HOOK_URL`, `ADMIN_UIDS` i `FIREBASE_API_KEY` (za Functions). Ti ih samo čitaš iz `process.env`.
+Ja u Cloudflare Pages projektu podešavam varijable `DEPLOY_HOOK_URL`, `ADMIN_UIDS` i `FIREBASE_API_KEY`. Ti ih samo čitaš iz `context.env`.
 
 ---
 

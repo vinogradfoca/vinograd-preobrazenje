@@ -25,6 +25,7 @@ const SEED = path.join(ROOT, "data", "seed.json");
 const SEED_IMG = path.join(ROOT, "data", "seed-img");
 const FIREBASE_CONFIG = path.join(ROOT, "firebase-config.json");
 const PANEL = path.join(ROOT, "panel");
+const HEADERS = path.join(ROOT, "_headers");
 
 const warnings = [];
 const warn = (m) => warnings.push(m);
@@ -233,7 +234,7 @@ function validate(db) {
     if (isStr(s.phoneIntl) && !/^\d{8,15}$/.test(s.phoneIntl)) E.push("settings.phoneIntl: samo cifre, bez + i bez vodećih nula (npr. 38765592120)");
     if (isStr(s.email) && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.email)) E.push(`settings.email: "${s.email}" nije ispravna adresa`);
     if (s.mapUrl && !/^https:\/\//.test(s.mapUrl)) E.push("settings.mapUrl: mora počinjati sa https://");
-    if (s.siteUrl && !/^https:\/\/[^\s/]+(\/[^\s]*)?$/.test(s.siteUrl)) E.push(`settings.siteUrl: "${s.siteUrl}" mora biti puna adresa, npr. https://primjer.netlify.app`);
+    if (s.siteUrl && !/^https:\/\/[^\s/]+(\/[^\s]*)?$/.test(s.siteUrl)) E.push(`settings.siteUrl: "${s.siteUrl}" mora biti puna adresa, npr. https://primjer.pages.dev`);
   }
 
   // images
@@ -778,6 +779,9 @@ async function main() {
   writeFile(path.join(tmp, "sitemap.xml"), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.join("\n")}\n</urlset>\n`);
   writeFile(path.join(tmp, "robots.txt"), `User-agent: *\nAllow: /\n${m.siteUrl ? `\nSitemap: ${m.siteUrl}/sitemap.xml\n` : ""}`);
   writeFile(path.join(tmp, "build.json"), JSON.stringify({ builtAt: now }) + "\n");
+  // _headers (Cloudflare Pages čita zaglavlja iz izlaznog foldera)
+  if (!fs.existsSync(HEADERS)) { fs.rmSync(tmp, { recursive: true, force: true }); throw new BuildError(["_headers: fajl nedostaje u korijenu repoa (zaglavlja za Cloudflare Pages)"]); }
+  fs.copyFileSync(HEADERS, path.join(tmp, "_headers"));
 
   const broken = checkLinks(tmp);
   if (broken.length) { fs.rmSync(tmp, { recursive: true, force: true }); throw new BuildError(broken); }
@@ -789,7 +793,7 @@ async function main() {
   const vp = list.filter((p) => p.route.startsWith("/sorte/") && p.route !== "/sorte/");
   for (const p of list) if (!vp.includes(p)) console.log("  " + p.route);
   console.log(`  /sorte/<slug>/ × ${vp.length} (${vp.filter((p) => p.seo.noindex).length} noindex, bez slike)`);
-  console.log("  /sitemap.xml\n  /robots.txt\n  /build.json");
+  console.log("  /sitemap.xml\n  /robots.txt\n  /build.json\n  /_headers");
 }
 
 try {

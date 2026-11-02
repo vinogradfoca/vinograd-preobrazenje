@@ -1,24 +1,24 @@
-// Netlify Function: POST /api/publish
-// Pokreće novu izgradnju sajta (Netlify build hook), ali samo za prijavljenog admina.
+// Cloudflare Pages Function: POST /api/publish (putanju daje sam fajl: functions/api/publish.js)
+// Pokreće novu izgradnju sajta (Cloudflare Pages deploy hook), ali samo za prijavljenog admina.
 //
 // Zahtjev:  POST, zaglavlje Authorization: Bearer <Firebase ID token>
 // Odgovor:  200 { ok: true, requestedAt }   (vrijeme servera, ms)
 //           401 nema tokena ili token nije ispravan
 //           403 prijavljen, ali nije admin
-//           405 nije POST
+//           405 GET (ostale metode Cloudflare ne prosljeđuje ovoj funkciji)
 //           429 objava je pokrenuta prije manje od 30 s
 //           500 funkcija nije podešena (nedostaje varijabla okruženja)
-//           502 Identity Toolkit ili build hook nije odgovorio kako treba
+//           502 Identity Toolkit ili deploy hook nije odgovorio kako treba
 //
-// Varijable okruženja (Netlify → Site configuration → Environment variables, scope Functions):
+// Varijable (Cloudflare Pages projekat → Settings → varijable i tajne, za Production):
 //   FIREBASE_API_KEY   javni web API ključ Firebase projekta
 //   ADMIN_UIDS         UID-ovi admina odvojeni zarezom
-//   DEPLOY_HOOK_URL    build hook (tajna: nikad se ne vraća ni ne ispisuje)
+//   DEPLOY_HOOK_URL    deploy hook (tajna: nikad se ne vraća ni ne ispisuje)
 //
 // Token se provjerava preko Google Identity Toolkita (accounts:lookup), bez vlastite kriptografije.
 
 const LOOKUP = "https://identitytoolkit.googleapis.com/v1/accounts:lookup";
-const MIN_GAP_MS = 30 * 1000; // Netlify hook: najviše jedna objava na 30 s (u okviru jedne instance funkcije)
+const MIN_GAP_MS = 30 * 1000; // najviše jedna objava na 30 s (u okviru jedne instance funkcije)
 let lastPublishAt = 0;
 
 const json = (status, body) => new Response(JSON.stringify(body), {
@@ -26,12 +26,15 @@ const json = (status, body) => new Response(JSON.stringify(body), {
   headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" },
 });
 
-export default async (req) => {
-  if (req.method !== "POST") return json(405, { ok: false, error: "method" });
+export function onRequestGet() {
+  return json(405, { ok: false, error: "method" });
+}
 
-  const apiKey = process.env.FIREBASE_API_KEY;
-  const hook = process.env.DEPLOY_HOOK_URL;
-  const admins = String(process.env.ADMIN_UIDS || "").split(",").map((s) => s.trim()).filter(Boolean);
+export async function onRequestPost(context) {
+  const req = context.request, env = context.env || {};
+  const apiKey = env.FIREBASE_API_KEY;
+  const hook = env.DEPLOY_HOOK_URL;
+  const admins = String(env.ADMIN_UIDS || "").split(",").map((s) => s.trim()).filter(Boolean);
   if (!apiKey || !hook || !admins.length) {
     console.error("publish: nedostaje FIREBASE_API_KEY, DEPLOY_HOOK_URL ili ADMIN_UIDS");
     return json(500, { ok: false, error: "config" });
@@ -68,16 +71,14 @@ export default async (req) => {
     return json(429, { ok: false, error: "too-soon", retryAfter: Math.ceil((MIN_GAP_MS - (now - lastPublishAt)) / 1000) });
   }
 
-  // 4) build hook (adresa se nigdje ne vraća ni ne ispisuje)
+  // 4) deploy hook (adresa se nigdje ne vraća ni ne ispisuje)
   try {
     const h = await fetch(hook, { method: "POST", signal: AbortSignal.timeout(15000) });
-    if (!h.ok) { console.error("publish: build hook HTTP", h.status); return json(502, { ok: false, error: "hook" }); }
+    if (!h.ok) { console.error("publish: deploy hook HTTP", h.status); return json(502, { ok: false, error: "hook" }); }
   } catch (e) {
-    console.error("publish: build hook nedostupan:", e && e.name);
+    console.error("publish: deploy hook nedostupan:", e && e.name);
     return json(502, { ok: false, error: "hook" });
   }
   lastPublishAt = now;
   return json(200, { ok: true, requestedAt: now });
-};
-
-export const config = { path: "/api/publish" };
+}

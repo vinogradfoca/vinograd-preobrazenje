@@ -7,7 +7,7 @@
       "email": "vinogradfoca@gmail.com",
       "address": "Šuba bb, Foča",
       "mapUrl": "https://maps.app.goo.gl/zjia9Jqr959i946s9",
-      "siteUrl": "https://vinograd-preobrazenje.netlify.app"
+      "siteUrl": "https://vinograd-preobrazenje.pages.dev"
     },
     "pages": {
       "home": {
@@ -25,11 +25,11 @@
         "steps": [
           {
             "title": "Izaberite sortu.",
-            "text": "U katalogu otvorite sortu, izaberite sadnicu ili reznicu i količinu, pa dodajte u korpu."
+            "text": "U katalogu otvorite sortu, izaberite sadnicu ili reznicu i količinu, pa dodajte u upit."
           },
           {
             "title": "Pošaljite upit.",
-            "text": "U korpi upišite ime i telefon. Poruka se složi sama, a vi je šaljete preko WhatsApp-a ili e-maila."
+            "text": "U upitu upišite ime i telefon. Poruka se složi sama, a vi je šaljete preko WhatsApp-a ili e-maila."
           },
           {
             "title": "Dogovor.",

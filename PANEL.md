@@ -115,7 +115,7 @@ Cilj: dodati mnogo slika odjednom (npr. 149) bez rada sliku po sliku.
 
 ## 8. Sigurnost
 
-Pravila baze i Storagea kako piše u `PLAN.md` sekcija 3. Upis samo za dva uid-a. Panel ne sadrži nikakve tajne. Firebase config i adresa baze su javne vrijednosti i smiju biti u kodu. Hook, `ADMIN_UIDS` i ostalo su samo u varijablama okruženja na Netlifyju.
+Pravila baze i Storagea kako piše u `PLAN.md` sekcija 3. Upis samo za dva uid-a. Panel ne sadrži nikakve tajne. Firebase config i adresa baze su javne vrijednosti i smiju biti u kodu. Hook, `ADMIN_UIDS` i ostalo su samo u varijablama Cloudflare Pages projekta.
 
 ## 9. Redoslijed rada za Code (zamjenjuje Korake 3 do 5)
 
@@ -126,7 +126,7 @@ Svaki korak je jedna grana i jedan PR. Prije svega treba Korak 2 iz `PLAN.md` (p
 - **4a:** konvertor slika, upload i biblioteka slika po sorti.
 - **4b:** uvoz slika po imenu (sekcija 5).
 - **4c:** nova sorta korak po korak.
-- **5:** Objavi (Netlify Function ili ekvivalent, dugme, status preko `build.json`), nakon provjere načina na koji Netlify prima build hook.
+- **5:** Objavi (Cloudflare Pages Function, dugme, status preko `build.json`).
 - **6 i dalje:** SEO i brzina, sadržaj, kako piše u `PLAN.md`.
 
-Napomena o objavi: hosting je Netlify, pa `api/publish.js` iz `PLAN.md` postaje Netlify Function (`netlify/functions/publish.js`). Funkcija provjerava ID token preko Google Identity Toolkita, poredi `localId` sa listom `ADMIN_UIDS` i tek tada poziva build hook. Tačne korake provjeriti u Netlifyjevoj dokumentaciji prije Koraka 5.
+Napomena o objavi: hosting je Cloudflare Pages, pa je funkcija iz `PLAN.md` 4.5 Pages Function (`functions/api/publish.js`, putanja `/api/publish`). Funkcija provjerava ID token preko Google Identity Toolkita, poredi `localId` sa listom `ADMIN_UIDS` i tek tada poziva deploy hook.
