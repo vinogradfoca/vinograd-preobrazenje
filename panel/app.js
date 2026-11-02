@@ -1,6 +1,7 @@
-// Panel Vinograda Preobraženje (Koraci 3a i 4a).
+// Panel Vinograda Preobraženje (Koraci 3a, 3b, 4a, 4b, 4c i 5).
 // Ekrani: prijava, Početna, Sorte, Uređivanje sorte (sa slikama), Cijene i količine,
-// Slike (biblioteka i dodavanje), Objavi, Dodaj sortu (čarobnjak), Promijeni lozinku.
+// Slike (biblioteka, dodavanje, uvoz po imenu), Objavi, Dodaj sortu (čarobnjak),
+// Podešavanja (kontakt, tekstovi stranica, promjena lozinke).
 import { createDb } from "./db.js";
 import { similarVarieties, uniqueSlug, matchFile } from "./match.js";
 import { convertImage, canMakeWebp, storagePaths, sha256Hex, ACCEPT, NO_WEBP_MSG, WIDTHS } from "./images.js";
@@ -194,6 +195,7 @@ function commitInput(input) {
 function onViewChange(e) {
   const el = e.target;
   if (location.hash.startsWith("#/uvoz") && impOnChange(el)) return;
+  if (el.matches("[data-sp]")) return commitSP(el);
   if (el.matches("input[type=file][data-upload]")) return onFilesChosen(el);
   if (el.matches("input[data-imgalt]")) return commitAlt(el);
   if (el.id === "libSorta") { const f = $("#libFile"); f.disabled = !el.value || !S.webp; f.closest("label").setAttribute("aria-disabled", String(f.disabled)); return; }
@@ -209,7 +211,7 @@ function onViewInput(e) {
   if (el.matches && el.matches("[data-impname]")) return impOnInput(el);
   if (el.id === "wName") { WIZ.name = el.value; WIZ.allowSimilar = false; const w = $("#wizSimilar"); if (w) w.innerHTML = ""; fieldError(el, ""); return; }
   const c = el.closest(".field")?.querySelector("[data-count]");
-  if (c && (el.tagName === "TEXTAREA" || el.dataset.max)) c.textContent = `${el.value.length} znakova` + (el.dataset.max ? ` (preporuka do ${el.dataset.max})` : "");
+  if (c && (el.tagName === "TEXTAREA" || el.dataset.max || el.dataset.sp)) c.textContent = `${el.value.length} znakova` + (el.dataset.max ? ` (preporuka do ${el.dataset.max})` : "");
 }
 function onViewClick(e) {
   const b = e.target.closest("button");
@@ -567,7 +569,8 @@ function screenPostavke() {
     };
   });
   return `
-    ${head("Podešavanja")}
+    ${head("Podešavanja", "Kontakt i tekstovi stranica. Snima se čim napustiš polje, a posjetioci izmjene vide poslije objave.")}
+    ${settingsSectionsHtml()}
     <div class="card">
       <h2>Promijeni lozinku</h2>
       ${S.mock ? `<p class="muted small">U probnom režimu promjena se samo glumi. "pogresna-lozinka" kao trenutna lozinka glumi grešku.</p>` : ""}
@@ -580,13 +583,9 @@ function screenPostavke() {
       </form>
       <div id="pwMsg" role="alert"></div>
     </div>
-    <div class="card"><h2>Prijavljen</h2><p class="muted">${esc(S.user.email)}</p><button type="button" class="btn ghost wide" id="out3">Odjava</button></div>
-    <div class="card"><h2>Kontakt i tekstovi stranica</h2><p class="muted">Uređivanje kontakta i tekstova stranica dolazi uskoro.</p></div>`;
+    <div class="card"><h2>Prijavljen</h2><p class="muted">${esc(S.user.email)}</p><button type="button" class="btn ghost wide" id="out3">Odjava</button></div>`;
 }
 
-function screenSoon(title, text) {
-  return `${head(title)}<div class="card"><p><span class="soon">Uskoro</span></p><p>${text}</p></div><p><a class="btn outline" href="#/">Nazad na početnu</a></p>`;
-}
 
 // ------------------------------------------------------------------ slike (Korak 4a)
 let uploading = 0; // dok traje upload, liste se ne iscrtavaju ponovo
@@ -1324,6 +1323,95 @@ async function offerResume() {
   const box = $("#impResume"); if (!box) return;
   const recs = await idbAll();
   box.innerHTML = recs.length ? `<a class="btn outline wide" href="#/uvoz?nastavi=1">Nastavi uvoz (${recs.length} preostalo)</a>` : "";
+}
+
+// ------------------------------------------------------------------ Kontakt i tekstovi stranica (Dio 4)
+// Samo polja koja već postoje u bazi (settings, pages/home, pages/kako, pages/kontakt).
+// Snimanje kao i ostatak panela: po polju, uz updatedAt/updatedBy čvora (settings ili pages/<p>).
+// "req": polje koje sajt mora imati (build bez njega pada), pa se ne smije isprazniti.
+const SP_SECTIONS = () => {
+  const steps = (getIn(S.data, "pages/kako/steps") || []);
+  const stepList = Array.isArray(steps) ? steps : Object.keys(steps).sort((a, b) => a - b).map((k) => steps[k]);
+  return [
+    { id: "settings", title: "Kontakt", root: "settings", fields: [
+      ["settings/phone", "Telefon", "req", "Kako se prikazuje na sajtu, npr. 065/592-120."],
+      ["settings/phoneIntl", "WhatsApp broj", "phoneIntl", "Samo cifre, bez + i bez nule na početku, npr. 38765592120."],
+      ["settings/email", "Mejl", "email"],
+      ["settings/address", "Adresa", "req"],
+      ["settings/mapUrl", "Link na mapu", "url", "Počinje sa https://. Prazno znači bez linka."],
+      ["settings/siteUrl", "Adresa sajta", "readonly", "Samo za čitanje. Mijenja se u bazi."],
+    ] },
+    { id: "home", title: "Početna stranica", root: "pages/home", fields: [
+      ["pages/home/eyebrow", "Natpis iznad naslova", "opt"],
+      ["pages/home/title", "Naslov", "reqArea", "Novi red u naslovu je i novi red na sajtu."],
+      ["pages/home/text", "Tekst ispod naslova", "reqArea"],
+      ["pages/home/heroAlt", "Opis naslovne slike", "req", "Za čitače ekrana i Google."],
+      ["pages/home/seoTitle", "Naslov za Google", "opt", "", 60],
+      ["pages/home/seoDescription", "Opis za Google", "optArea", "", 155],
+    ] },
+    { id: "kako", title: "Kako naručiti", root: "pages/kako", fields: [
+      ["pages/kako/title", "Naslov stranice", "req"],
+      ["pages/kako/intro", "Uvodni tekst", "optArea", "Prazno znači bez uvoda."],
+      ...stepList.flatMap((_, i) => [[`pages/kako/steps/${i}/title`, `Korak ${i + 1}: naslov`, "req"], [`pages/kako/steps/${i}/text`, `Korak ${i + 1}: tekst`, "reqArea"]]),
+      ["pages/kako/seoTitle", "Naslov za Google", "opt", "Prazno znači automatski.", 60],
+      ["pages/kako/seoDescription", "Opis za Google", "optArea", "Prazno znači automatski.", 155],
+    ] },
+    { id: "kontakt", title: "O nama i kontakt (stranica)", root: "pages/kontakt", fields: [
+      ["pages/kontakt/title", "Naslov odjeljka", "req"],
+      ["pages/kontakt/about", "Tekst o vinogradu", "reqArea"],
+      ["pages/kontakt/seoTitle", "Naslov za Google", "opt", "Prazno znači automatski.", 60],
+      ["pages/kontakt/seoDescription", "Opis za Google", "optArea", "Prazno znači automatski.", 155],
+    ] },
+  ];
+};
+const SP_CHECK = {
+  req: (t) => (t ? { value: t } : { error: "Ovo polje ne smije biti prazno, sajt ga prikazuje." }),
+  reqArea: (t) => SP_CHECK.req(t),
+  opt: (t) => ({ value: t || null }),
+  optArea: (t) => ({ value: t || null }),
+  phoneIntl: (t) => (!t ? { error: "WhatsApp broj ne smije biti prazan." } : !/^\d+$/.test(t) ? { error: "Upiši samo cifre, bez +, razmaka i crtica. Npr. 38765592120." }
+    : t.startsWith("0") ? { error: "Bez nule na početku: počni pozivnim brojem države, npr. 387." } : t.length < 8 || t.length > 15 ? { error: "Broj mora imati od 8 do 15 cifara." } : { value: t }),
+  email: (t) => (!t ? { error: "Mejl ne smije biti prazan." } : !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(t) ? { error: "Mejl nije ispravan. Npr. ime@gmail.com." } : { value: t }),
+  url: (t) => (!t ? { value: null } : !/^https:\/\/\S+$/.test(t) ? { error: "Link mora počinjati sa https:// (kopiraj ga iz Google mapa)." } : { value: t }),
+};
+function spSummary(sec) {
+  const f = sec.fields.filter((x) => x[2] !== "readonly");
+  const n = f.filter((x) => str(getIn(S.data, x[0])).trim()).length;
+  return n === f.length ? "popunjeno" : n === 0 ? "prazno" : `popunjeno ${n} od ${f.length}`;
+}
+function spField([path, label, kind, hint = "", max = 0]) {
+  const id = "sp-" + path.replace(/\//g, "-"), val = str(getIn(S.data, path));
+  const area = /Area$/.test(kind);
+  const input = kind === "readonly"
+    ? `<input id="${id}" type="text" value="${esc(val)}" readonly aria-readonly="true" class="ro">`
+    : area ? `<textarea id="${id}" data-sp="${path}" data-spk="${kind}"${max ? ` data-max="${max}"` : ""}>${esc(val)}</textarea>`
+      : `<input id="${id}" type="${kind === "email" ? "email" : kind === "url" ? "url" : "text"}"${kind === "phoneIntl" ? ' inputmode="numeric"' : ""} data-sp="${path}" data-spk="${kind}" value="${esc(val)}"${max ? ` data-max="${max}"` : ""} autocomplete="off">`;
+  return `<div class="field"><label for="${id}">${label}${/^req|phoneIntl|email/.test(kind) ? "" : kind === "readonly" ? "" : ' <span class="muted small">(neobavezno)</span>'}</label>${input}
+    ${hint || max || area ? `<div class="hint"><span>${hint}</span>${max || area ? `<span data-count>${val.length} znakova${max ? ` (preporuka do ${max})` : ""}</span>` : ""}</div>` : ""}</div>`;
+}
+function commitSP(el) {
+  const path = el.dataset.sp, kind = el.dataset.spk;
+  const t = el.value.trim();
+  const r = SP_CHECK[kind](t);
+  if (r.error) { fieldError(el, r.error); return; }
+  fieldError(el, "");
+  const cur = getIn(S.data, path) ?? null;
+  if ((cur === "" ? null : cur) === r.value) { if (el.value !== (r.value ?? "")) el.value = r.value ?? ""; return; }
+  el.value = r.value ?? "";
+  const root = path.startsWith("settings/") ? "settings" : path.split("/").slice(0, 2).join("/");
+  setIn(S.data, path, r.value);
+  setIn(S.data, root + "/updatedAt", Date.now()); setIn(S.data, root + "/updatedBy", S.user.uid);
+  send({ [path]: r.value, [root + "/updatedAt"]: S.db.TIMESTAMP, [root + "/updatedBy"]: S.user.uid });
+  const sec = SP_SECTIONS().find((s) => s.root === root);
+  const sm = $(`#sum-${sec.id}`); if (sm) sm.textContent = spSummary(sec);
+}
+function spMeta(root) {
+  const at = num(getIn(S.data, root + "/updatedAt")), by = getIn(S.data, root + "/updatedBy");
+  return at ? `Zadnja izmjena: ${NAMES[by] || "nepoznat korisnik"}, ${fmtDate(at)}` : "";
+}
+function settingsSectionsHtml() {
+  return SP_SECTIONS().map((sec, i) => `<details class="sec" data-spsec="${sec.id}"${i === 0 ? " open" : ""}><summary>${sec.title} <small id="sum-${sec.id}">${spSummary(sec)}</small></summary>
+    <div class="secbody">${spMeta(sec.root) ? `<p class="hint"><span>${esc(spMeta(sec.root))}</span></p>` : ""}${sec.fields.map(spField).join("")}</div></details>`).join("");
 }
 
 // ------------------------------------------------------------------ usmjeravanje

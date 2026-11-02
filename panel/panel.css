@@ -244,3 +244,7 @@ select.search{appearance:auto}
 .check input{width:22px;height:22px;accent-color:var(--green2);flex:0 0 auto}
 .btn.sm{min-height:44px;padding:0 12px;font-size:15px}
 @media(min-width:760px){.impgrid{grid-template-columns:1fr 1fr}}
+
+/* Podešavanja (Dio 4) */
+.field input.ro{background:#f0f3f1;color:var(--muted)}
+.field input[type=url]{width:100%;min-height:48px;border:1px solid #c9d3cc;border-radius:12px;padding:10px 12px;background:#fff}
