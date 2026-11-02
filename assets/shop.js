@@ -54,6 +54,25 @@
     clearTimeout(tt); tt = setTimeout(function () { t.classList.remove("on"); }, 2200);
   }
 
+  /* ---------- traka pri dnu: Pošalji upit i Podijeli (stranica sorte) ---------- */
+  var barUpit = $("#barUpit");
+  if (barUpit) barUpit.addEventListener("click", function () { openPanel(cartEl, $("#cartBtn")); });
+  var barShare = $("#barShare");
+  if (barShare) barShare.addEventListener("click", function () {
+    var d = barShare.dataset, url = d.url || location.href;
+    var copied = function () { toast("Link je kopiran"); };
+    var copy = function () {
+      if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(url).then(copied, fallback);
+      else fallback();
+    };
+    var fallback = function () { window.prompt("Kopirajte link:", url); };
+    if (navigator.share) {
+      navigator.share({ title: d.title || document.title, text: d.text || "", url: url }).catch(function (e) {
+        if (!e || e.name !== "AbortError") copy();
+      });
+    } else copy();
+  });
+
   /* ---------- korpa (localStorage) ---------- */
   var CART_KEY = "vp-cart-v1";
   var cart = [];
@@ -75,7 +94,7 @@
   }
   function addToCart(id, kind, qty) {
     if (!MAP) {
-      loadData().then(function () { addToCart(id, kind, qty); }, function () { toast("Korpa trenutno nije dostupna. Nazovite nas."); });
+      loadData().then(function () { addToCart(id, kind, qty); }, function () { toast("Upit trenutno nije dostupan. Nazovite nas."); });
       return;
     }
     var x = byId(id); if (!x) return;
@@ -85,7 +104,7 @@
     it.qty += qty;
     if (o.qty !== null) it.qty = Math.min(it.qty, o.qty);
     saveCart(); renderCart();
-    toast(x.name + " (" + KIND[kind].toLowerCase() + ") je u korpi");
+    toast(x.name + " (" + KIND[kind].toLowerCase() + ") je dodan u upit");
   }
   function setQty(id, kind, q) {
     var it = find(id, kind); if (!it) return;
@@ -118,9 +137,9 @@
   function renderCart() {
     $("#cartCount").textContent = cart.reduce(function (a, i) { return a + i.qty; }, 0);
     var box = $("#cartItems");
-    if (cart.length && !MAP) { $("#cartFoot").hidden = true; box.innerHTML = '<div class="empty">Učitavanje korpe…</div>'; return; }
+    if (cart.length && !MAP) { $("#cartFoot").hidden = true; box.innerHTML = '<div class="empty">Učitavanje upita…</div>'; return; }
     if (!cart.length) {
-      box.innerHTML = '<div class="empty">Korpa je prazna.<br><a href="/sorte/" class="btn outline">Pogledajte sorte</a></div>';
+      box.innerHTML = '<div class="empty">Upit je prazan.<br><a href="/sorte/" class="btn outline">Pogledajte sorte</a></div>';
       $("#cartFoot").hidden = true; return;
     }
     $("#cartFoot").hidden = false;
@@ -168,7 +187,7 @@
   // podaci se učitavaju odmah samo ako korpa nije prazna; inače pri prvom otvaranju ili dodavanju
   function ensureData() {
     loadData().then(function () { cleanCart(); renderCart(); }, function () {
-      if (cart.length) $("#cartItems").innerHTML = '<div class="empty">Korpa trenutno nije dostupna. Pokušajte ponovo ili nas nazovite.</div>';
+      if (cart.length) $("#cartItems").innerHTML = '<div class="empty">Upit trenutno nije dostupan. Pokušajte ponovo ili nas nazovite.</div>';
     });
   }
   if (cart.length) ensureData();
@@ -196,7 +215,7 @@
         qty[k] = q; st.querySelector("span").textContent = q;
       }
     });
-    loadData().catch(function () {}); // da "U korpu" radi odmah
+    loadData().catch(function () {}); // da "Dodaj u upit" radi odmah
   }
 
   /* ---------- katalog: filteri samo skrivaju kartice koje su već u HTML-u ---------- */
@@ -206,7 +225,7 @@
     var val = function (id) { var el = document.getElementById(id); return el ? el.value : ""; };
     var filter = function () {
       var q = val("search").trim().toLowerCase(), c = val("fColor"), r = val("fRipen"), ty = val("fType");
-      var a = $("#fAvail").checked, n = 0;
+      var fa = document.getElementById("fAvail"), a = !!(fa && fa.checked), n = 0;
       cards.forEach(function (el) {
         var d = el.dataset;
         var ok = (!q || d.name.indexOf(q) !== -1) && (!c || d.color === c) && (!r || d.ripen === r) && (!ty || d.type === ty) && (!a || d.avail === "1");

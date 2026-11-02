@@ -28,7 +28,7 @@
     <img class="logo" data-logo src="{{logo.src}}" width="{{logo.w}}" height="{{logo.h}}" alt="Vinograd Preobraženje" onerror="this.parentNode.classList.add('nologo')">
     <span class="wordmark">Vinograd <b>Preobraženje</b></span>
   </a>
-  <button class="icon-btn" id="cartBtn" aria-label="Korpa" aria-controls="cart" aria-expanded="false">🛒 <b id="cartCount" class="badge">0</b></button>
+  <button class="icon-btn" id="cartBtn" aria-label="Upit" aria-controls="cart" aria-expanded="false">🛒 <b id="cartCount" class="badge">0</b></button>
 </header>
 
 <aside id="drawer" aria-label="Meni">
@@ -48,10 +48,10 @@
   <b>{{site.name}}</b> · {{site.address}} · <a href="{{site.tel}}">{{site.phone}}</a> · <a href="mailto:{{site.email}}">{{site.email}}</a>
 </footer>
 
-<aside id="cart" class="cart" aria-label="Korpa">
+<aside id="cart" class="cart" aria-label="Upit">
   <button class="close" id="cartClose" aria-label="Zatvori">×</button>
-  <h2>Vaša korpa</h2>
-  <div id="cartItems"><div class="empty">Korpa je prazna.<br><a href="/sorte/" class="btn outline">Pogledajte sorte</a></div></div>
+  <h2>Vaš upit</h2>
+  <div id="cartItems"><div class="empty">Upit je prazan.<br><a href="/sorte/" class="btn outline">Pogledajte sorte</a></div></div>
   <div id="cartFoot" hidden>
     <div class="cart-total">Ukupno <b id="total">0,00 KM</b></div>
     <p id="totalNote" class="muted small"></p>
@@ -64,6 +64,14 @@
     <a class="btn ghost wide" href="{{site.tel}}">☎ Radije zovem</a>
   </div>
 </aside>
+
+<div class="cbar{{#if bar.variety}} cbar3{{/if}}" id="cbar">
+{{#if bar.variety}}  <button type="button" class="btn outline" id="barShare" data-url="{{bar.url}}" data-title="{{bar.title}}" data-text="{{bar.text}}">Podijeli</button>
+  <a class="btn outline" href="{{site.wa}}" target="_blank" rel="noopener">WhatsApp</a>
+  <button type="button" class="btn primary" id="barUpit" aria-controls="cart">Pošalji upit</button>
+{{else}}  <a class="btn outline" href="{{site.tel}}">☎ Pozovi</a>
+  <a class="btn primary" href="{{site.wa}}" target="_blank" rel="noopener">WhatsApp</a>
+{{/if}}</div>
 
 <div id="toast" role="status"></div>
 

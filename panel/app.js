@@ -196,6 +196,7 @@ function onViewChange(e) {
   const el = e.target;
   if (location.hash.startsWith("#/uvoz") && impOnChange(el)) return;
   if (el.matches("[data-sp]")) return commitSP(el);
+  if (el.id === "showNoImg") return commitShowNoImg(el);
   if (el.matches("input[type=file][data-upload]")) return onFilesChosen(el);
   if (el.matches("input[data-imgalt]")) return commitAlt(el);
   if (el.id === "libSorta") { const f = $("#libFile"); f.disabled = !el.value || !S.webp; f.closest("label").setAttribute("aria-disabled", String(f.disabled)); return; }
@@ -575,6 +576,9 @@ function screenPostavke() {
   return `
     ${head("Podešavanja", "Kontakt i tekstovi stranica. Snima se čim napustiš polje, a posjetioci izmjene vide poslije objave.")}
     ${settingsSectionsHtml()}
+    <div class="card"><h2>Prikaz na sajtu</h2>
+      <label class="switch"><span>Prikaži na sajtu sorte bez slike<small>Kad je isključeno, sorte bez slike nisu u katalogu, na početnoj ni u cjenovniku. Stranica sorte i dalje postoji.</small></span><input type="checkbox" id="showNoImg"${getIn(S.data, "settings/showWithoutImage") !== false ? " checked" : ""}></label>
+    </div>
     <div class="card">
       <h2>Promijeni lozinku</h2>
       ${S.mock ? `<p class="muted small">U probnom režimu promjena se samo glumi. "pogresna-lozinka" kao trenutna lozinka glumi grešku.</p>` : ""}
@@ -1426,6 +1430,13 @@ function commitSP(el) {
   send({ [path]: r.value, [root + "/updatedAt"]: S.db.TIMESTAMP, [root + "/updatedBy"]: S.user.uid });
   const sec = SP_SECTIONS().find((s) => s.root === root);
   const sm = $(`#sum-${sec.id}`); if (sm) sm.textContent = spSummary(sec);
+}
+// settings/showWithoutImage: kad polja nema, build ga tretira kao uključeno (true)
+function commitShowNoImg(el) {
+  const v = el.checked;
+  setIn(S.data, "settings/showWithoutImage", v);
+  setIn(S.data, "settings/updatedAt", Date.now()); setIn(S.data, "settings/updatedBy", S.user.uid);
+  send({ "settings/showWithoutImage": v, "settings/updatedAt": S.db.TIMESTAMP, "settings/updatedBy": S.user.uid });
 }
 function spMeta(root) {
   const at = num(getIn(S.data, root + "/updatedAt")), by = getIn(S.data, root + "/updatedBy");

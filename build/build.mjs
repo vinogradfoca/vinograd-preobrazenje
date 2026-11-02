@@ -385,17 +385,27 @@ function buildModel(db) {
       priceSapling: v.sapling.enabled && v.sapling.price != null ? KM(v.sapling.price) : "–",
       priceCutting: v.cutting.enabled && v.cutting.price != null ? KM(v.cutting.price) : "–",
       available,
-      small: available ? (prices.length ? "od " + KM(Math.min(...prices)) : "Cijena na upit") : "Trenutno nedostupno",
+      // kartica: cijena samo kad postoji (najniža od sadnice i reznice); bez cijene nema teksta
+      small: available ? (prices.length ? "od " + KM(Math.min(...prices)) : "") : "Trenutno nedostupno",
+      // kartica: "Boja · Zrenje"; bez zrenja ili kad je zrenje "Za provjeru", samo boja
+      line: v.color + (ripen && ripen !== CHECK ? " · " + ripen : ""),
+      hasQty: kinds.some((k) => v[k].qty != null),
       search: v.name.toLowerCase(),
       seoTitle: v.seoTitle, seoDescription: v.seoDescription,
       kindsText: kinds.length === 2 ? "sadnice i reznice" : kinds[0] === "sapling" ? "sadnice" : kinds[0] === "cutting" ? "reznice" : "",
     };
   });
 
+  // settings/showWithoutImage: kad je false, sorte bez slike nisu u katalogu, na početnoj ni u
+  // cjenovniku (stranica sorte se i dalje pravi, noindex). Polje koje ne postoji = uključeno.
+  const showNoImg = s.showWithoutImage !== false;
+  const catalog = showNoImg ? varieties : varieties.filter((v) => v.hasImage);
+  const anyQty = catalog.some((v) => v.hasQty); // filter "Samo dostupno" samo kad neka sorta ima količinu
+
   // izdvojene; ako nijedna nije označena, prvih 6 koje imaju sliku
-  let featured = varieties.filter((v) => v.featured);
-  if (!featured.length) featured = varieties.filter((v) => v.hasImage).slice(0, 6);
-  if (!featured.length) featured = varieties.slice(0, 6);
+  let featured = catalog.filter((v) => v.featured);
+  if (!featured.length) featured = catalog.filter((v) => v.hasImage).slice(0, 6);
+  if (!featured.length) featured = catalog.slice(0, 6);
   const options = (key) => {
     const vals = new Set(varieties.map((v) => v[key]).filter(Boolean));
     const known = ORDER[key].filter((x) => vals.has(x));
@@ -442,6 +452,7 @@ function buildModel(db) {
   return {
     s, siteUrl, abs, hero, logo, varieties, featured, hasPrices, nav, cartData, localBusiness,
     options: { color: options("color"), ripen: options("ripen"), type: options("type") },
+    catalog, anyQty,
     common: {
       hero, varieties, logo,
       site: {
@@ -469,16 +480,17 @@ function pages(m, db) {
   }, {
     home: { eyebrow: home.eyebrow || "", text: home.text, titleLines: home.title.split("\n").map((t, i) => ({ t, br: i > 0 })) },
     featured: m.featured,
-    sortCount: sorti(m.varieties.length) + " u ponudi",
+    sortCount: sorti(m.catalog.length) + " u ponudi",
   });
 
   // /sorte/
   add("/sorte/", "sorte.html", "sorte", {
     title: "Sorte vinove loze | " + name,
-    description: clip(`Katalog sorti vinove loze: ${sorti(m.varieties.length)}, sadnice i reznice. ${name}, ${m.s.address}.`),
+    description: clip(`Katalog sorti vinove loze: ${sorti(m.catalog.length)}, sadnice i reznice. ${name}, ${m.s.address}.`),
   }, {
-    total: m.varieties.length,
-    resultCount: `${m.varieties.length} od ${m.varieties.length} sorti`,
+    total: m.catalog.length,
+    resultCount: `${m.catalog.length} od ${m.catalog.length} sorti`,
+    catalog: m.catalog, showAvail: m.anyQty,
     colorOptions: m.options.color, ripenOptions: m.options.ripen, typeOptions: m.options.type,
   });
 
@@ -509,6 +521,8 @@ function pages(m, db) {
       description: v.seoDescription || clip(v.desc || fallbackDesc),
       schema: [product],
       ogType: "product",
+      // traka pri dnu stranice sorte
+      bar: { variety: true, url: m.abs(v.url), title: v.name, text: `${v.name} – ${[v.ripen, v.color, v.type].filter((x) => x && x !== CHECK).map((x) => x.toLowerCase()).join(" ")} sorta`.replace(" –  sorta", " – sorta") },
       // pregled linka: og varijanta prve slike, ako je prva slika nova (iz panela); inače slika sa početne
       og: v.cover && v.cover.og ? v.cover.og : null,
       // stranica bez ijedne slike ostaje u katalogu, ali je noindex i nije u sitemapi dok ne dobije sliku
@@ -523,8 +537,8 @@ function pages(m, db) {
       description: clip(`Cijene sadnica i reznica vinove loze. Cijene su informativne, za precizne detalje pozovite ${m.s.phone}.`),
     }, {
       // u tabeli su samo sorte s bar jednom unesenom cijenom; ostale su "na upit"
-      priced: m.varieties.filter((v) => v.priceSapling !== "–" || v.priceCutting !== "–"),
-      unpricedCount: m.varieties.filter((v) => v.priceSapling === "–" && v.priceCutting === "–").length,
+      priced: m.catalog.filter((v) => v.priceSapling !== "–" || v.priceCutting !== "–"),
+      unpricedCount: m.catalog.filter((v) => v.priceSapling === "–" && v.priceCutting === "–").length,
     });
   } else {
     warn("Nijedna cijena nije unesena: /cjenovnik/ se ne generiše i nije u meniju.");
@@ -752,7 +766,7 @@ async function main() {
       noindex: !!pg.seo.noindex,
       schema: (pg.seo.schema || []).map(jsonForScript),
     };
-    let html = engine.render("layout.html", { ...m.common, seo, assets, nav: m.nav(pg.navKey), content });
+    let html = engine.render("layout.html", { ...m.common, seo, assets, nav: m.nav(pg.navKey), content, bar: pg.seo.bar || { variety: false } });
     html = finishImages(html, pg.route);
     writeFile(routeToFile(tmp, pg.route), html);
   }
