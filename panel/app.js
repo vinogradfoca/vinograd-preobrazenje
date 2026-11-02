@@ -240,6 +240,8 @@ function onViewClick(e) {
   else if (b.dataset.retry) retryUpload(b.dataset.retry);
   else if (b.dataset.attach) attachExisting(b);
   else if (b.hasAttribute("data-pub-retry")) { PUB.phase = ""; doPublish(); }
+  else if (b.dataset.delimg) deleteImageDialog(b.dataset.delimg);
+  else if (b.id === "backupBtn") downloadBackup(b);
 }
 
 // ------------------------------------------------------------------ dijeljenje
@@ -492,11 +494,13 @@ function screenEdit(key) {
       <button type="button" class="btn ghost" id="hideBtn">${v.visible !== false ? "Sakrij sortu" : "Prikaži sortu"}</button>
       <a class="btn green" href="#/sorte">Gotovo</a>
     </div>
+    <button type="button" class="btn danger wide" id="delBtn">Obriši sortu</button>
   </div>`;
 }
 function bindEdit(key) {
   const hb = $("#hideBtn");
   if (!hb) return;
+  const delb = $("#delBtn"); if (delb) delb.onclick = () => deleteVarietyDialog(key);
   hb.onclick = () => {
     const show = V(key).visible === false;
     if (!show && !confirm(`Sakriti sortu "${V(key).name}"? Neće se vidjeti na sajtu poslije sljedeće objave. Može se ponovo prikazati.`)) return;
@@ -583,6 +587,8 @@ function screenPostavke() {
       </form>
       <div id="pwMsg" role="alert"></div>
     </div>
+    <div class="card"><h2>Kopija podataka</h2><p class="muted small">Sve sorte, tekstovi i podešavanja u jednom fajlu (JSON), za čuvanje na sigurnom mjestu.</p>
+      <button type="button" class="btn outline wide" id="backupBtn">Preuzmi kopiju podataka</button></div>
     <div class="card"><h2>Prijavljen</h2><p class="muted">${esc(S.user.email)}</p><button type="button" class="btn ghost wide" id="out3">Odjava</button></div>`;
 }
 
@@ -605,7 +611,7 @@ function renderImgBox(key) {
   const box = $("#imgBox"); if (!box) return;
   const v = V(key), list = imgList(v);
   if (!list.length) { box.innerHTML = `<p class="muted">Sorta još nema slika.</p>`; return; }
-  box.innerHTML = `<p class="hint"><span>Prva slika je naslovna. Strelicama mijenjaš redoslijed. "Ukloni" sklanja sliku samo sa ove sorte, a slika ostaje u biblioteci.</span></p>` +
+  box.innerHTML = (list.length > 8 ? `<p class="warnbox" id="manyImg">Mnogo slika usporava sajt i troši promet. Razmisli da neke ukloniš.</p>` : "") + `<p class="hint"><span>Prva slika je naslovna. Strelicama mijenjaš redoslijed. "Ukloni" sklanja sliku samo sa ove sorte, a slika ostaje u biblioteci.</span></p>` +
     list.map((ref, i) => {
       const src = imgSrc(ref), isNew = isNewImg(ref), im = isNew ? S.data.images[ref] : null;
       return `<div class="imrow">
@@ -815,7 +821,8 @@ function libList() {
       <img src="${esc(imgSrc(id))}" alt="" loading="lazy">
       <div><div class="libalt">${esc(im.alt || "(bez opisa)")}</div>
         <div class="hint"><span>${u.length ? `u ${u.length} ${u.length === 1 ? "sorti" : "sorte"}: ${esc(u.slice(0, 3).join(", "))}${u.length > 3 ? "…" : ""}` : "nije dodijeljena nijednoj sorti"}</span></div>
-        <div class="hint"><span>${im.w}×${im.h} px${im.createdAt ? " · " + esc(fmtDate(im.createdAt)) : ""}</span></div></div>
+        <div class="hint"><span>${im.w}×${im.h} px${im.createdAt ? " · " + esc(fmtDate(im.createdAt)) : ""}</span></div>
+        <button type="button" class="btn ghost sm delimgbtn" data-delimg="${esc(id)}">Obriši sliku trajno</button></div>
     </div>`;
   }).join("") : `<p class="empty">${q ? "Nema slika s tim opisom." : "Još nema slika dodanih kroz panel. Starije slike sa sajta vide se kod svake sorte."}</p>`;
 }
@@ -866,7 +873,7 @@ function pendingChanges() {
     ...["home", "kako", "kontakt"].map((p) => num(getIn(S.data, `pages/${p}/updatedAt`))),
     num(getIn(S.data, "settings/updatedAt")),
   ];
-  return { last, n: last == null ? items.length : items.filter((t) => t != null && t > last).length };
+  return { last, n: (last == null ? items.length : items.filter((t) => t != null && t > last).length) + pendingDeletions(last) };
 }
 function pubHistory() {
   const h = getIn(S.data, "publish/history") || {};
@@ -1429,6 +1436,108 @@ function settingsSectionsHtml() {
     <div class="secbody">${spMeta(sec.root) ? `<p class="hint"><span>${esc(spMeta(sec.root))}</span></p>` : ""}${sec.fields.map(spField).join("")}</div></details>`).join("");
 }
 
+// ------------------------------------------------------------------ Brisanje (Dio 5)
+// Prozor za potvrdu (isti izgled kao kartice panela). Esc i klik van prozora ga zatvaraju.
+function openModal(html, onOpen) {
+  closeModal();
+  const wrap = document.createElement("div");
+  wrap.className = "modalwrap"; wrap.id = "modal";
+  wrap.innerHTML = `<div class="modalbox card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">${html}</div>`;
+  wrap.addEventListener("click", (e) => { if (e.target === wrap || e.target.closest("[data-modal-close]")) closeModal(); });
+  document.body.appendChild(wrap); document.body.classList.add("modalopen");
+  if (onOpen) onOpen(wrap);
+  const f = wrap.querySelector("input,button:not([disabled])"); if (f) f.focus();
+}
+function closeModal() { const m = $("#modal"); if (m) m.remove(); document.body.classList.remove("modalopen"); }
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && $("#modal")) closeModal(); });
+
+// Brisanja koja čekaju objavu: svako brisanje sorte upiše publish/deletions/<ključ> = {at, by, ref}.
+// Brojač na ekranu Objavi broji one novije od zadnje objave. (Brisanje slike iz biblioteke se ne broji:
+// takva slika ne koristi nijedna sorta, pa ni sajt.)
+function pendingDeletions(last) {
+  const d = getIn(S.data, "publish/deletions") || {};
+  return Object.values(d).filter((x) => x && num(x.at) && (last == null || x.at > last)).length;
+}
+
+function deleteVarietyDialog(key) {
+  const v = V(key); if (!v) return;
+  openModal(`<h2 id="modalTitle">Obriši sortu "${esc(v.name)}"</h2>
+    <p class="warnbox" style="margin-top:10px">Ovo se ne može vratiti. Linkovi koje si već slao (/sorte/${esc(v.slug || key)}/) prestaju raditi poslije sljedeće objave. Ako nisi siguran, sakrij sortu.</p>
+    <p class="muted small">Slike ove sorte ostaju u biblioteci.</p>
+    <div class="field"><label for="delName">Upiši naziv sorte: <b>${esc(v.name)}</b></label><input id="delName" type="text" autocomplete="off"></div>
+    <div class="endbtns"><button type="button" class="btn ghost" data-modal-close>Odustani</button><button type="button" class="btn primary" id="delGo" disabled>Obriši sortu</button></div>
+    <div id="delMsg" role="alert"></div>`, (m) => {
+    const inp = m.querySelector("#delName"), go = m.querySelector("#delGo");
+    const same = () => inp.value.trim().toLowerCase() === String(v.name).trim().toLowerCase();
+    inp.addEventListener("input", () => { go.disabled = !same(); });
+    go.addEventListener("click", async () => {
+      if (!same()) return;
+      go.disabled = true; go.textContent = "Brišem…";
+      const dk = S.db.newKey("publish/deletions");
+      const rec = { at: S.db.TIMESTAMP, by: S.user.uid, ref: key };
+      try {
+        await S.db.update({ [`varieties/${key}`]: null, [`publish/deletions/${dk}`]: rec });
+      } catch {
+        m.querySelector("#delMsg").innerHTML = `<div class="notice bad">Nema veze, sorta nije obrisana. Pokušaj ponovo.</div>`;
+        go.disabled = false; go.textContent = "Obriši sortu"; return;
+      }
+      delete S.data.varieties[key];
+      setIn(S.data, `publish/deletions/${dk}`, { ...rec, at: Date.now() });
+      if (WIZ.key === key) WIZ.key = "";
+      closeModal();
+      location.hash = "#/sorte";
+      toast("Sorta je obrisana");
+    });
+  });
+}
+
+function imageUsers(id) {
+  return Object.entries(S.data.varieties).filter(([, v]) => imgList(v).includes(id)).map(([k, v]) => ({ key: k, name: v.name || k }));
+}
+function deleteImageDialog(id) {
+  const im = S.data.images[id]; if (!im) return;
+  const users = imageUsers(id);
+  openModal(`<h2 id="modalTitle">Obriši sliku trajno</h2>
+    <div class="delimg"><img src="${esc(imgSrc(id))}" alt=""><div><div class="libalt">${esc(im.alt || "(bez opisa)")}</div><div class="hint"><span>${im.w}×${im.h} px</span></div></div></div>
+    ${users.length
+      ? `<p class="warnbox">Prvo je ukloni sa sorti: ${users.map((u) => `<a href="#/sorta/${encodeURIComponent(u.key)}" data-modal-close>${esc(u.name)}</a>`).join(", ")}</p>`
+      : `<p class="warnbox">Ovo se ne može vratiti. Slika se briše iz biblioteke i sa servera (sve 4 veličine).</p>`}
+    <div class="endbtns"><button type="button" class="btn ghost" data-modal-close>Odustani</button><button type="button" class="btn primary" id="delImgGo"${users.length ? " disabled" : ""}>Obriši sliku</button></div>
+    <div id="delMsg" role="alert"></div>`, (m) => {
+    const go = m.querySelector("#delImgGo");
+    go.addEventListener("click", async () => {
+      if (imageUsers(id).length) return;
+      go.disabled = true; go.textContent = "Brišem…";
+      const paths = Object.values(im.variants || {}).map((x) => x && x.path).filter(Boolean);
+      try {
+        for (const p of paths) await S.db.deleteFile(p); // nepostojeći fajl nije greška
+        await S.db.update({ [`images/${id}`]: null }); // zapis tek kad su svi fajlovi obrisani
+      } catch {
+        m.querySelector("#delMsg").innerHTML = `<div class="notice bad">Nije obrisano do kraja, pokušaj ponovo.</div>`;
+        go.disabled = false; go.textContent = "Pokušaj ponovo"; return;
+      }
+      delete S.data.images[id];
+      closeModal(); libList(); toast("Slika je obrisana");
+    });
+  });
+}
+
+async function downloadBackup(btn) {
+  btn.disabled = true; const t = btn.textContent; btn.textContent = "Preuzimam…";
+  try {
+    const text = await S.db.exportData();
+    const d = new Date(), p = (x) => String(x).padStart(2, "0");
+    const name = `vinograd-kopija-${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}.json`;
+    const url = URL.createObjectURL(new Blob([text], { type: "application/json" }));
+    const a = document.createElement("a"); a.href = url; a.download = name; a.hidden = true;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    toast("Kopija je preuzeta: " + name);
+  } catch {
+    toast("Kopija nije preuzeta: nema veze. Pokušaj ponovo.");
+  } finally { btn.disabled = false; btn.textContent = t; }
+}
+
 // ------------------------------------------------------------------ usmjeravanje
 function route() {
   flushLater();
@@ -1478,6 +1587,7 @@ async function startApp(user) {
   S.db.watch("varieties", (val) => {
     if (!val) return;
     for (const [k, v] of Object.entries(val)) if (!S.data.varieties[k] || !debounced.size) S.data.varieties[k] = v;
+    for (const k of Object.keys(S.data.varieties)) if (!(k in val) && !debounced.size) delete S.data.varieties[k]; // obrisao drugi admin
     const typing = document.activeElement && view().contains(document.activeElement) && /INPUT|TEXTAREA/.test(document.activeElement.tagName);
     const h = location.hash;
     if (!typing && !uploading && (h === "" || h === "#/" || h.startsWith("#/sorte"))) route();
