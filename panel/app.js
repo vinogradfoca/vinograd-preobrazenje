@@ -230,6 +230,7 @@ function onViewClick(e) {
   } else if (b.dataset.share) shareVariety(b.dataset.share);
   else if (b.dataset.imgmove || b.dataset.imgdel) imgAction(b);
   else if (b.dataset.retry) retryUpload(b.dataset.retry);
+  else if (b.dataset.attach) attachExisting(b);
 }
 
 // ------------------------------------------------------------------ dijeljenje
@@ -708,7 +709,11 @@ async function processUpload(id) {
   let dup;
   try { dup = await S.db.findImageByHash(conv.hash); }
   catch { setRow(id, 0, `Nema veze, slika nije snimljena. <button type="button" class="link" data-retry="${id}">Pokušaj ponovo</button>`, "err"); return; }
-  if (dup) { setRow(id, 1, "Ova slika je već dodana.", "dup"); return; }
+  if (dup) {
+    if (imgList(V(key)).includes(dup)) setRow(id, 1, "Ova slika je već dodana ovoj sorti.", "dup");
+    else setRow(id, 1, `Ova slika je već u biblioteci. Dodaj je ovoj sorti? <button type="button" class="btn outline attach" data-attach="${esc(dup)}" data-attach-key="${esc(key)}" data-row="${id}">Dodaj ovoj sorti</button>`, "dup");
+    return;
+  }
 
   const imageId = S.db.newImageId();
   const paths = storagePaths(imageId);
@@ -757,6 +762,20 @@ async function processUpload(id) {
     if (dbTried) S.db.update({ [`images/${imageId}`]: null, [`varieties/${key}/images`]: oldList.length ? oldList : null }).catch(() => {});
     setRow(id, 0, `Slika nije snimljena: veza je prekinuta. <button type="button" class="link" data-retry="${id}">Pokušaj ponovo</button>`, "err");
   }
+}
+
+// slika koja je već u biblioteci (isti hash) dodaje se sorti bez novog uploada
+function attachExisting(b) {
+  const imageId = b.dataset.attach, key = b.dataset.attachKey;
+  if (!V(key)) return;
+  const list = imgList(V(key));
+  if (!list.includes(imageId)) {
+    list.push(imageId);
+    save(key, { images: list }); // cijeli niz u jednom upisu
+  }
+  setRow(b.dataset.row, 1, "✓ Dodana ovoj sorti (bez novog uploada).", "ok");
+  if (location.hash.startsWith("#/sorta/")) refreshImages(key);
+  if (location.hash.startsWith("#/slike")) libList();
 }
 
 // ekran Slike: biblioteka svih slika, najnovije prve

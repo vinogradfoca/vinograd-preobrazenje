@@ -2,9 +2,9 @@
   <p class="crumbs"><a href="/sorte/">← Sve sorte</a></p>
   <div class="mgrid">
     <div class="gallery">
-      {{#if v.hasImage}}<img id="mainImg" src="{{v.cover.src}}" width="{{v.cover.w}}" height="{{v.cover.h}}" alt="{{v.cover.alt}}">{{else}}<div class="noimg big {{v.colorClass}}" role="img" aria-label="Sorta {{v.name}}, fotografija još nije dodata">{{v.name}}</div>{{/if}}
+      {{#if v.hasImage}}<img id="mainImg" src="{{v.cover.src}}"{{#if v.cover.srcset}} srcset="{{v.cover.srcset}}" sizes="(max-width: 820px) 100vw, 600px"{{/if}} width="{{v.cover.w}}" height="{{v.cover.h}}" alt="{{v.cover.alt}}">{{else}}<div class="noimg big {{v.colorClass}}" role="img" aria-label="Sorta {{v.name}}, fotografija još nije dodata">{{v.name}}</div>{{/if}}
       {{#if v.multiple}}<div class="thumbs">
-        {{#each v.images}}<button type="button"{{#if on}} class="on"{{/if}} data-src="{{src}}" data-w="{{w}}" data-h="{{h}}" data-alt="{{alt}}" aria-label="{{label}}"><img src="{{src}}" width="{{w}}" height="{{h}}" alt=""></button>{{/each}}
+        {{#each v.images}}<button type="button"{{#if on}} class="on"{{/if}} data-src="{{src}}"{{#if srcset}} data-srcset="{{srcset}}"{{/if}} data-w="{{w}}" data-h="{{h}}" data-alt="{{alt}}" aria-label="{{label}}"><img src="{{thumb}}" width="{{w}}" height="{{h}}" alt=""></button>{{/each}}
       </div>{{/if}}
     </div>
     <div class="minfo">

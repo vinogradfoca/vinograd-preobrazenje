@@ -210,3 +210,4 @@ details.sec>summary small{font:600 13px Inter,system-ui,sans-serif;color:var(--m
 .libalt{font:700 16px Georgia,serif;word-break:break-word}
 select.search{appearance:auto}
 @media(min-width:760px){.libgrid{grid-template-columns:1fr 1fr}}
+.upmsg .attach{display:flex;width:100%;margin-top:8px;min-height:44px}
