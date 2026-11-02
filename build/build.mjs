@@ -460,7 +460,7 @@ function buildModel(db) {
         name: s.name, phone: s.phone, tel: telHref(s.phone), email: s.email, address: s.address,
         mapUrl: s.mapUrl || "", wa: "https://wa.me/" + s.phoneIntl, phoneIntl: s.phoneIntl,
       },
-      shopJson: jsonForScript({ phoneIntl: s.phoneIntl, email: s.email, name: s.name }),
+      shopJson: jsonForScript({ phoneIntl: s.phoneIntl, email: s.email, name: s.name, phone: s.phone, address: s.address || "" }),
     },
   };
 }

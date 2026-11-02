@@ -121,18 +121,51 @@
     });
     return { total: total, unpriced: unpriced };
   }
-  function buildMessage() {
-    var name = $("#cName").value.trim(), phone = $("#cPhone").value.trim(), note = $("#cNote").value.trim();
-    var t = cartTotals();
-    var m = "Zdravo, želim da pošaljem upit za narudžbu:\n\n";
-    cart.forEach(function (i) {
+  // Narudžbenica kao običan tekst (WhatsApp i mejl). Sve vrijednosti dolaze iz upita i
+  // iz settings (naziv, telefon, mejl, adresa); ništa se ne dodaje.
+  function newRef(d) {
+    var p = function (x) { return (x < 10 ? "0" : "") + x; };
+    var abc = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789", r = "";
+    var rnd = new Uint32Array(4);
+    if (window.crypto && crypto.getRandomValues) crypto.getRandomValues(rnd);
+    else for (var k = 0; k < 4; k++) rnd[k] = Math.floor(Math.random() * 4294967296);
+    for (var i = 0; i < 4; i++) r += abc.charAt(rnd[i] % abc.length);
+    return "UP-" + d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + "-" + r;
+  }
+  function buildMessage(ref, d) {
+    var name = $("#cName").value.trim(), phone = $("#cPhone").value.trim();
+    var email = $("#cEmail").value.trim(), note = $("#cNote").value.trim();
+    var L = [];
+    L.push("UPIT / NARUDŽBENICA");
+    if (SHOP.name) L.push(SHOP.name);
+    L.push("");
+    L.push("Datum: " + d.getDate() + ". " + (d.getMonth() + 1) + ". " + d.getFullYear() + ".");
+    L.push("Broj upita: " + ref);
+    L.push("");
+    L.push("KUPAC");
+    L.push("Ime i prezime: " + name);
+    L.push("Telefon: " + phone);
+    if (email) L.push("E-mail: " + email);
+    if (note) L.push("Napomena: " + note);
+    L.push("");
+    L.push("STAVKE");
+    var total = 0, allPriced = true;
+    cart.forEach(function (i, n) {
       var x = byId(i.id), o = x[i.kind];
-      m += "• " + x.name + " – " + KIND[i.kind].toLowerCase() + " × " + i.qty + (o.price != null ? " (" + KM(o.price * i.qty) + ")" : " (cijena na upit)") + "\n";
+      var line = (n + 1) + ". " + x.name + " – " + KIND[i.kind].toLowerCase() + " – " + i.qty + " kom";
+      if (o.price != null) { line += " × " + KM(o.price) + " = " + KM(o.price * i.qty); total += o.price * i.qty; }
+      else allPriced = false;
+      L.push(line);
     });
-    if (t.total > 0) m += "\nUkupno" + (t.unpriced ? " (bez stavki na upit)" : "") + ": " + KM(t.total) + "\n";
-    if (note) m += "\nNapomena: " + note + "\n";
-    m += "\nIme: " + name + "\nTelefon: " + phone;
-    return m;
+    L.push("");
+    L.push(allPriced ? "UKUPNO: " + KM(total) : "Cijenu potvrđujemo u odgovoru.");
+    L.push("");
+    L.push("KONTAKT");
+    if (SHOP.name) L.push(SHOP.name);
+    if (SHOP.phone) L.push("Telefon: " + SHOP.phone);
+    if (SHOP.email) L.push("E-mail: " + SHOP.email);
+    if (SHOP.address) L.push("Adresa: " + SHOP.address);
+    return L.join("\n");
   }
   function renderCart() {
     $("#cartCount").textContent = cart.reduce(function (a, i) { return a + i.qty; }, 0);
@@ -196,11 +229,13 @@
   });
   $("#sendWa").addEventListener("click", function (e) {
     if (!validateSend(e)) return;
-    this.href = "https://wa.me/" + SHOP.phoneIntl + "?text=" + encodeURIComponent(buildMessage());
+    var d = new Date();
+    this.href = "https://wa.me/" + SHOP.phoneIntl + "?text=" + encodeURIComponent(buildMessage(newRef(d), d));
   });
   $("#sendMail").addEventListener("click", function (e) {
     if (!validateSend(e)) return;
-    this.href = "mailto:" + SHOP.email + "?subject=" + encodeURIComponent("Upit za narudžbu – " + SHOP.name) + "&body=" + encodeURIComponent(buildMessage());
+    var d = new Date(), ref = newRef(d);
+    this.href = "mailto:" + SHOP.email + "?subject=" + encodeURIComponent("Upit / narudžbenica " + ref + (SHOP.name ? " – " + SHOP.name : "")) + "&body=" + encodeURIComponent(buildMessage(ref, d).replace(/\n/g, "\r\n"));
   });
   // korpa otvorena u drugoj kartici
   window.addEventListener("storage", function (e) {
