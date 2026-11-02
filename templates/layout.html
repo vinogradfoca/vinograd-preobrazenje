@@ -55,10 +55,11 @@
   <div id="cartFoot" hidden>
     <div class="cart-total">Ukupno <b id="total">0,00 KM</b></div>
     <p id="totalNote" class="muted small"></p>
-    <label>Ime i prezime<input id="cName" autocomplete="name"></label>
-    <label>Telefon<input id="cPhone" type="tel" autocomplete="tel"></label>
-    <label>Napomena<textarea id="cNote" rows="2"></textarea></label>
-    <p id="cartErr" class="err" role="alert"></p>
+    <label for="cName">Ime i prezime <span class="req" aria-hidden="true">*</span> <span class="opt">obavezno</span></label><input id="cName" autocomplete="name" aria-required="true" aria-describedby="cartErr">
+    <label for="cPhone">Telefon <span class="req" aria-hidden="true">*</span> <span class="opt">obavezno</span></label><input id="cPhone" type="tel" inputmode="tel" autocomplete="tel" aria-required="true" aria-describedby="cartErr">
+    <label for="cEmail">E-mail <span class="opt">neobavezno</span></label><input id="cEmail" type="email" inputmode="email" autocomplete="email">
+    <label for="cNote">Napomena <span class="opt">neobavezno</span></label><textarea id="cNote" rows="2"></textarea>
+    <p id="cartErr" class="err" role="alert" aria-live="assertive"></p>
     <a id="sendWa" class="btn primary wide" href="{{site.wa}}" target="_blank" rel="noopener">Pošalji upit na WhatsApp</a>
     <a id="sendMail" class="btn outline wide" href="mailto:{{site.email}}">Pošalji upit e-mailom</a>
     <a class="btn ghost wide" href="{{site.tel}}">☎ Radije zovem</a>

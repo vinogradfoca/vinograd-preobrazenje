@@ -591,11 +591,36 @@ function screenPostavke() {
       </form>
       <div id="pwMsg" role="alert"></div>
     </div>
+    <div class="card"><h2>Pomoć</h2><p class="muted small">Uputstvo za rad u panelu: dodavanje sorti, cijene, slike, objava i šta ako nešto ne radi.</p>
+      <a class="btn outline wide" href="#/pomoc">Otvori pomoć</a></div>
     <div class="card"><h2>Kopija podataka</h2><p class="muted small">Sve sorte, tekstovi i podešavanja u jednom fajlu (JSON), za čuvanje na sigurnom mjestu.</p>
       <button type="button" class="btn outline wide" id="backupBtn">Preuzmi kopiju podataka</button></div>
     <div class="card"><h2>Prijavljen</h2><p class="muted">${esc(S.user.email)}</p><button type="button" class="btn ghost wide" id="out3">Odjava</button></div>`;
 }
 
+
+// ------------------------------------------------------------------ Pomoć
+// Sadržaj je docs/uputstvo-za-panel.md, koji build pretvara u pomoc.html (bez baze).
+let pomocHtml = null; // učitava se jednom po otvaranju panela
+function screenPomoc() {
+  return `${head("Pomoć", "Uputstvo za rad u panelu. Dodirni naslov da otvoriš odjeljak.")}
+    <div id="pomoc" class="pomoc">${pomocHtml || `<p class="loading">Učitavanje…</p>`}</div>
+    <p><a class="btn ghost wide" href="#/postavke">Nazad na podešavanja</a></p>`;
+}
+async function loadPomoc() {
+  if (pomocHtml) return;
+  const box = $("#pomoc");
+  try {
+    const r = await fetch("pomoc.html", { cache: "no-cache" });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    pomocHtml = await r.text();
+    if (location.hash.startsWith("#/pomoc") && $("#pomoc")) $("#pomoc").innerHTML = pomocHtml;
+  } catch {
+    if (!location.hash.startsWith("#/pomoc") || !$("#pomoc")) return;
+    box.innerHTML = `<div class="notice bad">Pomoć se ne može učitati. Provjeri internet vezu.</div><button type="button" class="btn outline wide" id="pomocRetry">Pokušaj ponovo</button>`;
+    $("#pomocRetry").onclick = () => { box.innerHTML = `<p class="loading">Učitavanje…</p>`; loadPomoc(); };
+  }
+}
 
 // ------------------------------------------------------------------ slike (Korak 4a)
 let uploading = 0; // dok traje upload, liste se ne iscrtavaju ponovo
@@ -1563,6 +1588,7 @@ function route() {
     case "sorta": { const key = decodeURIComponent(parts[1] || ""); html = screenEdit(key); nav = "sorte"; after = () => bindEdit(key); break; }
     case "cijene": html = screenCijene(params); nav = "cijene"; break;
     case "postavke": html = screenPostavke(); after = () => ($("#out3").onclick = () => S.db.signOut()); break;
+    case "pomoc": html = screenPomoc(); after = loadPomoc; break;
     case "slike": html = screenSlike(); nav = "slike"; break;
     case "uvoz": html = screenUvoz(params); nav = "slike"; break;
     case "objavi": html = screenObjavi(); nav = "objavi"; after = () => ($("#pubBtn").onclick = doPublish); break;

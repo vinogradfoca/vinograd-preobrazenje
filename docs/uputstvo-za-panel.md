@@ -55,7 +55,7 @@ Sajt pokazuje količine kakve su bile u trenutku zadnje objave. Zato na sajtu pi
 1. Imenuj fajlove po sorti: `viktor-1.jpg`, `viktor-2.jpg`, `black-grand-1.jpg`. Broj na kraju je redoslijed.
 2. Dodirni **Slike**, pa **Uvoz po imenu**, izaberi sve fotografije.
 3. Panel ih sam upari sa sortama. Pregledaj: ispravi ime ili izaberi sortu ručno tamo gdje nije prepoznato.
-4. Dodirni **Snimi** i sačekaj da sve prođe.
+4. Dodirni **Snimi N slika** (N je broj slika) i sačekaj da sve prođe.
 5. Pritisni **Objavi**.
 
 Ako panel javi da pregledač ne pravi WebP slike, otvori panel u **Chromeu**.
@@ -75,19 +75,19 @@ Ako panel javi da pregledač ne pravi WebP slike, otvori panel u **Chromeu**.
 **Kad objavljivati:** objavi **jednom, kad završiš sve izmjene**, a ne poslije svake sitnice. Ekran pokazuje **Objava ovog mjeseca**: besplatni paket dozvoljava 500 izgradnji mjesečno.
 
 ## 7. Dijeljenje sorte
-Na kartici sorte ili u uređivanju dodirni **Podijeli**. Otvara se WhatsApp ili Viber s linkom na stranicu sorte. To radi tek kad je sorta **objavljena**. Ako link šalješ odmah poslije nove slike ili teksta, primaoc može još neko vrijeme vidjeti staru sliku u pregledu.
+U listi **Sorte** dodirni strelicu **↗** pored sorte, ili u uređivanju sorte dodirni **↗ Podijeli**. Na telefonu se otvara meni za dijeljenje, pa izabereš WhatsApp ili Viber i link na stranicu sorte ide u poruku. Na računaru dugme piše **Kopiraj link** i link se kopira. To radi tek kad je sorta **objavljena**. Ako link šalješ odmah poslije nove slike ili teksta, primaoc može još neko vrijeme vidjeti staru sliku u pregledu.
 
 ## 8. Podešavanja (zupčanik)
 - **Kontakt:** telefon, WhatsApp broj (samo cifre, npr. 38765592120), mejl, adresa, link na mapu.
-- **Tekstovi stranica:** početna, *Kako naručiti*, kontakt. Pazi da nigdje ne piše *korpa*: sajt koristi riječ *upit*.
-- **Prikaži sorte bez slike:** isključi da se na sajtu vide samo sorte koje imaju sliku.
+- **Tekstovi stranica:** odjeljci *Početna stranica*, *Kako naručiti* i *O nama i kontakt (stranica)*. Pazi da nigdje ne piše *korpa*: sajt koristi riječ *upit*.
+- **Prikaži na sajtu sorte bez slike:** isključi da se na sajtu vide samo sorte koje imaju sliku.
 - **Promijeni lozinku:** traži staru lozinku, pa novu (najmanje 8 znakova).
 - **Preuzmi kopiju podataka:** sprema sve podatke na telefon.
 
 ## 9. Šta ako nešto ne radi
 - **Izmjenu ne vidim na sajtu:** pritisni **Objavi** i sačekaj. Zatim zatvori karticu i otvori sajt ponovo.
 - **Nove sorte nema na sajtu:** provjeri da je **Vidljiva na sajtu** uključena, pa **Objavi**.
-- **Sorta nema slike na sajtu:** dodaj bar jednu sliku i objavi. Ako je isključen prekidač *Prikaži sorte bez slike*, sorte bez slike se ne vide.
+- **Sorta nema slike na sajtu:** dodaj bar jednu sliku i objavi. Ako je isključen prekidač *Prikaži na sajtu sorte bez slike*, sorte bez slike se ne vide.
 - **Piše Nije snimljeno:** nema interneta. Dodirni **Pokušaj ponovo**.
 - **Slika se ne dodaje:** otvori panel u Chromeu, provjeri internet, probaj manju sliku.
 - **Greška pri objavi:** sačekaj minut, pa probaj ponovo. Ako se ponovi, javi Žarku.

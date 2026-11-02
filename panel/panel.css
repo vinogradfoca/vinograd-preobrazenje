@@ -266,3 +266,11 @@ body.modalopen{overflow:hidden}
 .delimg img{width:96px;height:96px;object-fit:cover;border-radius:10px}
 .delimgbtn{margin-top:6px;color:var(--bad)}
 .warnbox a{font-weight:700;display:inline-flex;align-items:center;min-height:44px}
+
+/* Pomoć */
+.qmark{display:inline-grid;place-items:center;width:28px;height:28px;border:2px solid var(--green);border-radius:50%;font:800 17px Inter,system-ui,sans-serif;line-height:1}
+.pomoc .secbody{font-size:16px;line-height:1.55}
+.pomoc .secbody p{margin:10px 0}
+.pomoc .secbody ol,.pomoc .secbody ul{margin:10px 0;padding-left:22px}
+.pomoc .secbody li{margin:6px 0}
+.pomoc code{background:#f0f3f1;border-radius:6px;padding:1px 6px;font-size:14px;overflow-wrap:anywhere}
