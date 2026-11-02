@@ -2,8 +2,8 @@
 // Ekrani: prijava, Početna, Sorte, Uređivanje sorte (sa slikama), Cijene i količine,
 // Slike (biblioteka i dodavanje), Objavi, Dodaj sortu (čarobnjak), Promijeni lozinku.
 import { createDb } from "./db.js";
-import { similarVarieties, uniqueSlug } from "./match.js";
-import { convertImage, canMakeWebp, storagePaths, ACCEPT, NO_WEBP_MSG, WIDTHS } from "./images.js";
+import { similarVarieties, uniqueSlug, matchFile } from "./match.js";
+import { convertImage, canMakeWebp, storagePaths, sha256Hex, ACCEPT, NO_WEBP_MSG, WIDTHS } from "./images.js";
 
 // ------------------------------------------------------------------ konstante
 const COLORS = ["Bijela", "Crna", "Crvena", "Za provjeru"];
@@ -193,6 +193,7 @@ function commitInput(input) {
 }
 function onViewChange(e) {
   const el = e.target;
+  if (location.hash.startsWith("#/uvoz") && impOnChange(el)) return;
   if (el.matches("input[type=file][data-upload]")) return onFilesChosen(el);
   if (el.matches("input[data-imgalt]")) return commitAlt(el);
   if (el.id === "libSorta") { const f = $("#libFile"); f.disabled = !el.value || !S.webp; f.closest("label").setAttribute("aria-disabled", String(f.disabled)); return; }
@@ -205,6 +206,7 @@ function onViewChange(e) {
 }
 function onViewInput(e) {
   const el = e.target;
+  if (el.matches && el.matches("[data-impname]")) return impOnInput(el);
   if (el.id === "wName") { WIZ.name = el.value; WIZ.allowSimilar = false; const w = $("#wizSimilar"); if (w) w.innerHTML = ""; fieldError(el, ""); return; }
   const c = el.closest(".field")?.querySelector("[data-count]");
   if (c && (el.tagName === "TEXTAREA" || el.dataset.max)) c.textContent = `${el.value.length} znakova` + (el.dataset.max ? ` (preporuka do ${el.dataset.max})` : "");
@@ -213,6 +215,7 @@ function onViewClick(e) {
   const b = e.target.closest("button");
   if (!b) return;
   if (location.hash.startsWith("#/dodaj") && wizClick(b)) return;
+  if (location.hash.startsWith("#/uvoz") && impOnClick(b)) return;
   if (b.dataset.seg) { // izbor iz liste (boja, zrenje, vrsta)
     const key = b.closest("[data-key]").dataset.key, f = b.dataset.seg;
     const r = V8[f](b.dataset.val);
@@ -381,6 +384,7 @@ function sorteList() {
 function screenSorte(params) {
   if (params.has("f")) S.ui.sorteFilter = params.get("f");
   setTimeout(() => {
+    if (!$("#q") || !$("#list")) return; // ekran je u međuvremenu zamijenjen
     sorteList();
     $("#q").addEventListener("input", (e) => { S.ui.sorteQ = e.target.value; sorteList(); });
     $$("#chips button").forEach((b) => (b.onclick = () => {
@@ -518,6 +522,7 @@ function cijeneList() {
 function screenCijene(params) {
   if (params.has("f")) S.ui.cijeneFilter = params.get("f");
   setTimeout(() => {
+    if (!$("#q") || !$("#list")) return;
     cijeneList();
     $("#q").addEventListener("input", (e) => { S.ui.cijeneQ = e.target.value; cijeneList(); });
     $$("#chips button").forEach((b) => (b.onclick = () => {
@@ -719,6 +724,23 @@ async function processUpload(id) {
     return;
   }
 
+  try {
+    const sum = await storeImage(conv, key, { onProgress: (f, msg) => setRow(id, 0.1 + 0.85 * f, msg) });
+    uploadJobs.delete(id);
+    const kb = (b) => Math.round(b / 1024) + " KB";
+    setRow(id, 1, `✓ Snimljeno (${kb(file.size)} → ${kb(sum)} za sve 4 veličine)` + (conv.warnings.length ? `<br><span class="warntext">${esc(conv.warnings.join(" "))}</span>` : ""), "ok");
+    refreshImages(key);
+    refreshMeta(key);
+    if (location.hash.startsWith("#/slike")) libList();
+  } catch (e) {
+    setRow(id, 0, `Slika nije snimljena: veza je prekinuta. <button type="button" class="link" data-retry="${id}">Pokušaj ponovo</button>`, "err");
+  }
+}
+
+// Zajedničko jezgro (4a, uvoz po imenu): 4 fajla u Storage, pa zapis slike i niz sorte u
+// jednom upisu. Pri grešci briše poslane fajlove i (ako je upis krenuo) zapis, pa baca grešku.
+// Slika ide na kraj niza images sorte. Vraća ukupnu veličinu 4 fajla (bajtova).
+async function storeImage(conv, key, { source = "own", webApproved = false, onProgress = () => {} } = {}) {
   const imageId = S.db.newImageId();
   const paths = storagePaths(imageId);
   const parts = [...WIDTHS.map(String), "og"];
@@ -730,17 +752,16 @@ async function processUpload(id) {
     let before = 0;
     for (let i = 0; i < parts.length; i++) {
       const p = parts[i], vv = conv.variants[p];
-      setRow(id, 0.1 + 0.85 * (before / sum), `Šaljem ${i + 1} od 4…`);
-      await S.db.uploadFile(paths[p], vv.blob, vv.type, (f) => setRow(id, 0.1 + 0.85 * ((before + f * sizes[i]) / sum)));
+      onProgress(before / sum, `Šaljem ${i + 1} od 4…`);
+      await S.db.uploadFile(paths[p], vv.blob, vv.type, (f) => onProgress((before + f * sizes[i]) / sum));
       uploaded.push(paths[p]);
       before += sizes[i];
     }
-    // tek kad su sva četiri fajla gore: zapis slike i niz slika sorte u jednom upisu
     const v = V(key);
     const record = {
       alt: "Grozd sorte " + v.name, w: conv.w, h: conv.h,
       variants: Object.fromEntries(parts.map((p) => [p, { path: paths[p], w: conv.variants[p].w, h: conv.variants[p].h }])),
-      hash: conv.hash, source: "own", webApproved: false,
+      hash: conv.hash, source, webApproved: source === "web" ? !!webApproved : false,
       createdAt: S.db.TIMESTAMP, createdBy: S.user.uid,
     };
     const list = [...imgList(v), imageId];
@@ -753,18 +774,12 @@ async function processUpload(id) {
     });
     S.data.images[imageId] = { ...record, createdAt: Date.now() };
     V(key).images = list; V(key).updatedAt = Date.now(); V(key).updatedBy = S.user.uid;
-    uploadJobs.delete(id);
-    const kb = (b) => Math.round(b / 1024) + " KB";
-    setRow(id, 1, `✓ Snimljeno (${kb(file.size)} → ${kb(sum)} za sve 4 veličine)` + (conv.warnings.length ? `<br><span class="warntext">${esc(conv.warnings.join(" "))}</span>` : ""), conv.warnings.length ? "ok" : "ok");
-    refreshImages(key);
-    refreshMeta(key);
-    if (location.hash.startsWith("#/slike")) libList();
+    return sum;
   } catch (e) {
     console.warn("Upload nije uspio:", e && (e.code || e.message));
-    // ništa ne smije ostati na pola: obriši poslane fajlove i (ako je upis krenuo) zapis u bazi
     for (const p of uploaded) { try { await S.db.deleteFile(p); } catch { /* ostaje za ručno čišćenje */ } }
     if (dbTried) S.db.update({ [`images/${imageId}`]: null, [`varieties/${key}/images`]: oldList.length ? oldList : null }).catch(() => {});
-    setRow(id, 0, `Slika nije snimljena: veza je prekinuta. <button type="button" class="link" data-retry="${id}">Pokušaj ponovo</button>`, "err");
+    throw e;
   }
 }
 
@@ -804,8 +819,10 @@ function libList() {
 }
 function screenSlike() {
   setTimeout(() => {
+    if (!$("#libQ")) return;
     libList();
     checkWebp();
+    offerResume();
     $("#libQ").addEventListener("input", (e) => { S.ui.libQ = e.target.value; libList(); });
   });
   const opts = keysSorted().map((k) => `<option value="${esc(k)}">${esc(V(k).name)}</option>`).join("");
@@ -817,9 +834,11 @@ function screenSlike() {
       <div class="field"><label for="libSorta">Za koju sortu?</label>
         <select id="libSorta" class="search"><option value="">Izaberi sortu…</option>${opts}</select></div>
       <label class="btn primary wide upbtn" style="margin-top:12px" aria-disabled="true"><input type="file" id="libFile" data-upload="" accept="${ACCEPT}" multiple hidden disabled>＋ Dodaj slike</label>
-      <p class="hint"><span>Uvoz mnogo slika odjednom po imenu fajla dolazi uskoro.</span></p>
+      <p class="hint"><span>Za mnogo slika odjednom koristi uvoz po imenu fajla.</span></p>
       <div class="uplist" aria-live="polite"></div>
     </div>
+    <div class="card"><h2>Uvoz po imenu</h2><p class="muted small">Mnogo slika odjednom: sorta se nađe po imenu fajla (npr. viktor-2.jpg).</p>
+      <a class="btn green wide" href="#/uvoz">Uvoz po imenu</a><div id="impResume" style="margin-top:8px"></div></div>
     <input id="libQ" class="search" type="search" placeholder="Pretraži po opisu slike…" aria-label="Pretraži slike" value="${esc(S.ui.libQ || "")}">
     <p class="count" id="libCount"></p>
     <div class="libgrid" id="libList"></div>`;
@@ -1097,6 +1116,216 @@ function wizClick(b) {
   return false;
 }
 
+// ------------------------------------------------------------------ Uvoz slika po imenu (Dio 3)
+// Isti konvertor (images.js) i isti upload (storeImage) kao 4a. Ništa se ne snima dok se
+// ne potvrdi pregled. Spisak preostalih slika čuva se u IndexedDB za nastavak poslije prekida.
+const IMP = { items: [], phase: "pick", prep: 0, seq: 0, total: 0, done: 0, summary: null, resumed: false };
+const THUMB = 160;
+
+// IndexedDB: baza "vinograd-panel", spremište "uvoz" (jedan zapis po slici)
+function idb() {
+  return new Promise((res, rej) => {
+    const r = indexedDB.open("vinograd-panel", 1);
+    r.onupgradeneeded = () => r.result.createObjectStore("uvoz", { keyPath: "id" });
+    r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+  });
+}
+async function idbDo(mode, fn) {
+  const db = await idb();
+  return new Promise((res, rej) => {
+    const tx = db.transaction("uvoz", mode), st = tx.objectStore("uvoz");
+    const out = fn(st);
+    tx.oncomplete = () => { db.close(); res(out && "result" in out ? out.result : undefined); };
+    tx.onerror = () => { db.close(); rej(tx.error); }; tx.onabort = () => { db.close(); rej(tx.error); };
+  });
+}
+const idbAll = () => idbDo("readonly", (st) => st.getAll()).catch(() => []);
+const idbPut = (rec) => idbDo("readwrite", (st) => st.put(rec));
+const idbDel = (id) => idbDo("readwrite", (st) => st.delete(id)).catch(() => {});
+const idbClear = () => idbDo("readwrite", (st) => st.clear()).catch(() => {});
+
+async function makeThumb(file) {
+  try {
+    const bm = await createImageBitmap(file, { resizeWidth: THUMB, resizeQuality: "medium", imageOrientation: "from-image" });
+    const c = document.createElement("canvas"); c.width = bm.width; c.height = bm.height;
+    c.getContext("2d").drawImage(bm, 0, 0); bm.close();
+    const b = await new Promise((r) => c.toBlob(r, "image/jpeg", 0.7));
+    c.width = 0; c.height = 0;
+    return b ? URL.createObjectURL(b) : "";
+  } catch { return ""; }
+}
+function impMatch(it) {
+  const r = matchFile(it.name, S.data.varieties);
+  it.match = r; it.web = r.web; it.order = r.order;
+  if (!it.manualKey) it.key = r.status === "matched" ? r.key : "";
+}
+const impGroup = (it) => (it.dup || it.exclude ? "skip" : it.key ? "ok" : "none");
+
+async function impChoose(input) {
+  const files = [...input.files]; input.value = "";
+  if (!files.length) return;
+  if (!S.webp) return toast(NO_WEBP_MSG);
+  IMP.items.forEach((it) => it.thumb && URL.revokeObjectURL(it.thumb));
+  IMP.items = []; IMP.phase = "prep"; IMP.summary = null; IMP.resumed = false;
+  for (const file of files) IMP.items.push({ id: "imp" + ++IMP.seq, file, fname: file.name, name: file.name, approved: false, exclude: false, dup: "", manualKey: false });
+  await impPrepare();
+}
+// hash, sličica, poklapanje i provjera duplikata, jedna po jedna slika
+async function impPrepare() {
+  renderImport();
+  const seen = new Map();
+  for (let i = 0; i < IMP.items.length; i++) {
+    const it = IMP.items[i];
+    IMP.prep = i + 1; const pr = $("#impPrep"); if (pr) pr.textContent = `Pripremam pregled: ${i + 1} od ${IMP.items.length}…`;
+    if (!it.file) { it.dup = ""; continue; }
+    if (!it.hash) it.hash = await sha256Hex(await it.file.arrayBuffer());
+    if (!it.thumb) it.thumb = await makeThumb(it.file);
+    if (!it.key || !it.manualKey) impMatch(it);
+    if (seen.has(it.hash)) it.dup = "Isti fajl je izabran dva puta.";
+    else {
+      seen.set(it.hash, it.id);
+      try { const d = await S.db.findImageByHash(it.hash); if (d) it.dup = "Već je u biblioteci."; } catch { /* bez veze: provjera se ponavlja pri snimanju */ }
+    }
+  }
+  IMP.phase = "preview"; renderImport();
+}
+
+function impStatus(it) {
+  const m = it.match || { status: "none", candidates: [] }, nm = (k) => esc((V(k) || {}).name || k);
+  if (it.dup) return `<span class="warntext">${esc(it.dup)} Preskočena.</span>`;
+  if (it.key) return `<span class="oktext">✓ ${it.manualKey ? "Izabrano" : "Uparena"}: ${nm(it.key)}</span>`;
+  if (m.status === "suggest") return `Mislili ste: <b>${nm(m.key)}</b>? <button type="button" class="btn outline sm" data-impyes="${it.id}">Da, ${nm(m.key)}</button>`;
+  if (m.status === "ambiguous") return `<span class="warntext">Odgovara sortama ${m.candidates.map(nm).join(" i ")}. Izaberi iz liste.</span>`;
+  return `<span class="warntext">Nije pronađena sorta. Ispravi ime ili izaberi iz liste.</span>`;
+}
+function impCard(it, opts) {
+  return `<div class="impcard" data-imp="${it.id}">
+    ${it.thumb ? `<img src="${esc(it.thumb)}" alt="" width="${THUMB}" height="${THUMB}">` : `<span class="imthumb thumb x" aria-hidden="true">?</span>`}
+    <div class="impbody">
+      <div class="field"><label for="in-${it.id}">Ime fajla</label><input id="in-${it.id}" type="text" data-impname="${it.id}" value="${esc(it.name)}" autocomplete="off"></div>
+      <div class="field"><label for="ik-${it.id}">Sorta</label><select id="ik-${it.id}" class="search" data-impkey="${it.id}"><option value="">— izaberi sortu —</option>${opts.replace(`value="${esc(it.key)}"`, `value="${esc(it.key)}" selected`)}</select></div>
+      <div class="impstat small" id="is-${it.id}">${impStatus(it)}</div>
+      ${it.web ? `<div class="impweb"><span class="badge warn">sa interneta</span><label class="check"><input type="checkbox" data-impok="${it.id}"${it.approved ? " checked" : ""}> Provjereno da smijem koristiti</label>${it.approved ? "" : `<div class="hint"><span>Bez kvačice slika se snima, ali se ne objavljuje na sajtu.</span></div>`}</div>` : ""}
+      ${it.dup ? "" : `<label class="check"><input type="checkbox" data-impskip="${it.id}"${it.exclude ? " checked" : ""}> Preskoči ovu sliku</label>`}
+      ${it.state ? `<div class="bar"><span style="width:${Math.round((it.pct || 0) * 100)}%"></span></div><div class="upmsg small">${it.msg || ""}</div>` : ""}
+    </div></div>`;
+}
+function renderImport() {
+  const box = $("#impBox"); if (!box) return;
+  if (IMP.phase === "pick") { box.innerHTML = ""; return; }
+  if (IMP.phase === "prep") { box.innerHTML = `<p class="notice busy" id="impPrep">Pripremam pregled…</p>`; return; }
+  const opts = keysSorted().map((k) => `<option value="${esc(k)}">${esc(V(k).name)}</option>`).join("");
+  const g = { ok: [], none: [], skip: [] };
+  for (const it of IMP.items) g[impGroup(it)].push(it);
+  const needFile = IMP.items.filter((it) => !it.file);
+  const sec = (title, list, open) => `<details class="sec" ${open ? "open" : ""}><summary>${title} <small>${list.length}</small></summary><div class="secbody impgrid">${list.map((it) => impCard(it, opts)).join("") || `<p class="muted">Nema.</p>`}</div></details>`;
+  const n = g.ok.filter((it) => it.file && it.state !== "ok").length;
+  box.innerHTML = `
+    ${needFile.length ? `<div class="warnbox">Za ${needFile.length} slika sadržaj nije sačuvan. Izaberi ih ponovo (ista imena fajlova):
+      <label class="btn outline wide upbtn" style="margin-top:8px"><input type="file" data-impre accept="${ACCEPT}" multiple hidden>Izaberi ponovo</label></div>` : ""}
+    ${IMP.summary ? `<div class="notice ok" id="impSum"><b>${esc(IMP.summary)}</b><br><a class="btn primary" href="#/objavi" style="margin-top:8px">Objavi</a></div>` : ""}
+    ${IMP.phase === "saving" ? `<div class="uptotal"><div class="row"><b>Ukupno</b><span>snimljeno ${IMP.done} od ${IMP.total}</span></div><div class="bar"><span style="width:${IMP.total ? (IMP.done / IMP.total) * 100 : 0}%"></span></div><div class="small muted" id="impSizes">${esc(IMP.sizes || "")}</div></div>` : ""}
+    ${sec("Uparene", g.ok, true)}${sec("Neuparene", g.none, true)}${sec("Preskočene", g.skip, false)}
+    ${IMP.phase === "preview" ? `<div class="wiznav"><button type="button" class="btn primary wide" id="impSave"${n ? "" : " disabled"}>Snimi ${n} ${n % 10 === 1 && n % 100 !== 11 ? "sliku" : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? "slike" : "slika"}</button></div>` : ""}`;
+  const sv = $("#impSave"); if (sv) sv.onclick = impSave;
+}
+function impItem(el, attr) { return IMP.items.find((x) => x.id === el.getAttribute(attr)); }
+function impOnInput(el) { // ime se mijenja: ishod se odmah osvježi
+  const it = impItem(el, "data-impname"); if (!it) return;
+  it.name = el.value; it.manualKey = false; impMatch(it);
+  const st = $("#is-" + it.id); if (st) st.innerHTML = impStatus(it);
+  const sel = $("#ik-" + it.id); if (sel) sel.value = it.key || "";
+}
+function impOnChange(el) {
+  if (el.matches("[data-impname]")) { renderImport(); return true; }
+  if (el.matches("[data-impkey]")) { const it = impItem(el, "data-impkey"); it.key = el.value; it.manualKey = !!el.value; renderImport(); return true; }
+  if (el.matches("[data-impok]")) { const it = impItem(el, "data-impok"); it.approved = el.checked; renderImport(); return true; }
+  if (el.matches("[data-impskip]")) { const it = impItem(el, "data-impskip"); it.exclude = el.checked; renderImport(); return true; }
+  if (el.matches("[data-impre]")) { impReselect(el); return true; }
+  if (el.matches("[data-import]")) { impChoose(el); return true; }
+  return false;
+}
+function impOnClick(b) {
+  if (b.dataset.impyes) { const it = IMP.items.find((x) => x.id === b.dataset.impyes); it.key = it.match.key; it.manualKey = true; renderImport(); return true; }
+  if (b.id === "impDiscard") { idbClear(); IMP.items = []; IMP.phase = "pick"; route(); return true; }
+  return false;
+}
+function impReselect(input) {
+  const files = [...input.files]; input.value = "";
+  for (const f of files) { const it = IMP.items.find((x) => !x.file && x.fname === f.name); if (it) it.file = f; }
+  impPrepare();
+}
+
+async function impSave() {
+  const list = IMP.items.filter((it) => impGroup(it) === "ok" && it.file && it.state !== "ok" && !it.dup)
+    .sort((a, b) => a.key.localeCompare(b.key) || (a.order ?? 1e9) - (b.order ?? 1e9) || a.fname.localeCompare(b.fname));
+  if (!list.length) return;
+  IMP.phase = "saving"; IMP.total = list.length; IMP.done = 0; IMP.summary = null; uploading++;
+  // spisak preostalih u IndexedDB (sa sadržajem fajla; ako ne stane, samo ime)
+  for (const it of list) {
+    const rec = { id: it.id, fname: it.fname, name: it.name, key: it.key, web: !!it.web, approved: !!it.approved, order: it.order ?? null, hash: it.hash };
+    try { await idbPut({ ...rec, blob: it.file }); } catch { try { await idbPut(rec); } catch { /* bez nastavka */ } }
+  }
+  let before = 0, after = 0;
+  const kb = (b) => (b > 1048576 ? (b / 1048576).toFixed(1) + " MB" : Math.round(b / 1024) + " KB");
+  renderImport();
+  for (const it of list) {
+    const upd = () => { const c = $(`.impcard[data-imp="${it.id}"]`); if (c) { const bar = c.querySelector(".bar span"); if (bar) bar.style.width = Math.round((it.pct || 0) * 100) + "%"; const mm = c.querySelector(".upmsg"); if (mm) mm.innerHTML = it.msg || ""; } };
+    it.state = "busy"; it.pct = 0.02; it.msg = "Pretvaram…"; renderImport();
+    try {
+      const conv = await convertImage(it.file);
+      const dupNow = await S.db.findImageByHash(conv.hash);
+      if (dupNow) { it.state = "ok"; it.dup = "Već je snimljena."; it.pct = 1; it.msg = "Već je u biblioteci, preskočena."; await idbDel(it.id); IMP.done++; renderImport(); continue; }
+      const sum = await storeImage(conv, it.key, { source: it.web ? "web" : "own", webApproved: it.approved, onProgress: (f, msg) => { it.pct = 0.1 + 0.9 * f; if (msg) it.msg = msg; upd(); } });
+      before += it.file.size; after += sum;
+      it.state = "ok"; it.pct = 1; it.msg = `<span class="oktext">✓ Snimljeno (${kb(it.file.size)} → ${kb(sum)})</span>`;
+      await idbDel(it.id);
+    } catch (e) {
+      it.state = "err"; it.pct = 0; it.msg = `<span class="error">${esc(e && e.code === "no-webp" ? e.message : "Nije snimljeno: veza je prekinuta. Ostaje za nastavak.")}</span>`;
+    }
+    IMP.done++; IMP.sizes = `Veličina: ${kb(before)} prije, ${kb(after)} poslije (sve 4 veličine).`; renderImport();
+  }
+  uploading--;
+  const saved = IMP.items.filter((it) => it.state === "ok" && !it.dup).length;
+  const skipped = IMP.items.filter((it) => impGroup(it) === "skip").length;
+  const unmatched = IMP.items.filter((it) => impGroup(it) === "none").length;
+  const failed = IMP.items.filter((it) => it.state === "err").length;
+  const f3 = (n, one, few, many) => (n % 10 === 1 && n % 100 !== 11 ? one : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? few : many);
+  IMP.summary = `${saved} snimljeno, ${skipped} ${f3(skipped, "preskočena", "preskočena", "preskočeno")}, ${unmatched} ${f3(unmatched, "neuparena", "neuparene", "neuparenih")}` + (failed ? `, ${failed} nije snimljeno (pritisni Snimi za nastavak)` : "");
+  IMP.phase = failed ? "preview" : "done";
+  IMP.items.forEach((it) => { if (it.state === "err") it.state = "retry"; }); // poruka ostaje, slika se nudi ponovo
+  renderImport();
+}
+
+async function screenUvozAfter(params) {
+  await checkWebp();
+  if (params.get("nastavi") === "1" && !IMP.items.length) {
+    const recs = await idbAll();
+    IMP.items = recs.map((r) => ({ id: r.id, file: r.blob || null, fname: r.fname, name: r.name, key: r.key, manualKey: true, web: r.web, approved: r.approved, order: r.order, hash: r.hash, exclude: false, dup: "" }));
+    IMP.seq = Math.max(IMP.seq, ...IMP.items.map((x) => +String(x.id).replace(/\D/g, "") || 0));
+    IMP.resumed = true;
+    if (IMP.items.length) await impPrepare();
+  }
+  renderImport();
+}
+function screenUvoz(params) {
+  setTimeout(() => screenUvozAfter(params));
+  return `<a class="back" href="#/slike">← Slike</a>
+    ${head("Uvoz slika po imenu", "Izaberi više slika odjednom. Panel po imenu fajla nađe sortu (npr. viktor-2.jpg ide sorti Viktor, kao druga slika). Ništa se ne snima dok ne pregledaš i potvrdiš.")}
+    <div class="card uploader">
+      <div class="warnbox nowebp" hidden>${esc(NO_WEBP_MSG)}</div>
+      <label class="btn primary wide upbtn"><input type="file" data-import data-upload="" accept="${ACCEPT}" multiple hidden>Izaberi slike</label>
+      <p class="hint"><span>Prefiks "web-" znači slika sa interneta. Broj na kraju imena određuje redoslijed.</span></p>
+      ${IMP.resumed ? `<button type="button" class="btn ghost wide" id="impDiscard" style="margin-top:8px">Odbaci nedovršen uvoz</button>` : ""}
+    </div>
+    <div id="impBox"></div>`;
+}
+async function offerResume() {
+  const box = $("#impResume"); if (!box) return;
+  const recs = await idbAll();
+  box.innerHTML = recs.length ? `<a class="btn outline wide" href="#/uvoz?nastavi=1">Nastavi uvoz (${recs.length} preostalo)</a>` : "";
+}
+
 // ------------------------------------------------------------------ usmjeravanje
 function route() {
   flushLater();
@@ -1112,6 +1341,7 @@ function route() {
     case "cijene": html = screenCijene(params); nav = "cijene"; break;
     case "postavke": html = screenPostavke(); after = () => ($("#out3").onclick = () => S.db.signOut()); break;
     case "slike": html = screenSlike(); nav = "slike"; break;
+    case "uvoz": html = screenUvoz(params); nav = "slike"; break;
     case "objavi": html = screenObjavi(); nav = "objavi"; after = () => ($("#pubBtn").onclick = doPublish); break;
     case "dodaj": html = screenWizard(parts); nav = "sorte"; break;
     default: html = `${head("Stranica ne postoji")}<p><a class="btn outline" href="#/">Na početnu</a></p>`;

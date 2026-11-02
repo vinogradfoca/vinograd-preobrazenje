@@ -54,3 +54,57 @@ export function similarVarieties(name, varieties, maxDist = 2) {
   }
   return out.sort((a, b) => a.dist - b.dist || a.name.localeCompare(b.name, "sr"));
 }
+
+// ------------------------------------------------------------------ uvoz slika po imenu fajla (Dio 3)
+// Ime fajla → { base, order, web }:
+//   bez nastavka, bez kvačica, mala slova; prefiks "web-"/"web_" se skida i označava web sliku;
+//   broj na kraju ("-3", "_3", " 3", "3") se uklanja i čuva kao redoslijed;
+//   crtice, razmaci i donje crte se zanemaruju.
+// full: isto, ali bez uklanjanja broja (za sorte čiji naziv završava brojem, npr. "KM 342").
+export function parseFileName(name) {
+  let s = deaccent(String(name || "").trim()).replace(/\.[a-z0-9]{2,5}$/i, "");
+  let web = false;
+  const w = /^web[-_ ]+/.exec(s);
+  if (w) { web = true; s = s.slice(w[0].length); }
+  const full = s.replace(/[^a-z0-9]+/g, "");
+  const m = /[-_ ]*(\d+)$/.exec(s);
+  const order = m ? Number(m[1]) : null;
+  const base = (m ? s.slice(0, m.index) : s).replace(/[^a-z0-9]+/g, "");
+  return { base: base || full, full, order, web };
+}
+
+// varieties: { key: { name, slug } }
+// → { status: "matched" | "suggest" | "ambiguous" | "none", key, candidates: [key], order, web }
+//   matched:   tačno poklapanje s nazivom ili slugom tačno jedne sorte
+//   suggest:   jedna najbliža sorta: do 2 slova razlike, ili ime fajla počinje nazivom sorte
+//              (npr. "poslanik-signalni" → Poslanik); korisnik potvrđuje
+//   ambiguous: više sorti odgovara isto dobro: ne pogađa se, traži se izbor
+//   none:      nema sorte
+export function matchFile(name, varieties) {
+  const { base, full, order, web } = parseFileName(name);
+  const res = (status, candidates, ord = order) => ({ status, key: candidates.length === 1 ? candidates[0] : "", candidates, order: ord, web });
+  if (!base) return res("none", []);
+  const index = Object.entries(varieties || {}).filter(([, v]) => v).map(([key, v]) => ({ key, names: [...new Set([normName(v.name), normName(v.slug || key)].filter(Boolean))] }));
+  for (const probe of [...new Set([base, full])]) {
+    const exact = index.filter((x) => x.names.includes(probe)).map((x) => x.key);
+    const ord = probe === base ? order : null; // poklapanje s brojem: broj je dio naziva (npr. "V20", "KM 342")
+    if (exact.length === 1) return res("matched", exact, ord);
+    if (exact.length > 1) return res("ambiguous", exact, ord);
+  }
+  // najbliže po Levenshteinu (do 2)
+  let best = 3, near = [];
+  for (const x of index) {
+    const d = Math.min(...x.names.map((n) => levenshtein(base, n, 2)));
+    if (d < best) { best = d; near = [x.key]; } else if (d === best && d <= 2) near.push(x.key);
+  }
+  if (best <= 2) return res(near.length === 1 ? "suggest" : "ambiguous", near);
+  // ime fajla počinje nazivom sorte (najmanje 4 slova); najduži naziv pobjeđuje
+  let len = 0, pref = [];
+  for (const x of index) for (const n of x.names) {
+    if (n.length >= 4 && base.startsWith(n)) {
+      if (n.length > len) { len = n.length; pref = [x.key]; } else if (n.length === len && !pref.includes(x.key)) pref.push(x.key);
+    }
+  }
+  if (pref.length) return res(pref.length === 1 ? "suggest" : "ambiguous", pref);
+  return res("none", []);
+}
