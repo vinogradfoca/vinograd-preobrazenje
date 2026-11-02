@@ -1,6 +1,6 @@
 // Panel Vinograda Preobraženje (Koraci 3a i 4a).
 // Ekrani: prijava, Početna, Sorte, Uređivanje sorte (sa slikama), Cijene i količine,
-// Slike (biblioteka i dodavanje), Promijeni lozinku. Objavi i Dodaj sortu su "Uskoro".
+// Slike (biblioteka i dodavanje), Objavi, Promijeni lozinku. Dodaj sortu je "Uskoro".
 import { createDb } from "./db.js";
 import { convertImage, canMakeWebp, storagePaths, ACCEPT, NO_WEBP_MSG, WIDTHS } from "./images.js";
 
@@ -231,6 +231,7 @@ function onViewClick(e) {
   else if (b.dataset.imgmove || b.dataset.imgdel) imgAction(b);
   else if (b.dataset.retry) retryUpload(b.dataset.retry);
   else if (b.dataset.attach) attachExisting(b);
+  else if (b.hasAttribute("data-pub-retry")) { PUB.phase = ""; doPublish(); }
 }
 
 // ------------------------------------------------------------------ dijeljenje
@@ -332,7 +333,7 @@ function screenHome() {
       <a href="#/dodaj"><i>＋</i><span>Dodaj sortu <small><span class="soon">Uskoro</span></small></span></a>
       <a href="#/cijene"><i>KM</i><span>Cijene i količine</span></a>
       <a href="#/slike"><i>▣</i><span>Dodaj slike</span></a>
-      <a href="#/objavi"><i>↑</i><span>Objavi na sajt <small><span class="soon">Uskoro</span></small></span></a>
+      <a href="#/objavi"><i>↑</i><span>Objavi na sajt</span></a>
     </div>
     <div class="card fali">
       <h2>Šta još fali</h2>
@@ -821,9 +822,153 @@ function screenSlike() {
     <div class="libgrid" id="libList"></div>`;
 }
 
+// ------------------------------------------------------------------ Objavi (Dio 1)
+// Klik šalje Firebase ID token na /api/publish (Netlify Function), koja provjeri admina i
+// pozove build hook. Panel zatim upiše publish/last i publish/history i prati /build.json.
+const PUB_TIMEOUT_MS = 6 * 60 * 1000; // poslije 6 minuta bez nove izgradnje: poruka o neuspjehu
+const PUB_POLL_MS = 10 * 1000;
+const PUB_MONTH_WARN = 12;
+const PUB = { phase: "", requestedAt: 0, builtAt: 0, error: "", timer: null, mockBuiltAt: 0 };
+
+const hhmm = (ts) => { const d = new Date(ts), p = (x) => String(x).padStart(2, "0"); return `${p(d.getHours())}:${p(d.getMinutes())}`; };
+const izmjena = (n) => (n % 10 === 1 && n % 100 !== 11 ? "izmjena" : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? "izmjene" : "izmjena");
+const objava = (n) => (n % 10 === 1 && n % 100 !== 11 ? "objava" : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? "objave" : "objava");
+
+// Sorte, stranice i podešavanja čiji je updatedAt noviji od zadnje objave.
+function pendingChanges() {
+  const last = num(getIn(S.data, "publish/last/requestedAt"));
+  const items = [
+    ...Object.values(S.data.varieties || {}).map((v) => num(v && v.updatedAt)),
+    ...["home", "kako", "kontakt"].map((p) => num(getIn(S.data, `pages/${p}/updatedAt`))),
+    num(getIn(S.data, "settings/updatedAt")),
+  ];
+  return { last, n: last == null ? items.length : items.filter((t) => t != null && t > last).length };
+}
+function pubHistory() {
+  const h = getIn(S.data, "publish/history") || {};
+  return Object.values(h).filter((x) => x && num(x.requestedAt)).sort((a, b) => b.requestedAt - a.requestedAt);
+}
+function monthCount() {
+  const now = new Date();
+  return pubHistory().filter((x) => { const d = new Date(x.requestedAt); return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth(); }).length;
+}
+async function readBuiltAt() {
+  if (S.mock && PUB.mockBuiltAt) return PUB.mockBuiltAt;
+  try {
+    const r = await fetch("/build.json?t=" + Date.now(), { cache: "no-store" });
+    const j = await r.json();
+    return Date.parse(j.builtAt) || 0;
+  } catch { return 0; }
+}
+function stopPoll() { clearInterval(PUB.timer); PUB.timer = null; }
+async function checkBuild() {
+  PUB.builtAt = await readBuiltAt();
+  if (PUB.phase === "building") {
+    if (PUB.builtAt >= PUB.requestedAt) { PUB.phase = "done"; stopPoll(); }
+    else if (Date.now() - PUB.requestedAt > PUB_TIMEOUT_MS) { PUB.phase = "failed"; stopPoll(); }
+  }
+  renderPubStatus();
+}
+function startPoll() { stopPoll(); PUB.timer = setInterval(checkBuild, PUB_POLL_MS); }
+
+function renderPubStatus() {
+  const box = $("#pubStatus"); if (!box) return;
+  const btn = $("#pubBtn");
+  let html = "";
+  if (PUB.phase === "sending") html = `<div class="notice busy">Šaljem zahtjev za objavu…</div>`;
+  else if (PUB.phase === "building") html = `<div class="notice busy"><b>Objavljuje se…</b><br><span class="small">Pokrenuto u ${hhmm(PUB.requestedAt)}. Obično traje 1 do 3 minute.</span></div>`;
+  else if (PUB.phase === "done") html = `<div class="notice ok"><b>Objavljeno u ${hhmm(PUB.builtAt)}</b></div>`;
+  else if (PUB.phase === "failed") html = `<div class="notice bad"><b>Izgradnja nije uspjela ili još traje. Sajt ostaje na prethodnoj verziji.</b><br><button type="button" class="btn primary" data-pub-retry style="margin-top:8px">Pokušaj ponovo</button></div>`;
+  else if (PUB.phase === "error") html = `<div class="notice bad"><b>${esc(PUB.error)}</b><br><button type="button" class="btn primary" data-pub-retry style="margin-top:8px">Pokušaj ponovo</button></div>`;
+  else if (PUB.builtAt) html = `<div class="notice ok">Zadnja objava: ${esc(fmtDate(PUB.builtAt))}</div>`;
+  box.innerHTML = html;
+  const q = $("#pubQty"); if (q) q.textContent = PUB.builtAt ? `Količine na sajtu su od ${fmtDate(PUB.builtAt)}.` : "";
+  if (btn) { const busy = PUB.phase === "sending" || PUB.phase === "building"; btn.disabled = busy; btn.textContent = busy ? "Objavljuje se…" : "Objavi na sajt"; }
+}
+
+const PUB_ERR = {
+  401: "Prijava je istekla. Odjavi se pa se prijavi ponovo.",
+  403: "Nemaš dozvolu za objavu.",
+  429: "Objava je upravo pokrenuta. Pričekaj pola minute pa pokušaj ponovo.",
+  500: "Objava nije podešena na serveru (Netlify). Javi Žarku.",
+  502: "Netlify ili Google trenutno ne odgovaraju. Pokušaj ponovo za minut.",
+};
+async function doPublish() {
+  if (PUB.phase === "sending" || PUB.phase === "building") return;
+  flushLater();
+  PUB.phase = "sending"; PUB.error = ""; renderPubStatus();
+  let requestedAt;
+  if (S.mock) {
+    await new Promise((r) => setTimeout(r, 400));
+    requestedAt = Date.now();
+  } else {
+    try {
+      const token = await S.db.getIdToken();
+      const res = await fetch("/api/publish", { method: "POST", headers: { authorization: "Bearer " + token }, signal: AbortSignal.timeout(20000) });
+      let body = {}; try { body = await res.json(); } catch { /* prazno */ }
+      if (!res.ok || !body.ok) { PUB.phase = "error"; PUB.error = PUB_ERR[res.status] || "Objava nije pokrenuta. Pokušaj ponovo."; renderPubStatus(); return; }
+      requestedAt = num(body.requestedAt) || Date.now();
+    } catch (e) {
+      PUB.phase = "error";
+      PUB.error = e && (e.name === "TimeoutError" || e.name === "AbortError") ? "Sporo je i nismo dobili odgovor. Pokušaj ponovo." : "Nema veze s internetom. Pokušaj ponovo.";
+      renderPubStatus(); return;
+    }
+  }
+  // zapis o objavi (javni čvor, samo UID, bez imena i mejla)
+  const rec = { requestedAt, requestedBy: S.user.uid };
+  const hk = S.db.newKey("publish/history");
+  setIn(S.data, "publish/last", rec);
+  setIn(S.data, "publish/history/" + hk, rec);
+  send({ "publish/last": rec, ["publish/history/" + hk]: rec });
+  PUB.requestedAt = requestedAt; PUB.phase = "building";
+  renderPubStatus(); renderPubInfo();
+  if (S.mock) setTimeout(() => { PUB.mockBuiltAt = Date.now(); checkBuild(); }, 4000); // simulirana izgradnja
+  startPoll();
+}
+
+function renderPubInfo() {
+  const p = pendingChanges(), m = monthCount();
+  const pi = $("#pubPending");
+  if (pi) pi.innerHTML = p.n
+    ? `<b>${p.n} ${izmjena(p.n)}</b> ${p.n % 10 >= 2 && p.n % 10 <= 4 && (p.n % 100 < 12 || p.n % 100 > 14) ? "čekaju" : "čeka"} objavu${p.last == null ? " (još nema objave iz panela, pa se broje sve sorte i stranice)" : ""}.`
+    : `Nema izmjena od zadnje objave.`;
+  const mi = $("#pubMonth");
+  if (mi) mi.innerHTML = `Objava ovog mjeseca: <b>${m}</b>` + (m >= PUB_MONTH_WARN ? `<div class="warnbox" style="margin-top:8px">Netlify besplatni paket dozvoljava oko 20 objava mjesečno. Skupi više izmjena pa objavi jednom.</div>` : "");
+  const hl = $("#pubHist");
+  if (hl) {
+    const h = pubHistory().slice(0, 5);
+    hl.innerHTML = h.length ? h.map((x) => `<li><span>${esc(fmtDate(x.requestedAt))}</span><b>${esc(NAMES[x.requestedBy] || "nepoznat korisnik")}</b></li>`).join("") : `<li class="muted">Još nema objava iz panela.</li>`;
+  }
+}
+function screenObjavi() {
+  setTimeout(async () => {
+    renderPubInfo();
+    const last = num(getIn(S.data, "publish/last/requestedAt"));
+    PUB.builtAt = await readBuiltAt();
+    if (!PUB.phase || PUB.phase === "done") {
+      // vraćanje na ekran: ako zadnja objava još nije izgrađena, nastavi praćenje
+      if (last && PUB.builtAt < last) { PUB.requestedAt = last; PUB.phase = Date.now() - last > PUB_TIMEOUT_MS ? "failed" : "building"; }
+    }
+    if (PUB.phase === "building") startPoll();
+    renderPubStatus();
+  });
+  return `
+    ${head("Objavi")}
+    <div class="card">
+      <p id="pubPending" class="pubpending"></p>
+      <button type="button" class="btn primary wide pubbtn" id="pubBtn">Objavi na sajt</button>
+      <div id="pubStatus" role="status" aria-live="polite"></div>
+      <p class="muted small" id="pubQty"></p>
+      <p class="muted small">Sve što upišeš u panelu snima se u nacrt. Posjetioci to vide tek kad pritisneš Objavi i izgradnja se završi.</p>
+    </div>
+    <div class="card"><p id="pubMonth" style="margin:0"></p></div>
+    <div class="card"><h2>Zadnje objave</h2><ul class="pubhist" id="pubHist"></ul></div>`;
+}
+
 // ------------------------------------------------------------------ usmjeravanje
 function route() {
   flushLater();
+  if (!location.hash.startsWith("#/objavi")) stopPoll();
   const [path, query] = (location.hash.replace(/^#/, "") || "/").split("?");
   const params = new URLSearchParams(query || "");
   const parts = path.split("/").filter(Boolean);
@@ -835,7 +980,7 @@ function route() {
     case "cijene": html = screenCijene(params); nav = "cijene"; break;
     case "postavke": html = screenPostavke(); after = () => ($("#out3").onclick = () => S.db.signOut()); break;
     case "slike": html = screenSlike(); nav = "slike"; break;
-    case "objavi": html = screenSoon("Objavi", "Dugme Objavi dolazi uskoro. Do tada novu verziju sajta pokreće Žarko ručno u Netlifyju (Deploys, Trigger deploy, Deploy site). Sve izmjene iz panela su snimljene u nacrt i ulaze u sljedeću objavu."); nav = "objavi"; break;
+    case "objavi": html = screenObjavi(); nav = "objavi"; after = () => ($("#pubBtn").onclick = doPublish); break;
     case "dodaj": html = screenSoon("Dodaj sortu", "Dodavanje nove sorte korak po korak dolazi uskoro."); nav = "pocetna"; break;
     default: html = `${head("Stranica ne postoji")}<p><a class="btn outline" href="#/">Na početnu</a></p>`;
   }
@@ -873,6 +1018,7 @@ async function startApp(user) {
     if (!typing && !uploading && (h === "" || h === "#/" || h.startsWith("#/sorte"))) route();
   });
   S.db.watch("images", (val) => { S.data.images = val || {}; });
+  S.db.watch("publish", (val) => { S.data.publish = val || {}; if (location.hash.startsWith("#/objavi")) renderPubInfo(); });
   route();
 }
 

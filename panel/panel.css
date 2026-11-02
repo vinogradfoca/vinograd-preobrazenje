@@ -211,3 +211,12 @@ details.sec>summary small{font:600 13px Inter,system-ui,sans-serif;color:var(--m
 select.search{appearance:auto}
 @media(min-width:760px){.libgrid{grid-template-columns:1fr 1fr}}
 .upmsg .attach{display:flex;width:100%;margin-top:8px;min-height:44px}
+
+/* Objavi (Dio 1) */
+.pubpending{font-size:17px;margin:0 0 12px}
+.pubbtn{min-height:64px;font-size:19px}
+.pubbtn:disabled{opacity:.7}
+.notice.busy{background:#fff;border:1px solid var(--line);color:var(--ink)}
+.pubhist{list-style:none;padding:0;margin:10px 0 0}
+.pubhist li{display:flex;justify-content:space-between;gap:8px;padding:10px 0;border-top:1px solid var(--line);min-height:44px;align-items:center}
+.pubhist li:first-child{border-top:0}

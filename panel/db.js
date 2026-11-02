@@ -16,6 +16,8 @@
 //                              (npr. "varieties/viktor/sapling/price"), null briše polje
 //   TIMESTAMP                  vrijednost za "vrijeme na serveru" (updatedAt)
 //   newImageId()               novi push-ključ iz vinograd/images
+//   newKey(path)               novi push-ključ ispod vinograd/<path> (npr. publish/history)
+//   getIdToken()               Firebase ID token prijavljenog korisnika (za /api/publish)
 //   findImageByHash(hash)      imageId slike s istim SHA-256 ili null
 //   uploadFile(path, blob, contentType, onProgress)   upload u Storage (onProgress(0..1))
 //   deleteFile(path)           brisanje iz Storagea (nepostojeći fajl nije greška)
@@ -80,6 +82,8 @@ async function createFirebase() {
     },
     update: (paths) => withTimeout(update(ref(db, "vinograd"), paths)),
     newImageId: () => push(ref(db, "vinograd/images")).key,
+    newKey: (path) => push(ref(db, "vinograd/" + path)).key,
+    getIdToken: () => (auth.currentUser ? auth.currentUser.getIdToken() : Promise.reject(Object.assign(new Error("odjavljen"), { code: "auth/no-current-user" }))),
     async findImageByHash(hash) {
       const snap = await get(query(ref(db, "vinograd/images"), orderByChild("hash"), equalTo(hash)));
       const v = snap.val();
@@ -146,6 +150,8 @@ async function createMock() {
     watch(path, cb) { listeners.push({ path, cb }); return () => {}; },
     // Storage u memoriji: blob URL-ovi, ništa ne ide na server
     newImageId: () => "-probna" + Date.now().toString(36) + (idCounter++).toString(36),
+    newKey: () => "-probni" + Date.now().toString(36) + (idCounter++).toString(36),
+    getIdToken: async () => "probni-token",
     async findImageByHash(hash) {
       const imgs = data.images || {};
       return Object.keys(imgs).find((k) => imgs[k] && imgs[k].hash === hash) || null;
