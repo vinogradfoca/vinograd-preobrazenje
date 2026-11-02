@@ -162,12 +162,38 @@
     var d = +b.dataset.q;
     setQty(it.id, it.kind, d === 0 ? 0 : it.qty + d);
   });
-  function validateSend(e) {
-    var ok = $("#cName").value.trim() && $("#cPhone").value.trim();
-    $("#cartErr").textContent = ok ? "" : "Upišite ime i telefon da bismo vam se javili.";
-    if (!ok) { e.preventDefault(); return false; }
-    return true;
+  // Ime i telefon su obavezni; telefon najmanje 6 cifara (blaga provjera), mejl nije obavezan.
+  var ERR_EMPTY = "Upišite ime i telefon da bismo vam se javili.";
+  var ERR_PHONE = "Provjerite broj telefona: potrebno je najmanje 6 cifara.";
+  var phoneDigits = function (v) { return (v.match(/\d/g) || []).length; };
+  function markField(el, bad) {
+    el.classList.toggle("bad", bad);
+    if (bad) el.setAttribute("aria-invalid", "true"); else el.removeAttribute("aria-invalid");
   }
+  function validateSend(e) {
+    var n = $("#cName"), p = $("#cPhone");
+    var nameBad = !n.value.trim(), phoneEmpty = !p.value.trim(), phoneBad = phoneEmpty || phoneDigits(p.value) < 6;
+    markField(n, nameBad); markField(p, phoneBad);
+    var msg = nameBad || phoneEmpty ? ERR_EMPTY : phoneBad ? ERR_PHONE : "";
+    var box = $("#cartErr");
+    box.textContent = "";
+    if (!msg) return true;
+    e.preventDefault();
+    // ponovo upisan tekst da ga čitač ekrana pročita i kad je ista poruka
+    setTimeout(function () { box.textContent = msg; }, 30);
+    var first = nameBad ? n : p;
+    first.scrollIntoView({ block: "start", behavior: "smooth" });
+    try { first.focus({ preventScroll: true }); } catch (x) { first.focus(); }
+    return false;
+  }
+  ["cName", "cPhone"].forEach(function (id) {
+    document.getElementById(id).addEventListener("input", function () {
+      if (!this.classList.contains("bad")) return;
+      var ok = id === "cName" ? !!this.value.trim() : phoneDigits(this.value) >= 6;
+      if (ok) markField(this, false);
+      if (!$("#cartFoot .bad")) $("#cartErr").textContent = "";
+    });
+  });
   $("#sendWa").addEventListener("click", function (e) {
     if (!validateSend(e)) return;
     this.href = "https://wa.me/" + SHOP.phoneIntl + "?text=" + encodeURIComponent(buildMessage());
