@@ -17,6 +17,7 @@ import { fileURLToPath } from "node:url";
 import { createEngine, escapeHtml } from "./template.mjs";
 import { webpSize } from "./webp.mjs";
 import { toFirebaseShape } from "./firebase-shape.mjs";
+import { uputstvoHtml } from "./uputstvo.mjs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const DIST = path.join(ROOT, "dist");
@@ -26,6 +27,7 @@ const SEED_IMG = path.join(ROOT, "data", "seed-img");
 const FIREBASE_CONFIG = path.join(ROOT, "firebase-config.json");
 const PANEL = path.join(ROOT, "panel");
 const HEADERS = path.join(ROOT, "_headers");
+const UPUTSTVO = path.join(ROOT, "docs", "uputstvo-za-panel.md");
 
 const warnings = [];
 const warn = (m) => warnings.push(m);
@@ -715,6 +717,12 @@ async function main() {
     try { mock = toFirebaseShape(JSON.parse(fs.readFileSync(SEED, "utf8")).vinograd); }
     catch (e) { throw new BuildError([`panel/mock-data.json: ${e.message}`]); }
     writeFile(path.join(tmp, "panel", "mock-data.json"), JSON.stringify(mock));
+    // ekran Pomoć: uputstvo iz docs/uputstvo-za-panel.md kao gotov HTML (bez baze)
+    let help;
+    try { help = uputstvoHtml(fs.readFileSync(UPUTSTVO, "utf8")); }
+    catch (e) { throw new BuildError([`docs/uputstvo-za-panel.md: ${e.message}`]); }
+    if (!help.sections.length) throw new BuildError(["docs/uputstvo-za-panel.md: nema nijednog odjeljka (## naslov)"]);
+    writeFile(path.join(tmp, "panel", "pomoc.html"), help.html + "\n");
   }
 
   // podaci za korpu: jedan keširan fajl umjesto kopije u svakoj od 150+ stranica
