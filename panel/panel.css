@@ -248,3 +248,10 @@ select.search{appearance:auto}
 /* Podešavanja (Dio 4) */
 .field input.ro{background:#f0f3f1;color:var(--muted)}
 .field input[type=url]{width:100%;min-height:48px;border:1px solid #c9d3cc;border-radius:12px;padding:10px 12px;background:#fff}
+/* zamjena stare slike (dopuna Dijela 3) */
+.imppics{display:grid;gap:6px;justify-items:start}
+.imppics>img{width:96px;height:96px;object-fit:cover;border-radius:10px}
+.impold{margin:0;display:grid;justify-items:center;gap:2px}
+.impold img,.impold .imthumb{width:64px;height:64px;object-fit:cover;border-radius:8px;opacity:.85;outline:2px dashed var(--muted);outline-offset:-2px}
+.impold figcaption{font-size:12px;color:var(--muted);font-weight:700}
+.impcard.replaces{border-color:var(--green2)}

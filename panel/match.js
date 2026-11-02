@@ -108,3 +108,16 @@ export function matchFile(name, varieties) {
   if (pref.length) return res(pref.length === 1 ? "suggest" : "ambiguous", pref);
   return res("none", []);
 }
+
+// ------------------------------------------------------------------ zamjena stare slike (dopuna Dijela 3)
+// Ključ fajla za poređenje sa starim nazivom iz seeda: bez nastavka i kvačica, mala slova,
+// bez crtica/razmaka/donjih crta, ALI sa brojem na kraju i sa prefiksom web- ("viktor-3", "web-dikson").
+export const fileKey = (name) => deaccent(String(name || "").trim()).replace(/\.[a-z0-9]{2,5}$/i, "").replace(/[^a-z0-9]+/g, "");
+
+// Mjesto u nizu images sorte koje nova slika zamjenjuje: stavka koja je stari naziv fajla
+// (".webp" iz seeda, ne imageId) s istim ključem. -1 ako takve nema (slika ide na kraj niza).
+export function findOldSlot(name, refs) {
+  const k = fileKey(name);
+  if (!k) return -1;
+  return (refs || []).findIndex((r) => typeof r === "string" && /\.webp$/i.test(r) && fileKey(r) === k);
+}

@@ -1,7 +1,7 @@
 // Pokretanje: node tests/match.test.mjs
 // Testovi za panel/match.js sa stvarnim imenima fajlova i katalogom iz data/seed.json.
 import fs from "node:fs";
-import { matchFile, parseFileName, slugify, uniqueSlug, similarVarieties, levenshtein } from "../panel/match.js";
+import { matchFile, parseFileName, slugify, uniqueSlug, similarVarieties, levenshtein, findOldSlot, fileKey } from "../panel/match.js";
 
 const seed = JSON.parse(fs.readFileSync(new URL("../data/seed.json", import.meta.url)));
 const V = seed.vinograd.varieties;
@@ -56,5 +56,20 @@ ok(slugify("  Husein Kelin Barmak (Nevestini prsti) ") === "husein-kelin-barmak-
 ok(uniqueSlug("Viking", new Set(["viking", "viking-2"])) === "viking-3", "uniqueSlug daje viking-3");
 ok(similarVarieties("Ratatui", V).map((x) => x.key).join(",") === "ratatuj,km-ratatui", "similarVarieties Ratatui → Ratatuj, KM Ratatui");
 ok(levenshtein("korjanka", "kodrjanka") === 1, "levenshtein korjanka/kodrjanka = 1");
+console.log("— zamjena stare slike na istom mjestu (stari naziv fajla iz seeda)");
+const refs = (k) => V[k].images.map((id) => (seed.vinograd.images[id] ? seed.vinograd.images[id].file : id));
+const slot = (f, k, want) => { const r = refs(k), i = findOldSlot(f, r); ok(i === want, `${f.padEnd(22)} u ${k}: [${r.join(", ")}] → mjesto ${i}${i >= 0 ? " (" + r[i] + ")" : ""}`); };
+slot("viktor-3.webp", "viktor", 2);
+slot("nizina-2.webp", "nizina", 1);
+slot("black-grand-2.webp", "black-grand", 1);
+slot("Viktor_3.JPG", "viktor", 2);
+slot("web-dikson.jpg", "dikson", 0);
+slot("viktor-5.jpg", "viktor", -1);
+slot("viktor.jpg", "viktor", -1);
+slot("nizina-2.webp", "viktor", -1);
+ok(findOldSlot("viktor-3.webp", ["viktor-1.webp", "-NnovaSlika", "viktor-3.webp"]) === 2, "imageId u nizu se preskače, stari naziv se nalazi");
+ok(findOldSlot("viktor-3.webp", ["-Nviktor3"]) === -1, "imageId koji liči na ime se nikad ne zamjenjuje");
+ok(fileKey("Šarada-UA 3.webp") === "saradaua3", 'fileKey("Šarada-UA 3.webp") = saradaua3');
+
 console.log(`\n${pass} prošlo, ${fail} palo`);
 process.exit(fail ? 1 : 0);

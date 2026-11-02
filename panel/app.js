@@ -3,7 +3,7 @@
 // Slike (biblioteka, dodavanje, uvoz po imenu), Objavi, Dodaj sortu (čarobnjak),
 // Podešavanja (kontakt, tekstovi stranica, promjena lozinke).
 import { createDb } from "./db.js";
-import { similarVarieties, uniqueSlug, matchFile } from "./match.js";
+import { similarVarieties, uniqueSlug, matchFile, findOldSlot } from "./match.js";
 import { convertImage, canMakeWebp, storagePaths, sha256Hex, ACCEPT, NO_WEBP_MSG, WIDTHS } from "./images.js";
 
 // ------------------------------------------------------------------ konstante
@@ -738,8 +738,9 @@ async function processUpload(id) {
 
 // Zajedničko jezgro (4a, uvoz po imenu): 4 fajla u Storage, pa zapis slike i niz sorte u
 // jednom upisu. Pri grešci briše poslane fajlove i (ako je upis krenuo) zapis, pa baca grešku.
-// Slika ide na kraj niza images sorte. Vraća ukupnu veličinu 4 fajla (bajtova).
-async function storeImage(conv, key, { source = "own", webApproved = false, onProgress = () => {} } = {}) {
+// Slika ide na kraj niza images sorte, osim kad je zadan replace (stari naziv fajla iz
+// seeda u tom nizu): tada nova slika zauzima njegovo mjesto. Vraća ukupnu veličinu 4 fajla.
+async function storeImage(conv, key, { source = "own", webApproved = false, replace = "", onProgress = () => {} } = {}) {
   const imageId = S.db.newImageId();
   const paths = storagePaths(imageId);
   const parts = [...WIDTHS.map(String), "og"];
@@ -763,7 +764,9 @@ async function storeImage(conv, key, { source = "own", webApproved = false, onPr
       hash: conv.hash, source, webApproved: source === "web" ? !!webApproved : false,
       createdAt: S.db.TIMESTAMP, createdBy: S.user.uid,
     };
-    const list = [...imgList(v), imageId];
+    const list = [...imgList(v)];
+    const at = replace ? list.indexOf(replace) : -1;
+    if (at >= 0) list[at] = imageId; else list.push(imageId);
     dbTried = true;
     await S.db.update({
       [`images/${imageId}`]: record,
@@ -1157,6 +1160,15 @@ function impMatch(it) {
   const r = matchFile(it.name, S.data.varieties);
   it.match = r; it.web = r.web; it.order = r.order;
   if (!it.manualKey) it.key = r.status === "matched" ? r.key : "";
+  impOld(it);
+}
+// stara slika (naziv fajla iz seeda) koju ova slika zamjenjuje na istom mjestu u nizu sorte
+function impOld(it) {
+  const refs = it.key && V(it.key) ? imgList(V(it.key)) : [];
+  const i = findOldSlot(it.name, refs);
+  it.oldRef = i >= 0 ? refs[i] : "";
+  // ista stara slika ne može biti zamijenjena dvaput u istom uvozu: zamjenjuje prva, ostale idu na kraj
+  if (it.oldRef && IMP.items.some((o) => o !== it && o.oldRef === it.oldRef && o.key === it.key && impGroup(o) === "ok" && IMP.items.indexOf(o) < IMP.items.indexOf(it))) it.oldRef = "";
 }
 const impGroup = (it) => (it.dup || it.exclude ? "skip" : it.key ? "ok" : "none");
 
@@ -1192,14 +1204,17 @@ async function impPrepare() {
 function impStatus(it) {
   const m = it.match || { status: "none", candidates: [] }, nm = (k) => esc((V(k) || {}).name || k);
   if (it.dup) return `<span class="warntext">${esc(it.dup)} Preskočena.</span>`;
-  if (it.key) return `<span class="oktext">✓ ${it.manualKey ? "Izabrano" : "Uparena"}: ${nm(it.key)}</span>`;
+  if (it.key) return `<span class="oktext">✓ ${it.manualKey ? "Izabrano" : "Uparena"}: ${nm(it.key)}</span>` + (it.oldRef ? ` <span class="badge ft">zamjenjuje staru sliku ${esc(it.oldRef)}</span>` : "");
   if (m.status === "suggest") return `Mislili ste: <b>${nm(m.key)}</b>? <button type="button" class="btn outline sm" data-impyes="${it.id}">Da, ${nm(m.key)}</button>`;
   if (m.status === "ambiguous") return `<span class="warntext">Odgovara sortama ${m.candidates.map(nm).join(" i ")}. Izaberi iz liste.</span>`;
   return `<span class="warntext">Nije pronađena sorta. Ispravi ime ili izaberi iz liste.</span>`;
 }
 function impCard(it, opts) {
-  return `<div class="impcard" data-imp="${it.id}">
-    ${it.thumb ? `<img src="${esc(it.thumb)}" alt="" width="${THUMB}" height="${THUMB}">` : `<span class="imthumb thumb x" aria-hidden="true">?</span>`}
+  const oldSrc = it.oldRef ? imgSrc(it.oldRef) : "";
+  const pics = `<div class="imppics">${it.thumb ? `<img src="${esc(it.thumb)}" alt="Nova slika" width="${THUMB}" height="${THUMB}">` : `<span class="imthumb thumb x" aria-hidden="true">?</span>`}${it.oldRef
+    ? `<figure class="impold">${oldSrc ? `<img src="${esc(oldSrc)}" alt="Stara slika ${esc(it.oldRef)}" loading="lazy">` : `<span class="imthumb thumb x" aria-hidden="true">?</span>`}<figcaption>stara${oldSrc ? "" : " (fajla nema)"}</figcaption></figure>` : ""}</div>`;
+  return `<div class="impcard${it.oldRef ? " replaces" : ""}" data-imp="${it.id}">
+    ${pics}
     <div class="impbody">
       <div class="field"><label for="in-${it.id}">Ime fajla</label><input id="in-${it.id}" type="text" data-impname="${it.id}" value="${esc(it.name)}" autocomplete="off"></div>
       <div class="field"><label for="ik-${it.id}">Sorta</label><select id="ik-${it.id}" class="search" data-impkey="${it.id}"><option value="">— izaberi sortu —</option>${opts.replace(`value="${esc(it.key)}"`, `value="${esc(it.key)}" selected`)}</select></div>
@@ -1237,7 +1252,7 @@ function impOnInput(el) { // ime se mijenja: ishod se odmah osvježi
 }
 function impOnChange(el) {
   if (el.matches("[data-impname]")) { renderImport(); return true; }
-  if (el.matches("[data-impkey]")) { const it = impItem(el, "data-impkey"); it.key = el.value; it.manualKey = !!el.value; renderImport(); return true; }
+  if (el.matches("[data-impkey]")) { const it = impItem(el, "data-impkey"); it.key = el.value; it.manualKey = !!el.value; impOld(it); renderImport(); return true; }
   if (el.matches("[data-impok]")) { const it = impItem(el, "data-impok"); it.approved = el.checked; renderImport(); return true; }
   if (el.matches("[data-impskip]")) { const it = impItem(el, "data-impskip"); it.exclude = el.checked; renderImport(); return true; }
   if (el.matches("[data-impre]")) { impReselect(el); return true; }
@@ -1245,7 +1260,7 @@ function impOnChange(el) {
   return false;
 }
 function impOnClick(b) {
-  if (b.dataset.impyes) { const it = IMP.items.find((x) => x.id === b.dataset.impyes); it.key = it.match.key; it.manualKey = true; renderImport(); return true; }
+  if (b.dataset.impyes) { const it = IMP.items.find((x) => x.id === b.dataset.impyes); it.key = it.match.key; it.manualKey = true; impOld(it); renderImport(); return true; }
   if (b.id === "impDiscard") { idbClear(); IMP.items = []; IMP.phase = "pick"; route(); return true; }
   return false;
 }
@@ -1262,7 +1277,7 @@ async function impSave() {
   IMP.phase = "saving"; IMP.total = list.length; IMP.done = 0; IMP.summary = null; uploading++;
   // spisak preostalih u IndexedDB (sa sadržajem fajla; ako ne stane, samo ime)
   for (const it of list) {
-    const rec = { id: it.id, fname: it.fname, name: it.name, key: it.key, web: !!it.web, approved: !!it.approved, order: it.order ?? null, hash: it.hash };
+    const rec = { id: it.id, fname: it.fname, name: it.name, key: it.key, web: !!it.web, approved: !!it.approved, order: it.order ?? null, hash: it.hash, oldRef: it.oldRef || "" };
     try { await idbPut({ ...rec, blob: it.file }); } catch { try { await idbPut(rec); } catch { /* bez nastavka */ } }
   }
   let before = 0, after = 0;
@@ -1275,9 +1290,9 @@ async function impSave() {
       const conv = await convertImage(it.file);
       const dupNow = await S.db.findImageByHash(conv.hash);
       if (dupNow) { it.state = "ok"; it.dup = "Već je snimljena."; it.pct = 1; it.msg = "Već je u biblioteci, preskočena."; await idbDel(it.id); IMP.done++; renderImport(); continue; }
-      const sum = await storeImage(conv, it.key, { source: it.web ? "web" : "own", webApproved: it.approved, onProgress: (f, msg) => { it.pct = 0.1 + 0.9 * f; if (msg) it.msg = msg; upd(); } });
+      const sum = await storeImage(conv, it.key, { source: it.web ? "web" : "own", webApproved: it.approved, replace: it.oldRef || "", onProgress: (f, msg) => { it.pct = 0.1 + 0.9 * f; if (msg) it.msg = msg; upd(); } });
       before += it.file.size; after += sum;
-      it.state = "ok"; it.pct = 1; it.msg = `<span class="oktext">✓ Snimljeno (${kb(it.file.size)} → ${kb(sum)})</span>`;
+      it.state = "ok"; it.pct = 1; it.msg = `<span class="oktext">✓ Snimljeno (${kb(it.file.size)} → ${kb(sum)})${it.oldRef ? `, umjesto ${esc(it.oldRef)}` : ""}</span>`;
       await idbDel(it.id);
     } catch (e) {
       it.state = "err"; it.pct = 0; it.msg = `<span class="error">${esc(e && e.code === "no-webp" ? e.message : "Nije snimljeno: veza je prekinuta. Ostaje za nastavak.")}</span>`;
@@ -1300,7 +1315,7 @@ async function screenUvozAfter(params) {
   await checkWebp();
   if (params.get("nastavi") === "1" && !IMP.items.length) {
     const recs = await idbAll();
-    IMP.items = recs.map((r) => ({ id: r.id, file: r.blob || null, fname: r.fname, name: r.name, key: r.key, manualKey: true, web: r.web, approved: r.approved, order: r.order, hash: r.hash, exclude: false, dup: "" }));
+    IMP.items = recs.map((r) => ({ id: r.id, file: r.blob || null, fname: r.fname, name: r.name, key: r.key, manualKey: true, web: r.web, approved: r.approved, order: r.order, hash: r.hash, oldRef: r.oldRef || "", exclude: false, dup: "" }));
     IMP.seq = Math.max(IMP.seq, ...IMP.items.map((x) => +String(x.id).replace(/\D/g, "") || 0));
     IMP.resumed = true;
     if (IMP.items.length) await impPrepare();
