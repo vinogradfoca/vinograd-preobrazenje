@@ -220,3 +220,13 @@ select.search{appearance:auto}
 .pubhist{list-style:none;padding:0;margin:10px 0 0}
 .pubhist li{display:flex;justify-content:space-between;gap:8px;padding:10px 0;border-top:1px solid var(--line);min-height:44px;align-items:center}
 .pubhist li:first-child{border-top:0}
+
+/* Dodaj sortu (Dio 2) */
+.wizbar{margin:-4px 0 12px}
+.wiznav{position:sticky;bottom:calc(76px + env(safe-area-inset-bottom));background:var(--cream);padding:8px 0;margin:12px 0 0}
+.simrow{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:8px}
+.simrow span{font-weight:700}
+.props{width:100%;border-collapse:collapse;font-size:15px}
+.props th,.props td{text-align:left;vertical-align:top;padding:8px 0;border-top:1px solid var(--line)}
+.props tr:first-child th,.props tr:first-child td{border-top:0}
+.props th{width:38%;padding-right:12px;color:var(--muted);font-weight:600}

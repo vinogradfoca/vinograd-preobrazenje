@@ -1,7 +1,8 @@
 // Panel Vinograda Preobraženje (Koraci 3a i 4a).
 // Ekrani: prijava, Početna, Sorte, Uređivanje sorte (sa slikama), Cijene i količine,
-// Slike (biblioteka i dodavanje), Objavi, Promijeni lozinku. Dodaj sortu je "Uskoro".
+// Slike (biblioteka i dodavanje), Objavi, Dodaj sortu (čarobnjak), Promijeni lozinku.
 import { createDb } from "./db.js";
+import { similarVarieties, uniqueSlug } from "./match.js";
 import { convertImage, canMakeWebp, storagePaths, ACCEPT, NO_WEBP_MSG, WIDTHS } from "./images.js";
 
 // ------------------------------------------------------------------ konstante
@@ -204,12 +205,14 @@ function onViewChange(e) {
 }
 function onViewInput(e) {
   const el = e.target;
+  if (el.id === "wName") { WIZ.name = el.value; WIZ.allowSimilar = false; const w = $("#wizSimilar"); if (w) w.innerHTML = ""; fieldError(el, ""); return; }
   const c = el.closest(".field")?.querySelector("[data-count]");
   if (c && (el.tagName === "TEXTAREA" || el.dataset.max)) c.textContent = `${el.value.length} znakova` + (el.dataset.max ? ` (preporuka do ${el.dataset.max})` : "");
 }
 function onViewClick(e) {
   const b = e.target.closest("button");
   if (!b) return;
+  if (location.hash.startsWith("#/dodaj") && wizClick(b)) return;
   if (b.dataset.seg) { // izbor iz liste (boja, zrenje, vrsta)
     const key = b.closest("[data-key]").dataset.key, f = b.dataset.seg;
     const r = V8[f](b.dataset.val);
@@ -330,7 +333,7 @@ function screenHome() {
   return `
     ${head("Šta želiš uraditi?")}
     <div class="big">
-      <a href="#/dodaj"><i>＋</i><span>Dodaj sortu <small><span class="soon">Uskoro</span></small></span></a>
+      <a href="#/dodaj"><i>＋</i><span>Dodaj sortu</span></a>
       <a href="#/cijene"><i>KM</i><span>Cijene i količine</span></a>
       <a href="#/slike"><i>▣</i><span>Dodaj slike</span></a>
       <a href="#/objavi"><i>↑</i><span>Objavi na sajt</span></a>
@@ -388,8 +391,8 @@ function screenSorte(params) {
     }));
   });
   return `
-    ${head("Sorte")}
-    <input id="q" class="search" type="search" placeholder="Pretraži po nazivu…" aria-label="Pretraži sorte" value="${esc(S.ui.sorteQ)}">
+    <div class="ehead"><h1>Sorte</h1><a class="btn primary" href="#/dodaj">＋ Dodaj sortu</a></div>
+    <input id="q" class="search" style="margin-top:12px" type="search" placeholder="Pretraži po nazivu…" aria-label="Pretraži sorte" value="${esc(S.ui.sorteQ)}">
     <div class="chips" id="chips" role="group" aria-label="Filteri">
       ${SORTE_FILTERS.map(([f, l]) => `<button type="button" data-f="${f}" aria-pressed="${S.ui.sorteFilter === f}">${l}</button>`).join("")}
     </div>
@@ -965,6 +968,135 @@ function screenObjavi() {
     <div class="card"><h2>Zadnje objave</h2><ul class="pubhist" id="pubHist"></ul></div>`;
 }
 
+// ------------------------------------------------------------------ Dodaj sortu (Dio 2)
+// Pet koraka. Sorta se pravi u bazi čim se prođe korak 1 (skrivena, visible:false), a
+// ostali koraci snimaju u istu sortu putanjama do polja (isto autosnimanje kao uređivanje).
+const WIZ = { key: "", name: "", color: "", allowSimilar: false };
+const WIZ_STEPS = ["Naziv i boja", "Slike", "Cijena i količina", "Opis i iskustvo", "Pregled"];
+
+function wizHead(step) {
+  return `<a class="back" href="#/sorte">← Sorte</a>
+    <h1>Dodaj sortu</h1>
+    <p class="lead">Korak ${step} od 5: ${WIZ_STEPS[step - 1]}</p>
+    <div class="bar wizbar" aria-hidden="true"><span style="width:${step * 20}%"></span></div>`;
+}
+function wizNav(step, nextLabel = "Dalje") {
+  return `<div class="endbtns wiznav">
+    ${step > 1 ? `<button type="button" class="btn ghost" data-wiz-back="${step}">← Nazad</button>` : `<a class="btn ghost" href="#/sorte">Odustani</a>`}
+    <button type="button" class="btn ${step === 5 ? "primary" : "green"}" data-wiz-next="${step}">${nextLabel}</button>
+  </div>`;
+}
+function screenWizard(parts) {
+  const key = decodeURIComponent(parts[1] || "");
+  const step = Math.min(5, Math.max(1, +parts[2] || 1));
+  if (key && !V(key)) return `${head("Sorta nije pronađena")}<p><a class="btn outline" href="#/dodaj">Dodaj novu sortu</a></p>`;
+  if (!key) { // korak 1, sorta još ne postoji
+    if (!parts[1] && !WIZ.key) { /* nova */ }
+    const unfinished = WIZ.key && V(WIZ.key) ? `<div class="notice busy">Nedovršeno dodavanje: <b>${esc(V(WIZ.key).name)}</b>. <a href="#/dodaj/${encodeURIComponent(WIZ.key)}/2">Nastavi</a></div>` : "";
+    return `${wizHead(1)}${unfinished}
+      <div class="card" id="wiz1">
+        <div class="field"><label for="wName">Naziv sorte</label><input id="wName" type="text" maxlength="120" value="${esc(WIZ.name)}" autocomplete="off"></div>
+        <div class="field"><span class="lbl" id="lbl-wcolor">Boja</span>
+          <div class="seg" role="radiogroup" aria-labelledby="lbl-wcolor">
+            ${COLORS.map((c) => `<button type="button" role="radio" data-wcolor="${esc(c)}" aria-checked="${WIZ.color === c}"><span class="dot ${CC[c]}"></span>${esc(c)}</button>`).join("")}
+          </div></div>
+        <p class="hint"><span>Obavezni su samo naziv i boja. Sve ostalo možeš dodati poslije.</span></p>
+        <div id="wizSimilar"></div>
+      </div>${wizNav(1)}`;
+  }
+  const v = V(key);
+  let body = "";
+  if (step === 1) {
+    body = `<div class="card" data-key="${esc(key)}">
+      ${fieldText("name", "Naziv sorte", v.name, { v: "name" })}
+      <p class="hint"><span>Adresa stranice: /sorte/${esc(v.slug || key)}/ (ne mijenja se kad se promijeni naziv)</span></p>
+      ${seg("color", "Boja", COLORS, v.color)}</div>`;
+  } else if (step === 2) {
+    setTimeout(() => renderImgBox(key));
+    body = `<div class="card" data-key="${esc(key)}"><p class="hint"><span>Neobavezno. Sliku možeš dodati i kasnije. Prva slika je naslovna.</span></p>
+      <div id="imgBox"></div>${uploaderHtml(key)}</div>`;
+  } else if (step === 3) {
+    body = `<div class="card" data-key="${esc(key)}"><p class="hint"><span>Neobavezno. Prazno polje znači "na upit". Količina 0 znači "nema na stanju".</span></p>
+      <div class="kinds">${KINDS.map(([k, label]) => `<div class="kind"><h3>${label}</h3>${priceField(k, v, false, key)}${qtyField(k, v, false, key)}</div>`).join("")}</div></div>`;
+  } else if (step === 4) {
+    body = `<div class="card" data-key="${esc(key)}"><p class="hint"><span>Neobavezno.</span></p>
+      ${seg("ripen", "Vrijeme zrenja", RIPEN, v.ripen)}
+      ${seg("type", "Vrsta", TYPES, v.type)}
+      ${fieldText("desc", "Opis", str(v.desc), { area: true })}
+      ${fieldText("exp", "Lično iskustvo", str(v.exp), { area: true })}
+      ${fieldText("flaws", "Nedostaci", str(v.flaws), { area: true, warn: "Unesite samo provjerene nedostatke sorte." })}</div>`;
+  } else {
+    const imgs = imgList(v), k = (kk) => kind(v, kk);
+    const pr = (kk) => { const o = k(kk); return `${num(o.price) != null ? fmtPrice(o.price) + " KM" : "cijena na upit"}, ${num(o.qty) != null ? o.qty + " kom." : "količina na upit"}`; };
+    const row = (l, val) => `<tr><th scope="row">${l}</th><td>${val}</td></tr>`;
+    body = `<div class="card" data-key="${esc(key)}">
+      <div class="strip" id="strip" style="margin:0 0 12px">${stripHtml(key)}</div>
+      <table class="props"><tbody>
+        ${row("Naziv", esc(v.name))}${row("Boja", `<span class="dot ${CC[v.color] || "x"}"></span> ${esc(v.color || "")}`)}
+        ${row("Vrijeme zrenja", esc(v.ripen || "nije upisano"))}${row("Vrsta", esc(v.type || "nije upisano"))}
+        ${row("Slike", imgs.length ? String(imgs.length) : "nema")}
+        ${row("Sadnica", pr("sapling"))}${row("Reznica", pr("cutting"))}
+        ${row("Tekstovi", ["desc", "exp", "flaws"].filter((f) => str(v[f]).trim()).length + " od 3 popunjeno")}
+        ${row("Adresa", `/sorte/${esc(v.slug || key)}/`)}
+      </tbody></table>
+      <label class="switch">Vidljiva na sajtu<input type="checkbox" data-f="visible"${v.visible === true ? " checked" : ""}></label>
+      <p class="warnbox" style="margin-top:12px">Nova sorta se ne vidi na sajtu dok je ne uključiš i ne pritisneš Objavi.</p></div>`;
+  }
+  return `${wizHead(step)}<p class="muted small" style="margin-top:-6px">Sorta: <b class="js-name">${esc(v.name)}</b></p>${body}${wizNav(step, step === 5 ? "Spremi sortu" : "Dalje")}`;
+}
+
+function wizValidateStep1() {
+  const nameEl = $("#wName");
+  const r = V8.name(nameEl.value);
+  if (r.error) { fieldError(nameEl, r.error); nameEl.focus(); return null; }
+  fieldError(nameEl, "");
+  if (!COLORS.includes(WIZ.color)) { toast("Izaberi boju sorte."); return null; }
+  return r.value;
+}
+async function wizCreate() {
+  const name = wizValidateStep1(); if (!name) return;
+  WIZ.name = name;
+  if (!WIZ.allowSimilar) {
+    const sim = similarVarieties(name, S.data.varieties).slice(0, 3);
+    if (sim.length) {
+      $("#wizSimilar").innerHTML = `<div class="warnbox" role="alert"><b>Već postoji sorta sa sličnim nazivom:</b>
+        ${sim.map((x) => `<div class="simrow"><span>${esc(x.name)}</span><a class="btn outline" href="#/sorta/${encodeURIComponent(x.key)}">Otvori postojeću</a></div>`).join("")}
+        <button type="button" class="btn ghost wide" data-wiz-force style="margin-top:8px">Ipak dodaj novu</button></div>`;
+      return;
+    }
+  }
+  // prvi upis: sorta s obaveznim poljima, skrivena; slug je ključ i poslije se ne mijenja
+  const taken = new Set([...Object.keys(S.data.varieties), ...Object.values(S.data.varieties).map((v) => v && v.slug).filter(Boolean)]);
+  const slug = uniqueSlug(name, taken);
+  const maxOrder = Math.max(0, ...Object.values(S.data.varieties).map((v) => num(v && v.order) ?? 0));
+  const v = { name, slug, color: WIZ.color, visible: false, featured: false, order: maxOrder + 1, updatedAt: S.db.TIMESTAMP, updatedBy: S.user.uid };
+  S.data.varieties[slug] = { ...v, updatedAt: Date.now() };
+  send({ [`varieties/${slug}`]: v });
+  WIZ.key = slug; WIZ.allowSimilar = false;
+  location.hash = `#/dodaj/${encodeURIComponent(slug)}/2`;
+}
+function wizClick(b) {
+  if (b.dataset.wcolor) {
+    WIZ.color = b.dataset.wcolor;
+    $$("button[data-wcolor]").forEach((x) => x.setAttribute("aria-checked", String(x === b)));
+    return true;
+  }
+  if (b.hasAttribute("data-wiz-force")) { WIZ.allowSimilar = true; wizCreate(); return true; }
+  if (b.dataset.wizNext || b.dataset.wizBack) {
+    const step = +(b.dataset.wizNext || b.dataset.wizBack);
+    const key = decodeURIComponent((location.hash.split("/")[2] || "").split("?")[0]);
+    document.activeElement && document.activeElement.blur && document.activeElement.blur(); // snimi polje koje je u fokusu
+    flushLater();
+    if (b.dataset.wizBack) { location.hash = step - 1 === 1 && !key ? "#/dodaj" : `#/dodaj/${encodeURIComponent(key)}/${step - 1}`; return true; }
+    if (!key) { wizCreate(); return true; }
+    if ($("#view .field.err")) { toast("Ispravi označeno polje."); return true; }
+    if (step < 5) location.hash = `#/dodaj/${encodeURIComponent(key)}/${step + 1}`;
+    else { toast(`Sorta "${V(key).name}" je spremljena.`); WIZ.key = ""; WIZ.name = ""; WIZ.color = ""; location.hash = `#/sorta/${encodeURIComponent(key)}`; }
+    return true;
+  }
+  return false;
+}
+
 // ------------------------------------------------------------------ usmjeravanje
 function route() {
   flushLater();
@@ -981,7 +1113,7 @@ function route() {
     case "postavke": html = screenPostavke(); after = () => ($("#out3").onclick = () => S.db.signOut()); break;
     case "slike": html = screenSlike(); nav = "slike"; break;
     case "objavi": html = screenObjavi(); nav = "objavi"; after = () => ($("#pubBtn").onclick = doPublish); break;
-    case "dodaj": html = screenSoon("Dodaj sortu", "Dodavanje nove sorte korak po korak dolazi uskoro."); nav = "pocetna"; break;
+    case "dodaj": html = screenWizard(parts); nav = "sorte"; break;
     default: html = `${head("Stranica ne postoji")}<p><a class="btn outline" href="#/">Na početnu</a></p>`;
   }
   view().innerHTML = html;
