@@ -858,11 +858,11 @@ function screenSlike() {
 }
 
 // ------------------------------------------------------------------ Objavi (Dio 1)
-// Klik šalje Firebase ID token na /api/publish (Netlify Function), koja provjeri admina i
-// pozove build hook. Panel zatim upiše publish/last i publish/history i prati /build.json.
+// Klik šalje Firebase ID token na /api/publish (Cloudflare Pages Function), koja provjeri admina i
+// pozove deploy hook. Panel zatim upiše publish/last i publish/history i prati /build.json.
 const PUB_TIMEOUT_MS = 6 * 60 * 1000; // poslije 6 minuta bez nove izgradnje: poruka o neuspjehu
 const PUB_POLL_MS = 10 * 1000;
-const PUB_MONTH_WARN = 12;
+const PUB_MONTH_WARN = 300; // Cloudflare Pages besplatno: 500 izgradnji mjesečno (računaju se i pregledi grana i PR-ova)
 const PUB = { phase: "", requestedAt: 0, builtAt: 0, error: "", timer: null, mockBuiltAt: 0 };
 
 const hhmm = (ts) => { const d = new Date(ts), p = (x) => String(x).padStart(2, "0"); return `${p(d.getHours())}:${p(d.getMinutes())}`; };
@@ -925,8 +925,8 @@ const PUB_ERR = {
   401: "Prijava je istekla. Odjavi se pa se prijavi ponovo.",
   403: "Nemaš dozvolu za objavu.",
   429: "Objava je upravo pokrenuta. Pričekaj pola minute pa pokušaj ponovo.",
-  500: "Objava nije podešena na serveru (Netlify). Javi Žarku.",
-  502: "Netlify ili Google trenutno ne odgovaraju. Pokušaj ponovo za minut.",
+  500: "Objava nije podešena na serveru (Cloudflare). Javi Žarku.",
+  502: "Cloudflare ili Google trenutno ne odgovaraju. Pokušaj ponovo za minut.",
 };
 async function doPublish() {
   if (PUB.phase === "sending" || PUB.phase === "building") return;
@@ -968,7 +968,7 @@ function renderPubInfo() {
     ? `<b>${p.n} ${izmjena(p.n)}</b> ${p.n % 10 >= 2 && p.n % 10 <= 4 && (p.n % 100 < 12 || p.n % 100 > 14) ? "čekaju" : "čeka"} objavu${p.last == null ? " (još nema objave iz panela, pa se broje sve sorte i stranice)" : ""}.`
     : `Nema izmjena od zadnje objave.`;
   const mi = $("#pubMonth");
-  if (mi) mi.innerHTML = `Objava ovog mjeseca: <b>${m}</b>` + (m >= PUB_MONTH_WARN ? `<div class="warnbox" style="margin-top:8px">Netlify besplatni paket dozvoljava oko 20 objava mjesečno. Skupi više izmjena pa objavi jednom.</div>` : "");
+  if (mi) mi.innerHTML = `Objava ovog mjeseca: <b>${m}</b>` + (m >= PUB_MONTH_WARN ? `<div class="warnbox" style="margin-top:8px">Cloudflare besplatni paket dozvoljava 500 izgradnji mjesečno. Skupi više izmjena pa objavi jednom.</div>` : "");
   const hl = $("#pubHist");
   if (hl) {
     const h = pubHistory().slice(0, 5);

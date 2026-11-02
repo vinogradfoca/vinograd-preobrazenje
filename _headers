@@ -1,0 +1,17 @@
+# Cloudflare Pages: zaglavlja. Build kopira ovaj fajl u dist/_headers.
+# Stranice su u folderima s index.html, pa čisti URL-ovi i završna kosa crta
+# ne trebaju posebna podešavanja.
+
+# CSS i JS imaju heš sadržaja u imenu, pa smiju biti immutable.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/img/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/build.json
+  Cache-Control: no-cache
+
+# Panel nije za pretraživače.
+/panel/*
+  X-Robots-Tag: noindex
