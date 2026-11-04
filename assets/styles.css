@@ -195,7 +195,7 @@ footer a{color:#fff}
 }
 /* telefon: kompaktna lista rezultata dok se kuca (assets/shop.js) */
 .qlist{margin:6px 0 14px;border:1px solid var(--line);border-radius:12px;background:#fff;overflow:hidden}
-.qrow{display:flex;align-items:center;gap:12px;min-height:56px;padding:8px 12px;border-top:1px solid var(--line);color:var(--ink);text-decoration:none}
+.qrow{display:flex;align-items:center;gap:12px;min-height:56px;padding:4px 12px;border-top:1px solid var(--line);color:var(--ink);text-decoration:none}
 .qrow:first-child{border-top:0}
 .qimg{flex:0 0 56px;width:56px;height:56px;border-radius:8px;object-fit:cover;display:grid;place-items:center;overflow:hidden;background:var(--cream);color:var(--green);font:400 22px Georgia,"Times New Roman",serif}
 .qimg.b{background:var(--green);color:#fff}
@@ -209,12 +209,20 @@ footer a{color:#fff}
 .qempty{margin:0;padding:18px 14px;text-align:center;color:var(--muted)}
 /* telefon: filteri u sklopivom odjeljku iza dugmeta "Filteri", brojač odmah ispod polja */
 @media(max-width:720px){
-  .filters{gap:8px}
+  /* polje za pretragu ostaje pri vrhu (ispod zaglavlja) dok se skroluje */
+  .filters{display:contents}
+  .filters .search-box{position:sticky;top:76px;z-index:15;background:#fff;margin:0 -16px 4px;padding:8px 16px;border-bottom:1px solid var(--line)}
+  .fmeta{margin-bottom:8px}
+  .fpanel{margin-bottom:12px}
+  /* dok se kuca, traka Pozovi/WhatsApp se skloni da ne prekriva rezultate iznad tastature */
+  body.searching .cbar{display:none}
+  /* dok se kuca, filteri se ne mogu koristiti: dugme se skloni, red s brojačem je niži */
+  body.searching .ftoggle{display:none}
   .fmeta{order:0}
   .fmeta #resultCount{margin:0}
   .ftoggle{display:inline-flex;flex:0 0 auto;padding:10px 16px}
   .ftoggle[aria-expanded=true]{background:var(--green);color:#fff}
-  .fpanel{display:none;flex:1 1 100%;flex-direction:column;gap:10px;background:#f6f8f6;border:1px solid var(--line);border-radius:12px;padding:12px}
+  .fpanel{display:none;flex-direction:column;gap:10px;background:#f6f8f6;border:1px solid var(--line);border-radius:12px;padding:12px}
   .filters.fopen .fpanel{display:flex}
   .filters .fpanel select{width:100%;flex:none}
   .fpanel .check{min-height:48px}

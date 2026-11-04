@@ -365,8 +365,16 @@
     var toGrid = function () {
       showGrid = true;
       searchEl.blur();
+      document.body.classList.remove("searching");
       filter();
-      var top = $("#resultCount").getBoundingClientRect().top + window.pageYOffset - 90;
+      var top = $("#resultCount").getBoundingClientRect().top + window.pageYOffset - (phone.matches ? 76 + searchBox.offsetHeight + 8 : 90);
+      window.scrollTo(0, Math.max(0, top));
+    };
+    // telefon: polje odmah ispod zaglavlja, a lista rezultata odmah ispod polja
+    var searchBox = $(".search-box"), fmeta = $(".fmeta");
+    var toSearchTop = function () {
+      if (!phone.matches || document.activeElement !== searchEl) return;
+      var top = fmeta.getBoundingClientRect().top + window.pageYOffset - searchBox.offsetHeight - 8 - 76;
       window.scrollTo(0, Math.max(0, top));
     };
     // pretraga i filteri se pamte u ovoj kartici pregledača (povratak sa stranice sorte)
@@ -405,9 +413,19 @@
     });
     if (quick) {
       quick.addEventListener("click", function (e) { if (e.target.closest("#quickAll")) toGrid(); });
-      searchEl.addEventListener("focus", function () { showGrid = false; filter(); });
+      searchEl.addEventListener("focus", function () {
+        showGrid = false;
+        if (phone.matches) document.body.classList.add("searching");
+        filter(); toSearchTop();
+      });
       // kratko čekanje: dodir na red liste stigne do veze prije nego što se lista skloni
-      searchEl.addEventListener("blur", function () { setTimeout(function () { if (document.activeElement !== searchEl) filter(); }, 250); });
+      searchEl.addEventListener("blur", function () {
+        setTimeout(function () { if (document.activeElement !== searchEl) { document.body.classList.remove("searching"); filter(); } }, 250);
+      });
+      // Enter / "Traži" na tastaturi: zatvori tastaturu i pokaži rezultate
+      searchEl.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); toGrid(); } });
+      // tastatura mijenja visinu prozora: polje ostaje pri vrhu
+      if (window.visualViewport) window.visualViewport.addEventListener("resize", toSearchTop);
       if (phone.addEventListener) phone.addEventListener("change", filter);
     }
     restore();
