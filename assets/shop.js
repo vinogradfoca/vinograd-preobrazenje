@@ -280,26 +280,68 @@
   }
 
   /* ---------- katalog: filteri samo skrivaju kartice koje su već u HTML-u ---------- */
+  // Poređenje naziva: mala slova, bez kvačica (č ć → c, š → s, ž → z), đ → "dj" ili "d",
+  // a razmaci, crtice i ostali znakovi se zanemaruju. Traži se samo po nazivu sorte.
+  var fold = function (s) {
+    s = String(s || "").toLowerCase();
+    if (s.normalize) s = s.normalize("NFD").replace(/[̀-ͯ]/g, "");
+    return s;
+  };
+  var squash = function (s) { return s.replace(/[^a-z0-9]+/g, ""); };
+  // dvije varijante naziva: đ kao "dj" i kao "d" (npr. Đurđevka: "djurdjevka" i "durdevka")
+  var nameKeys = function (name) { var f = fold(name); return [squash(f.replace(/đ/g, "dj")), squash(f.replace(/đ/g, "d"))]; };
+  var queryKey = function (q) { return squash(fold(q).replace(/đ/g, "dj")); };
   var grid = $("#catalogGrid");
   if (grid) {
     var cards = $$("#catalogGrid .card");
-    var val = function (id) { var el = document.getElementById(id); return el ? el.value : ""; };
+    var keys = cards.map(function (el) { return nameKeys(el.dataset.name); });
+    var FKEY = "vp-katalog-v1", FIELDS = ["search", "fColor", "fRipen", "fType", "fAvail"];
+    var field = function (id) { return document.getElementById(id); };
+    var val = function (id) { var el = field(id); return el ? el.value : ""; };
+    var noRes = $("#noResults"), noResDefault = noRes.textContent, clearBtn = $("#searchClear");
     var filter = function () {
-      var q = val("search").trim().toLowerCase(), c = val("fColor"), r = val("fRipen"), ty = val("fType");
-      var fa = document.getElementById("fAvail"), a = !!(fa && fa.checked), n = 0;
-      cards.forEach(function (el) {
+      var raw = val("search").trim(), q = queryKey(raw), c = val("fColor"), r = val("fRipen"), ty = val("fType");
+      var fa = field("fAvail"), a = !!(fa && fa.checked), n = 0;
+      cards.forEach(function (el, i) {
         var d = el.dataset;
-        var ok = (!q || d.name.indexOf(q) !== -1) && (!c || d.color === c) && (!r || d.ripen === r) && (!ty || d.type === ty) && (!a || d.avail === "1");
+        var ok = (!q || keys[i][0].indexOf(q) !== -1 || keys[i][1].indexOf(q) !== -1) && (!c || d.color === c) && (!r || d.ripen === r) && (!ty || d.type === ty) && (!a || d.avail === "1");
         el.hidden = !ok; if (ok) n++;
       });
       $("#resultCount").textContent = n + " od " + cards.length + " sorti";
-      $("#noResults").hidden = n > 0;
+      noRes.hidden = n > 0;
+      noRes.textContent = raw
+        ? "Nema sorti za '" + raw + "'. Pokušajte drugi naziv" + (SHOP.phone ? " ili pozovite " + SHOP.phone : "") + "." +
+          (c || r || ty || a ? " Provjerite i izabrane filtere." : "")
+        : noResDefault;
+      if (clearBtn) clearBtn.hidden = !val("search");
+    };
+    // pretraga i filteri se pamte u ovoj kartici pregledača (povratak sa stranice sorte)
+    var save = function () {
+      var st = {};
+      FIELDS.forEach(function (id) { var el = field(id); if (el) st[id] = el.type === "checkbox" ? el.checked : el.value; });
+      try { sessionStorage.setItem(FKEY, JSON.stringify(st)); } catch (e) {}
+    };
+    var restore = function () {
+      var st = null;
+      try { st = JSON.parse(sessionStorage.getItem(FKEY) || "null"); } catch (e) {}
+      if (!st) return;
+      FIELDS.forEach(function (id) {
+        var el = field(id); if (!el || !(id in st)) return;
+        if (el.type === "checkbox") el.checked = !!st[id];
+        else if (el.tagName !== "SELECT" || [].some.call(el.options, function (o) { return o.value === st[id]; })) el.value = st[id];
+      });
     };
     $("#filters").hidden = false;
-    ["search", "fColor", "fRipen", "fType", "fAvail"].forEach(function (id) {
-      var el = document.getElementById(id); if (el) el.addEventListener("input", filter);
+    FIELDS.forEach(function (id) {
+      var el = field(id); if (el) el.addEventListener("input", function () { filter(); save(); });
     });
+    if (clearBtn) clearBtn.addEventListener("click", function () {
+      var s = field("search"); s.value = ""; filter(); save(); s.focus();
+    });
+    restore();
     filter();
+    // pregledač može vratiti vrijednosti polja tek poslije učitavanja, ili stranicu iz keša
+    window.addEventListener("pageshow", function () { restore(); filter(); });
   }
 
   /* ---------- cjenovnik: pretraga ---------- */
