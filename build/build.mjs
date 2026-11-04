@@ -18,6 +18,7 @@ import { createEngine, escapeHtml } from "./template.mjs";
 import { webpSize } from "./webp.mjs";
 import { toFirebaseShape } from "./firebase-shape.mjs";
 import { uputstvoHtml } from "./uputstvo.mjs";
+import { snapshot as publishedSnapshot } from "../panel/changes.js";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const DIST = path.join(ROOT, "dist");
@@ -117,7 +118,10 @@ async function loadDb(urlOverride) {
   if (data === null || typeof data !== "object" || !Object.keys(data).length) {
     throw new BuildError([`Baza je prazna (${url} vraća ${text.trim().slice(0, 20) || "prazan odgovor"}). Podaci se uvoze iz data/firebase-import.json. Sajt ostaje na prethodnoj verziji.`]);
   }
-  return normalizeDb(data);
+  const db = normalizeDb(data);
+  // sirovi podaci (oblik iz baze) za snimak objavljenog stanja, panel/objavljeno.json
+  Object.defineProperty(db, "raw", { value: data });
+  return db;
 }
 
 // Firebase ne čuva null, prazne nizove ni prazne objekte, a nizove može vratiti
@@ -717,6 +721,9 @@ async function main() {
     try { mock = toFirebaseShape(JSON.parse(fs.readFileSync(SEED, "utf8")).vinograd); }
     catch (e) { throw new BuildError([`panel/mock-data.json: ${e.message}`]); }
     writeFile(path.join(tmp, "panel", "mock-data.json"), JSON.stringify(mock));
+    // ekran Objavi, "Šta čeka objavu": snimak objavljenih vrijednosti, da panel zna koje polje je
+    // promijenjeno (baza čuva samo vrijeme izmjene). Iz baze, ili iz seeda u obliku baze (kao mock).
+    writeFile(path.join(tmp, "panel", "objavljeno.json"), JSON.stringify({ builtAt: new Date().toISOString(), ...publishedSnapshot(db.raw || mock) }));
     // ekran Pomoć: uputstvo iz docs/uputstvo-za-panel.md kao gotov HTML (bez baze)
     let help;
     try { help = uputstvoHtml(fs.readFileSync(UPUTSTVO, "utf8")); }

@@ -274,3 +274,17 @@ body.modalopen{overflow:hidden}
 .pomoc .secbody ol,.pomoc .secbody ul{margin:10px 0;padding-left:22px}
 .pomoc .secbody li{margin:6px 0}
 .pomoc code{background:#f0f3f1;border-radius:6px;padding:1px 6px;font-size:14px;overflow-wrap:anywhere}
+
+/* Objavi: "Šta čeka objavu" */
+details.pubwhat{margin:0 0 14px}
+details.pubwhat>summary{font-size:17px}
+.pwsum{margin:4px 0 8px;font-weight:700;font-size:15px}
+.pwlist{list-style:none;padding:0;margin:0}
+.pwi{border-top:1px solid var(--line);padding:8px 0}
+.pwhead{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.pwlink,.pwtitle{display:inline-flex;align-items:center;min-height:44px;font-weight:700;font-size:16px}
+.pwlink{color:var(--green)}
+.pwwhat{margin:0;font-size:15px}
+.pwmeta{margin:2px 0 0;color:var(--muted);font-size:14px}
+.pwnote{margin:4px 0;color:var(--bad);font-size:14px}
+.pwmore,.pwempty{margin:10px 0 0;color:var(--muted)}

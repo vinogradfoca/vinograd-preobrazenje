@@ -5,6 +5,7 @@
 import { createDb } from "./db.js";
 import { similarVarieties, uniqueSlug, matchFile, findOldSlot } from "./match.js";
 import { convertImage, canMakeWebp, storagePaths, sha256Hex, ACCEPT, NO_WEBP_MSG, WIDTHS } from "./images.js";
+import { SECTIONS as PUB_SECTIONS, changedVarietyFields, changedSectionFields, whenText } from "./changes.js";
 
 // ------------------------------------------------------------------ konstante
 const COLORS = ["Bijela", "Crna", "Crvena", "Za provjeru"];
@@ -576,7 +577,7 @@ function screenPostavke() {
   return `
     ${head("Podešavanja", "Kontakt i tekstovi stranica. Snima se čim napustiš polje, a posjetioci izmjene vide poslije objave.")}
     ${settingsSectionsHtml()}
-    <div class="card"><h2>Prikaz na sajtu</h2>
+    <div class="card" id="sec-prikaz"><h2>Prikaz na sajtu</h2>
       <label class="switch"><span>Prikaži na sajtu sorte bez slike<small>Kad je isključeno, sorte bez slike nisu u katalogu, na početnoj ni u cjenovniku. Stranica sorte i dalje postoji.</small></span><input type="checkbox" id="showNoImg"${getIn(S.data, "settings/showWithoutImage") !== false ? " checked" : ""}></label>
     </div>
     <div class="card">
@@ -894,15 +895,26 @@ const hhmm = (ts) => { const d = new Date(ts), p = (x) => String(x).padStart(2, 
 const izmjena = (n) => (n % 10 === 1 && n % 100 !== 11 ? "izmjena" : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? "izmjene" : "izmjena");
 const objava = (n) => (n % 10 === 1 && n % 100 !== 11 ? "objava" : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? "objave" : "objava");
 
-// Sorte, stranice i podešavanja čiji je updatedAt noviji od zadnje objave.
+// Sorte, stranice i podešavanja čiji je updatedAt noviji od zadnje objave, i brisanja sorti.
+// Ako objave iz panela još nema, broje se sve sorte i stranice. Broj u rečenici i spisak
+// "Šta čeka objavu" dolaze iz istog niza stavki, pa se uvijek slažu.
 function pendingChanges() {
   const last = num(getIn(S.data, "publish/last/requestedAt"));
-  const items = [
-    ...Object.values(S.data.varieties || {}).map((v) => num(v && v.updatedAt)),
-    ...["home", "kako", "kontakt"].map((p) => num(getIn(S.data, `pages/${p}/updatedAt`))),
-    num(getIn(S.data, "settings/updatedAt")),
-  ];
-  return { last, n: (last == null ? items.length : items.filter((t) => t != null && t > last).length) + pendingDeletions(last) };
+  const newer = (t) => last == null || (t != null && t > last);
+  const items = [];
+  for (const [key, v] of Object.entries(S.data.varieties || {})) {
+    if (!v) continue;
+    const at = num(v.updatedAt);
+    if (newer(at)) items.push({ type: "variety", key, at, by: v.updatedBy || "" });
+  }
+  for (const sec of PUB_SECTIONS) {
+    const at = num(getIn(S.data, sec.root + "/updatedAt"));
+    if (newer(at)) items.push({ type: "section", key: sec.id, sec, at, by: getIn(S.data, sec.root + "/updatedBy") || "" });
+  }
+  for (const [dk, d] of Object.entries(getIn(S.data, "publish/deletions") || {})) {
+    if (d && num(d.at) && (last == null || d.at > last)) items.push({ type: "deleted", key: dk, ref: d.ref || "", at: d.at, by: d.by || "" });
+  }
+  return { last, n: items.length, items };
 }
 function pubHistory() {
   const h = getIn(S.data, "publish/history") || {};
@@ -924,7 +936,7 @@ function stopPoll() { clearInterval(PUB.timer); PUB.timer = null; }
 async function checkBuild() {
   PUB.builtAt = await readBuiltAt();
   if (PUB.phase === "building") {
-    if (PUB.builtAt >= PUB.requestedAt) { PUB.phase = "done"; stopPoll(); }
+    if (PUB.builtAt >= PUB.requestedAt) { PUB.phase = "done"; stopPoll(); loadPubSnap(true); }
     else if (Date.now() - PUB.requestedAt > PUB_TIMEOUT_MS) { PUB.phase = "failed"; stopPoll(); }
   }
   renderPubStatus();
@@ -986,8 +998,64 @@ async function doPublish() {
   startPoll();
 }
 
+// Snimak vrijednosti iz zadnje izgradnje sajta: undefined = još se učitava, null = nije dostupan
+let pubSnap;
+async function loadPubSnap(force) {
+  if (pubSnap !== undefined && !force) return;
+  try {
+    const r = await fetch("objavljeno.json", { cache: "no-store" });
+    pubSnap = r.ok ? await r.json() : null;
+  } catch { pubSnap = null; }
+  renderPubList();
+}
+
+const PUB_LIST_MAX = 20;
+function pubItemHtml(it, last) {
+  const who = NAMES[it.by] || (it.by ? "nepoznat korisnik" : "");
+  const meta = [who, it.at ? whenText(it.at) : (last == null ? "čeka prvu objavu iz panela" : "")].filter(Boolean).join(" · ");
+  let title, badge = "", what, note = "";
+  if (it.type === "variety") {
+    const v = V(it.key) || {};
+    const prev = pubSnap && pubSnap.varieties ? pubSnap.varieties[it.key] : undefined;
+    const fields = changedVarietyFields(prev, v);
+    title = `<a class="pwlink" href="#/sorta/${encodeURIComponent(it.key)}">${esc(v.name || it.key)}</a>`;
+    if (v.visible === false) {
+      badge = `<span class="badge hid">skrivena</span>`;
+      note = `<p class="pwnote">Skrivena je, pa se neće vidjeti na sajtu ni poslije objave.</p>`;
+    }
+    what = pubSnap && pubSnap.varieties && !prev ? "nova sorta" : fields.length ? fields.join(", ") : (it.at ? "izmijenjena" : "");
+  } else if (it.type === "section") {
+    const prev = pubSnap && pubSnap.sections ? pubSnap.sections[it.key] : undefined;
+    const fields = changedSectionFields(prev, S.data, it.sec);
+    const onlyView = it.key === "settings" && fields.length === 1 && fields[0] === it.sec.labels.showWithoutImage;
+    title = `<a class="pwlink" href="#/postavke?sec=${onlyView ? "prikaz" : it.key}">${esc(it.sec.title)}</a>`;
+    what = fields.length ? fields.join(", ") : (it.at ? "izmijenjeno" : "");
+  } else {
+    const name = pubSnap && pubSnap.varieties && pubSnap.varieties[it.ref] ? pubSnap.varieties[it.ref].name : "";
+    title = `<span class="pwtitle">${name ? "Sorta " + esc(name) : "Obrisana sorta"}</span>`;
+    badge = `<span class="badge hid">obrisano</span>`;
+    what = name ? "" : (it.ref ? `oznaka: ${esc(it.ref)}` : "");
+  }
+  return `<li class="pwi"><div class="pwhead">${title}${badge}</div>${what ? `<p class="pwwhat">${esc(what)}</p>` : ""}${note}${meta ? `<p class="pwmeta">${esc(meta)}</p>` : ""}</li>`;
+}
+function renderPubList() {
+  const box = $("#pubWhatBody"); if (!box) return;
+  const p = pendingChanges();
+  const sum = $("#pubWhatCount"); if (sum) sum.textContent = p.n ? String(p.n) : "";
+  if (!p.n) { box.innerHTML = `<p class="pwempty">Sve je objavljeno.</p>`; return; }
+  const items = p.items.slice().sort((a, b) => (b.at ?? -Infinity) - (a.at ?? -Infinity) || String(a.key).localeCompare(String(b.key), "sr"));
+  const cnt = (t) => items.filter((x) => x.type === t).length;
+  const parts = [[cnt("variety"), "sorte"], [cnt("section"), "stranice i podešavanja"], [cnt("deleted"), "obrisano"]].filter(([n]) => n).map(([n, l]) => `${l}: ${n}`);
+  box.innerHTML = `<p class="pwsum">${esc(parts.join(" · "))}</p>`
+    + (p.last == null ? `<p class="pwnote">Još nema objave iz panela, pa su na spisku sve sorte i stranice.</p>` : "")
+    + (pubSnap === null ? `<p class="pwnote">Spisak promijenjenih polja nije dostupan, pa piše samo "izmijenjena".</p>` : "")
+    + `<ul class="pwlist">${items.slice(0, PUB_LIST_MAX).map((it) => pubItemHtml(it, p.last)).join("")}</ul>`
+    + (items.length > PUB_LIST_MAX ? `<p class="pwmore">… i još ${items.length - PUB_LIST_MAX}</p>` : "");
+}
+
 function renderPubInfo() {
   const p = pendingChanges(), m = monthCount();
+  renderPubList();
   const pi = $("#pubPending");
   if (pi) pi.innerHTML = p.n
     ? `<b>${p.n} ${izmjena(p.n)}</b> ${p.n % 10 >= 2 && p.n % 10 <= 4 && (p.n % 100 < 12 || p.n % 100 > 14) ? "čekaju" : "čeka"} objavu${p.last == null ? " (još nema objave iz panela, pa se broje sve sorte i stranice)" : ""}.`
@@ -1003,6 +1071,7 @@ function renderPubInfo() {
 function screenObjavi() {
   setTimeout(async () => {
     renderPubInfo();
+    loadPubSnap();
     const last = num(getIn(S.data, "publish/last/requestedAt"));
     PUB.builtAt = await readBuiltAt();
     if (!PUB.phase || PUB.phase === "done") {
@@ -1016,6 +1085,7 @@ function screenObjavi() {
     ${head("Objavi")}
     <div class="card">
       <p id="pubPending" class="pubpending"></p>
+      <details class="sec pubwhat" id="pubWhat"><summary>Šta čeka objavu <small id="pubWhatCount"></small></summary><div class="secbody" id="pubWhatBody"></div></details>
       <button type="button" class="btn primary wide pubbtn" id="pubBtn">Objavi na sajt</button>
       <div id="pubStatus" role="status" aria-live="polite"></div>
       <p class="muted small" id="pubQty"></p>
@@ -1463,6 +1533,14 @@ function commitShowNoImg(el) {
   setIn(S.data, "settings/updatedAt", Date.now()); setIn(S.data, "settings/updatedBy", S.user.uid);
   send({ "settings/showWithoutImage": v, "settings/updatedAt": S.db.TIMESTAMP, "settings/updatedBy": S.user.uid });
 }
+// otvori i pokaži odjeljak Podešavanja (veza sa ekrana Objavi)
+function openSettingsSection(id) {
+  if (!id) return;
+  const d = id === "prikaz" ? $("#sec-prikaz") : $(`details[data-spsec="${id}"]`);
+  if (!d) return;
+  if (d.tagName === "DETAILS") $$("details[data-spsec]").forEach((x) => (x.open = x === d));
+  setTimeout(() => d.scrollIntoView({ block: "start" }), 0);
+}
 function spMeta(root) {
   const at = num(getIn(S.data, root + "/updatedAt")), by = getIn(S.data, root + "/updatedBy");
   return at ? `Zadnja izmjena: ${NAMES[by] || "nepoznat korisnik"}, ${fmtDate(at)}` : "";
@@ -1488,12 +1566,8 @@ function closeModal() { const m = $("#modal"); if (m) m.remove(); document.body.
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && $("#modal")) closeModal(); });
 
 // Brisanja koja čekaju objavu: svako brisanje sorte upiše publish/deletions/<ključ> = {at, by, ref}.
-// Brojač na ekranu Objavi broji one novije od zadnje objave. (Brisanje slike iz biblioteke se ne broji:
-// takva slika ne koristi nijedna sorta, pa ni sajt.)
-function pendingDeletions(last) {
-  const d = getIn(S.data, "publish/deletions") || {};
-  return Object.values(d).filter((x) => x && num(x.at) && (last == null || x.at > last)).length;
-}
+// Brojač na ekranu Objavi (pendingChanges) broji one novije od zadnje objave. (Brisanje slike iz
+// biblioteke se ne bilježi ni ne broji: takva slika ne koristi nijedna sorta, pa ni sajt.)
 
 function deleteVarietyDialog(key) {
   const v = V(key); if (!v) return;
@@ -1587,7 +1661,7 @@ function route() {
     case "sorte": html = screenSorte(params); nav = "sorte"; break;
     case "sorta": { const key = decodeURIComponent(parts[1] || ""); html = screenEdit(key); nav = "sorte"; after = () => bindEdit(key); break; }
     case "cijene": html = screenCijene(params); nav = "cijene"; break;
-    case "postavke": html = screenPostavke(); after = () => ($("#out3").onclick = () => S.db.signOut()); break;
+    case "postavke": html = screenPostavke(); after = () => { $("#out3").onclick = () => S.db.signOut(); openSettingsSection(params.get("sec")); }; break;
     case "pomoc": html = screenPomoc(); after = loadPomoc; break;
     case "slike": html = screenSlike(); nav = "slike"; break;
     case "uvoz": html = screenUvoz(params); nav = "slike"; break;
