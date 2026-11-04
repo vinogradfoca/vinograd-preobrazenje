@@ -90,6 +90,11 @@ header{height:76px;display:flex;align-items:center;justify-content:space-between
 .filters input[type=search]{flex:1 1 auto;min-width:0}
 .filters input[type=search]::-webkit-search-cancel-button{display:none}
 .search-box .btn{flex:0 0 auto;padding:10px 16px}
+/* brojač i dugme "Filteri": na širem ekranu brojač je ispod filtera kao i ranije, dugme se ne vidi */
+.fmeta{order:10;flex:1 1 100%;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.fmeta #resultCount{margin:6px 0 4px}
+.ftoggle,.freset{display:none}
+.fpanel{display:contents}
 input,select,textarea{border:1px solid #c9d3cc;border-radius:10px;padding:12px 14px;background:#fff;min-height:48px;width:100%}
 .filters select{width:auto;flex:0 1 190px}
 .check{display:flex;align-items:center;gap:8px;font-weight:600}
@@ -187,6 +192,41 @@ footer a{color:#fff}
   .gallery{position:static;padding:10px}
   #mainImg{aspect-ratio:1/1;max-height:44vh;width:100%}
   .close{background:#ffffffe6;box-shadow:0 2px 8px #0003}
+}
+/* telefon: kompaktna lista rezultata dok se kuca (assets/shop.js) */
+.qlist{margin:6px 0 14px;border:1px solid var(--line);border-radius:12px;background:#fff;overflow:hidden}
+.qrow{display:flex;align-items:center;gap:12px;min-height:56px;padding:4px 12px;border-top:1px solid var(--line);color:var(--ink);text-decoration:none}
+.qrow:first-child{border-top:0}
+.qimg{flex:0 0 56px;width:56px;height:56px;border-radius:8px;object-fit:cover;display:grid;place-items:center;overflow:hidden;background:var(--cream);color:var(--green);font:400 22px Georgia,"Times New Roman",serif}
+.qimg.b{background:var(--green);color:#fff}
+.qimg.r{background:var(--wine);color:#fff}
+.qimg.x{background:#e9efe9;color:var(--muted)}
+.qtext{min-width:0}
+.qtext b{display:block;font-weight:600;font-size:17px;overflow-wrap:anywhere}
+.qtext mark{background:none;color:var(--green);font-weight:800;text-decoration:underline;text-underline-offset:3px}
+.qtext small{display:block;color:var(--muted);font-size:14px}
+.qmore{display:flex;width:calc(100% - 24px);margin:4px 12px 12px}
+.qempty{margin:0;padding:18px 14px;text-align:center;color:var(--muted)}
+/* telefon: filteri u sklopivom odjeljku iza dugmeta "Filteri", brojač odmah ispod polja */
+@media(max-width:720px){
+  /* polje za pretragu ostaje pri vrhu (ispod zaglavlja) dok se skroluje */
+  .filters{display:contents}
+  .filters .search-box{position:sticky;top:76px;z-index:15;background:#fff;margin:0 -16px 4px;padding:8px 16px;border-bottom:1px solid var(--line)}
+  .fmeta{margin-bottom:8px}
+  .fpanel{margin-bottom:12px}
+  /* dok se kuca, traka Pozovi/WhatsApp se skloni da ne prekriva rezultate iznad tastature */
+  body.searching .cbar{display:none}
+  /* dok se kuca, filteri se ne mogu koristiti: dugme se skloni, red s brojačem je niži */
+  body.searching .ftoggle{display:none}
+  .fmeta{order:0}
+  .fmeta #resultCount{margin:0}
+  .ftoggle{display:inline-flex;flex:0 0 auto;padding:10px 16px}
+  .ftoggle[aria-expanded=true]{background:var(--green);color:#fff}
+  .fpanel{display:none;flex-direction:column;gap:10px;background:#f6f8f6;border:1px solid var(--line);border-radius:12px;padding:12px}
+  .filters.fopen .fpanel{display:flex}
+  .filters .fpanel select{width:100%;flex:none}
+  .fpanel .check{min-height:48px}
+  .freset{display:inline-flex;width:100%}
 }
 @media(max-width:640px){
   .grid{grid-template-columns:repeat(2,1fr);gap:12px}

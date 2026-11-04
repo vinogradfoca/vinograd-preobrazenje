@@ -3,13 +3,17 @@
   <h1>Sorte vinove loze</h1>
   <p class="lead">Izaberite sortu za detalje, fotografije i narudžbu. Nedostupne sadnice ili reznice nije moguće poručiti.</p>
   <div class="filters" id="filters" hidden>
-    <div class="search-box"><input id="search" type="search" placeholder="Pretražite sorte…" aria-label="Pretražite sorte" autocomplete="off"><button type="button" class="btn ghost" id="searchClear" hidden>Očisti</button></div>
+    <div class="search-box"><input id="search" type="search" placeholder="Pretražite sorte…" aria-label="Pretražite sorte" enterkeyhint="search" autocomplete="off" autocapitalize="off" spellcheck="false"><button type="button" class="btn ghost" id="searchClear" hidden>Očisti</button></div>
+    <div class="fmeta"><p id="resultCount" class="muted" data-total="{{total}}">{{resultCount}}</p><button type="button" class="btn ghost ftoggle" id="fToggle" aria-expanded="false" aria-controls="fPanel">Filteri</button></div>
+    <div class="fpanel" id="fPanel">
     <select id="fColor" aria-label="Boja"><option value="">Sve boje</option>{{#each colorOptions}}<option>{{this}}</option>{{/each}}</select>
     {{#if ripenOptions}}<select id="fRipen" aria-label="Vrijeme zrenja"><option value="">Sva vremena zrenja</option>{{#each ripenOptions}}<option>{{this}}</option>{{/each}}</select>{{/if}}
     {{#if typeOptions}}<select id="fType" aria-label="Vrsta"><option value="">Sve vrste</option>{{#each typeOptions}}<option>{{this}}</option>{{/each}}</select>{{/if}}
     {{#if showAvail}}<label class="check"><input type="checkbox" id="fAvail"> Samo dostupno</label>{{/if}}
+    <button type="button" class="btn outline freset" id="fReset">Očisti filtere</button>
+    </div>
   </div>
-  <p id="resultCount" class="muted" data-total="{{total}}">{{resultCount}}</p>
+  <div id="quickList" class="qlist" hidden></div>
   <div id="catalogGrid" class="grid">
     {{#each catalog}}{{> card}}{{/each}}<div class="empty full" id="noResults" role="status" hidden>Nema sorti za zadate filtere.</div>
   </div>
