@@ -300,6 +300,9 @@
     var val = function (id) { var el = field(id); return el ? el.value : ""; };
     var noRes = $("#noResults"), noResDefault = noRes.textContent, clearBtn = $("#searchClear");
     var filtersEl = $("#filters"), fToggle = $("#fToggle"), fReset = $("#fReset");
+    var searchEl = field("search"), quick = $("#quickList"), QUICK_MAX = 6;
+    var phone = window.matchMedia ? window.matchMedia("(max-width: 720px)") : { matches: false };
+    var showGrid = false; // "Prikaži sve" ili Enter: mreža do sljedećeg fokusa na polju
     var filter = function () {
       var raw = val("search").trim(), q = queryKey(raw), c = val("fColor"), r = val("fRipen"), ty = val("fType");
       var fa = field("fAvail"), a = !!(fa && fa.checked), n = 0;
@@ -318,6 +321,53 @@
       // dugme "Filteri (N)" na telefonu: broj aktivnih filtera
       var active = (c ? 1 : 0) + (r ? 1 : 0) + (ty ? 1 : 0) + (a ? 1 : 0);
       if (fToggle) fToggle.textContent = active ? "Filteri (" + active + ")" : "Filteri";
+      renderQuick(n, raw, q);
+    };
+    // Dio označen u nazivu: poklapanje se traži u obliku bez kvačica i razmaka, pa se vraća na slova naziva
+    var highlight = function (name, q) {
+      if (!q) return esc(name);
+      for (var v = 0; v < 2; v++) {
+        var map = [], flat = "";
+        for (var i = 0; i < name.length; i++) {
+          var f = fold(name.charAt(i));
+          f = squash(v === 0 ? f.replace(/đ/g, "dj") : f.replace(/đ/g, "d"));
+          for (var j = 0; j < f.length; j++) map.push(i);
+          flat += f;
+        }
+        var at = flat.indexOf(q);
+        if (at === -1) continue;
+        var s = map[at], e = map[at + q.length - 1] + 1;
+        return esc(name.slice(0, s)) + "<mark>" + esc(name.slice(s, e)) + "</mark>" + esc(name.slice(e));
+      }
+      return esc(name);
+    };
+    // telefon: dok polje ima fokus i tekst, rezultati su kompaktna lista (prvih 6) umjesto mreže
+    var renderQuick = function (n, raw, q) {
+      var on = phone.matches && !showGrid && raw && document.activeElement === searchEl;
+      grid.hidden = !!on;
+      if (!on) { quick.hidden = true; quick.innerHTML = ""; return; }
+      var rows = [];
+      for (var i = 0; i < cards.length && rows.length < QUICK_MAX; i++) {
+        var el = cards[i]; if (el.hidden) continue;
+        var img = el.querySelector(".ph img"), ph = el.querySelector(".noimg");
+        var name = el.querySelector("h3").textContent, line = (el.querySelector(".cline") || {}).textContent || "";
+        var pic = img
+          ? '<img class="qimg" src="' + esc(img.getAttribute("src")) + '"' + (img.getAttribute("srcset") ? ' srcset="' + esc(img.getAttribute("srcset")) + '" sizes="56px"' : "") + ' width="56" height="56" alt="" loading="lazy">'
+          : '<span class="qimg ' + esc(ph ? ph.className.replace("noimg", "").trim() : "") + '" aria-hidden="true">' + esc(name.charAt(0)) + "</span>";
+        rows.push('<a class="qrow" href="' + esc(el.getAttribute("href")) + '">' + pic + '<span class="qtext"><b>' + highlight(name, q) + "</b>" + (line ? "<small>" + esc(line) + "</small>" : "") + "</span></a>");
+      }
+      quick.innerHTML = n
+        ? rows.join("") + (n > QUICK_MAX ? '<button type="button" class="btn outline qmore" id="quickAll">Prikaži sve (' + n + ")</button>" : "")
+        : '<p class="qempty" role="status">' + esc(noRes.textContent) + "</p>";
+      quick.hidden = false;
+    };
+    // zatvori tastaturu i pokaži običnu mrežu s rezultatima
+    var toGrid = function () {
+      showGrid = true;
+      searchEl.blur();
+      filter();
+      var top = $("#resultCount").getBoundingClientRect().top + window.pageYOffset - 90;
+      window.scrollTo(0, Math.max(0, top));
     };
     // pretraga i filteri se pamte u ovoj kartici pregledača (povratak sa stranice sorte)
     var save = function () {
@@ -353,6 +403,13 @@
       var fa = field("fAvail"); if (fa) fa.checked = false;
       filter(); save();
     });
+    if (quick) {
+      quick.addEventListener("click", function (e) { if (e.target.closest("#quickAll")) toGrid(); });
+      searchEl.addEventListener("focus", function () { showGrid = false; filter(); });
+      // kratko čekanje: dodir na red liste stigne do veze prije nego što se lista skloni
+      searchEl.addEventListener("blur", function () { setTimeout(function () { if (document.activeElement !== searchEl) filter(); }, 250); });
+      if (phone.addEventListener) phone.addEventListener("change", filter);
+    }
     restore();
     filter();
     // pregledač može vratiti vrijednosti polja tek poslije učitavanja, ili stranicu iz keša
