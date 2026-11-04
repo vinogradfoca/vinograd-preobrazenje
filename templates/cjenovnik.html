@@ -2,12 +2,13 @@
   <p class="eyebrow">CJENOVNIK</p>
   <h1>Cijene sadnica i reznica</h1>
   <p class="lead">Cijene su informativne. Za precizne detalje pozovite nas.</p>
-  <input id="priceSearch" type="search" placeholder="Pretražite sortu…" aria-label="Pretraži cjenovnik" class="wide-input" hidden>
+  <div class="search-box wide-input" id="priceSearchBox" hidden><input id="priceSearch" type="search" placeholder="Pretražite sortu…" aria-label="Pretraži cjenovnik" enterkeyhint="search" autocomplete="off" autocapitalize="off" spellcheck="false"><button type="button" class="btn ghost" id="priceClear" hidden>Očisti</button></div>
   <div class="ptable">
     <div class="prow phead"><b>Sorta</b><b>Sadnica</b><b>Reznica</b></div>
     <div id="priceList">
     {{#each priced}}<a class="prow" href="{{url}}" data-name="{{search}}"><span><i class="dot {{colorClass}}"></i> {{name}}</span><span>{{priceSapling}}</span><span>{{priceCutting}}</span></a>
     {{/each}}</div>
   </div>
+  <p class="empty" id="priceEmpty" role="status" hidden></p>
   {{#if unpricedCount}}<p class="muted small">Za ostale sorte ({{unpricedCount}}) cijena je na upit. Sve sorte su u <a href="/sorte/">katalogu</a>.</p>{{/if}}
 </section>
