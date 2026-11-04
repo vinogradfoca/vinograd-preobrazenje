@@ -299,6 +299,7 @@
     var field = function (id) { return document.getElementById(id); };
     var val = function (id) { var el = field(id); return el ? el.value : ""; };
     var noRes = $("#noResults"), noResDefault = noRes.textContent, clearBtn = $("#searchClear");
+    var filtersEl = $("#filters"), fToggle = $("#fToggle"), fReset = $("#fReset");
     var filter = function () {
       var raw = val("search").trim(), q = queryKey(raw), c = val("fColor"), r = val("fRipen"), ty = val("fType");
       var fa = field("fAvail"), a = !!(fa && fa.checked), n = 0;
@@ -314,6 +315,9 @@
           (c || r || ty || a ? " Provjerite i izabrane filtere." : "")
         : noResDefault;
       if (clearBtn) clearBtn.hidden = !val("search");
+      // dugme "Filteri (N)" na telefonu: broj aktivnih filtera
+      var active = (c ? 1 : 0) + (r ? 1 : 0) + (ty ? 1 : 0) + (a ? 1 : 0);
+      if (fToggle) fToggle.textContent = active ? "Filteri (" + active + ")" : "Filteri";
     };
     // pretraga i filteri se pamte u ovoj kartici pregledača (povratak sa stranice sorte)
     var save = function () {
@@ -337,6 +341,17 @@
     });
     if (clearBtn) clearBtn.addEventListener("click", function () {
       var s = field("search"); s.value = ""; filter(); save(); s.focus();
+    });
+    // telefon (do 720 px): filteri su u sklopivom odjeljku, zatvoreno zadano
+    if (fToggle) fToggle.addEventListener("click", function () {
+      var open = !filtersEl.classList.contains("fopen");
+      filtersEl.classList.toggle("fopen", open);
+      fToggle.setAttribute("aria-expanded", String(open));
+    });
+    if (fReset) fReset.addEventListener("click", function () {
+      ["fColor", "fRipen", "fType"].forEach(function (id) { var el = field(id); if (el) el.value = ""; });
+      var fa = field("fAvail"); if (fa) fa.checked = false;
+      filter(); save();
     });
     restore();
     filter();
