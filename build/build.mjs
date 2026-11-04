@@ -544,7 +544,9 @@ function pages(m, db) {
       description: clip(`Cijene sadnica i reznica vinove loze. Cijene su informativne, za precizne detalje pozovite ${m.s.phone}.`),
     }, {
       // u tabeli su samo sorte s bar jednom unesenom cijenom; ostale su "na upit"
-      priced: m.catalog.filter((v) => v.priceSapling !== "–" || v.priceCutting !== "–"),
+      // po nazivu, bosanski redoslijed slova (č ć dž đ š ž poslije c, d, s, z)
+      priced: m.catalog.filter((v) => v.priceSapling !== "–" || v.priceCutting !== "–")
+        .sort((a, b) => a.name.localeCompare(b.name, ["bs", "hr"], { sensitivity: "base" }) || a.name.localeCompare(b.name, ["bs", "hr"])),
       unpricedCount: m.catalog.filter((v) => v.priceSapling === "–" && v.priceCutting === "–").length,
     });
   } else {

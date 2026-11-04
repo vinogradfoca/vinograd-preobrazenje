@@ -279,18 +279,27 @@
     loadData().catch(function () {}); // da "Dodaj u upit" radi odmah
   }
 
-  /* ---------- katalog: filteri samo skrivaju kartice koje su već u HTML-u ---------- */
-  // Poređenje naziva: mala slova, bez kvačica (č ć → c, š → s, ž → z), đ → "dj" ili "d",
-  // a razmaci, crtice i ostali znakovi se zanemaruju. Traži se samo po nazivu sorte.
+  /* ---------- pretraga po nazivu: isto poređenje za katalog i cjenovnik ---------- */
+  // Mala slova, bez kvačica (č ć → c, š → s, ž → z), đ → "dj" ili "d", a razmaci, crtice
+  // i ostali znakovi se zanemaruju. Traži se samo po nazivu sorte.
   var fold = function (s) {
     s = String(s || "").toLowerCase();
-    if (s.normalize) s = s.normalize("NFD").replace(/[̀-ͯ]/g, "");
+    if (s.normalize) s = s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     return s;
   };
   var squash = function (s) { return s.replace(/[^a-z0-9]+/g, ""); };
   // dvije varijante naziva: đ kao "dj" i kao "d" (npr. Đurđevka: "djurdjevka" i "durdevka")
   var nameKeys = function (name) { var f = fold(name); return [squash(f.replace(/đ/g, "dj")), squash(f.replace(/đ/g, "d"))]; };
   var queryKey = function (q) { return squash(fold(q).replace(/đ/g, "dj")); };
+  var nameMatches = function (keys, q) { return !q || keys[0].indexOf(q) !== -1 || keys[1].indexOf(q) !== -1; };
+  var noResultsText = function (raw, withFilters) {
+    return "Nema sorti za '" + raw + "'. Pokušajte drugi naziv" + (SHOP.phone ? " ili pozovite " + SHOP.phone : "") + "." +
+      (withFilters ? " Provjerite i izabrane filtere." : "");
+  };
+  // telefon: dok polje za pretragu ima fokus, traka Pozovi/WhatsApp se skloni (CSS: body.searching)
+  var phoneMQ = window.matchMedia ? window.matchMedia("(max-width: 720px)") : { matches: false };
+
+  /* ---------- katalog: filteri samo skrivaju kartice koje su već u HTML-u ---------- */
   var grid = $("#catalogGrid");
   if (grid) {
     var cards = $$("#catalogGrid .card");
@@ -301,22 +310,19 @@
     var noRes = $("#noResults"), noResDefault = noRes.textContent, clearBtn = $("#searchClear");
     var filtersEl = $("#filters"), fToggle = $("#fToggle"), fReset = $("#fReset");
     var searchEl = field("search"), quick = $("#quickList"), QUICK_MAX = 6;
-    var phone = window.matchMedia ? window.matchMedia("(max-width: 720px)") : { matches: false };
+    var phone = phoneMQ;
     var showGrid = false; // "Prikaži sve" ili Enter: mreža do sljedećeg fokusa na polju
     var filter = function () {
       var raw = val("search").trim(), q = queryKey(raw), c = val("fColor"), r = val("fRipen"), ty = val("fType");
       var fa = field("fAvail"), a = !!(fa && fa.checked), n = 0;
       cards.forEach(function (el, i) {
         var d = el.dataset;
-        var ok = (!q || keys[i][0].indexOf(q) !== -1 || keys[i][1].indexOf(q) !== -1) && (!c || d.color === c) && (!r || d.ripen === r) && (!ty || d.type === ty) && (!a || d.avail === "1");
+        var ok = nameMatches(keys[i], q) && (!c || d.color === c) && (!r || d.ripen === r) && (!ty || d.type === ty) && (!a || d.avail === "1");
         el.hidden = !ok; if (ok) n++;
       });
       $("#resultCount").textContent = n + " od " + cards.length + " sorti";
       noRes.hidden = n > 0;
-      noRes.textContent = raw
-        ? "Nema sorti za '" + raw + "'. Pokušajte drugi naziv" + (SHOP.phone ? " ili pozovite " + SHOP.phone : "") + "." +
-          (c || r || ty || a ? " Provjerite i izabrane filtere." : "")
-        : noResDefault;
+      noRes.textContent = raw ? noResultsText(raw, !!(c || r || ty || a)) : noResDefault;
       if (clearBtn) clearBtn.hidden = !val("search");
       // dugme "Filteri (N)" na telefonu: broj aktivnih filtera
       var active = (c ? 1 : 0) + (r ? 1 : 0) + (ty ? 1 : 0) + (a ? 1 : 0);
@@ -434,13 +440,40 @@
     window.addEventListener("pageshow", function () { restore(); filter(); });
   }
 
-  /* ---------- cjenovnik: pretraga ---------- */
+  /* ---------- cjenovnik: pretraga (isto poređenje kao katalog) ---------- */
   var ps = $("#priceSearch");
   if (ps) {
-    ps.hidden = false;
-    ps.addEventListener("input", function () {
-      var q = ps.value.trim().toLowerCase();
-      $$("#priceList .prow").forEach(function (r) { r.hidden = !!q && r.dataset.name.indexOf(q) === -1; });
+    var pBox = $("#priceSearchBox"), pClear = $("#priceClear"), pEmpty = $("#priceEmpty");
+    var pRows = $$("#priceList .prow");
+    var pKeys = pRows.map(function (r) { return nameKeys(r.dataset.name); });
+    var pFilter = function () {
+      var raw = ps.value.trim(), q = queryKey(raw), n = 0;
+      pRows.forEach(function (r, i) { var ok = nameMatches(pKeys[i], q); r.hidden = !ok; if (ok) n++; });
+      pEmpty.hidden = n > 0;
+      pEmpty.textContent = n ? "" : noResultsText(raw, false);
+      pClear.hidden = !ps.value;
+    };
+    pBox.hidden = false;
+    ps.addEventListener("input", pFilter);
+    pClear.addEventListener("click", function () { ps.value = ""; pFilter(); ps.focus(); });
+    // Enter / "Traži" zatvara tastaturu
+    ps.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); ps.blur(); } });
+    // telefon: polje se postavi odmah ispod zaglavlja, da redovi ostanu iznad tastature
+    var pToTop = function () {
+      if (!phoneMQ.matches || document.activeElement !== ps) return;
+      window.scrollTo(0, Math.max(0, pBox.getBoundingClientRect().top + window.pageYOffset - 76 - 8));
+    };
+    ps.addEventListener("focus", function () {
+      if (phoneMQ.matches) document.body.classList.add("searching");
+      pToTop();
     });
+    // kratko čekanje: dodir na "Očisti" vraća fokus u polje, pa se traka ne pojavi ispod prsta
+    ps.addEventListener("blur", function () {
+      setTimeout(function () { if (document.activeElement !== ps) document.body.classList.remove("searching"); }, 250);
+    });
+    if (window.visualViewport) window.visualViewport.addEventListener("resize", pToTop);
+    pFilter();
+    // pregledač može vratiti tekst u polju pri povratku na stranicu
+    window.addEventListener("pageshow", pFilter);
   }
 })();
