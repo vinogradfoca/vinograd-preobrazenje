@@ -1278,12 +1278,30 @@ function impOld(it) {
 }
 const impGroup = (it) => (it.dup || it.exclude ? "skip" : it.key ? "ok" : "none");
 
+// Dugme "Izaberi fajlove (čuva imena)" nema accept, da Android ponudi sistemski izbor datoteka
+// (izbor iz galerije često vrati generička imena, npr. 1000062053.jpg). Zato se ovdje zadrže
+// samo slike po ekstenziji, a ostalo se preskoči uz poruku.
+const IMP_EXT = /\.(jpe?g|png|webp)$/i;
+const notImageMsg = (n) => n % 10 === 1 && n % 100 !== 11 ? `${n} fajl nije slika i preskočen je.`
+  : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? `${n} fajla nisu slike i preskočena su.`
+  : `${n} fajlova nije slika i preskočeno je.`;
+function pickImages(input) {
+  const all = [...input.files]; input.value = "";
+  if (input.dataset.import !== "fajlovi" && !input.hasAttribute("data-impre")) return { files: all, skipped: 0 };
+  const files = all.filter((f) => IMP_EXT.test(f.name));
+  return { files, skipped: all.length - files.length };
+}
+// Izgubljena imena: većina fajlova se zove samo brojem (npr. 1000062053.jpg)
+const LOST_NAME = /^\d{5,}\.(jpe?g|png|webp|heic)$/i;
+const namesLost = (items) => items.length > 0 && items.filter((it) => LOST_NAME.test(it.fname || "")).length * 2 > items.length;
+
 async function impChoose(input) {
-  const files = [...input.files]; input.value = "";
+  const { files, skipped } = pickImages(input);
+  if (skipped) toast(notImageMsg(skipped));
   if (!files.length) return;
   if (!S.webp) return toast(NO_WEBP_MSG);
   IMP.items.forEach((it) => it.thumb && URL.revokeObjectURL(it.thumb));
-  IMP.items = []; IMP.phase = "prep"; IMP.summary = null; IMP.resumed = false;
+  IMP.items = []; IMP.phase = "prep"; IMP.summary = null; IMP.resumed = false; IMP.skipped = skipped;
   for (const file of files) IMP.items.push({ id: "imp" + ++IMP.seq, file, fname: file.name, name: file.name, approved: false, exclude: false, dup: "", manualKey: false });
   await impPrepare();
 }
@@ -1342,7 +1360,9 @@ function renderImport() {
   const n = g.ok.filter((it) => it.file && it.state !== "ok").length;
   box.innerHTML = `
     ${needFile.length ? `<div class="warnbox">Za ${needFile.length} slika sadržaj nije sačuvan. Izaberi ih ponovo (ista imena fajlova):
-      <label class="btn outline wide upbtn" style="margin-top:8px"><input type="file" data-impre accept="${ACCEPT}" multiple hidden>Izaberi ponovo</label></div>` : ""}
+      <label class="btn outline wide upbtn" style="margin-top:8px"><input type="file" data-impre multiple hidden>Izaberi ponovo</label></div>` : ""}
+    ${IMP.phase === "preview" && IMP.skipped ? `<p class="notice" id="impSkipped">${esc(notImageMsg(IMP.skipped))}</p>` : ""}
+    ${IMP.phase === "preview" && namesLost(IMP.items) ? `<div class="warnbox" id="impLost">Imena fajlova su izgubljena pa se slike ne mogu uparivati po imenu. Pokušaj dugme 'Izaberi fajlove (čuva imena)' ili dodijeli sorte ručno ispod.</div>` : ""}
     ${IMP.summary ? `<div class="notice ok" id="impSum"><b>${esc(IMP.summary)}</b><br><a class="btn primary" href="#/objavi" style="margin-top:8px">Objavi</a></div>` : ""}
     ${IMP.phase === "saving" ? `<div class="uptotal"><div class="row"><b>Ukupno</b><span>snimljeno ${IMP.done} od ${IMP.total}</span></div><div class="bar"><span style="width:${IMP.total ? (IMP.done / IMP.total) * 100 : 0}%"></span></div><div class="small muted" id="impSizes">${esc(IMP.sizes || "")}</div></div>` : ""}
     ${sec("Uparene", g.ok, true)}${sec("Neuparene", g.none, true)}${sec("Preskočene", g.skip, false)}
@@ -1371,7 +1391,8 @@ function impOnClick(b) {
   return false;
 }
 function impReselect(input) {
-  const files = [...input.files]; input.value = "";
+  const { files, skipped } = pickImages(input);
+  if (skipped) toast(notImageMsg(skipped));
   for (const f of files) { const it = IMP.items.find((x) => !x.file && x.fname === f.name); if (it) it.file = f; }
   impPrepare();
 }
@@ -1434,7 +1455,9 @@ function screenUvoz(params) {
     ${head("Uvoz slika po imenu", "Izaberi više slika odjednom. Panel po imenu fajla nađe sortu (npr. viktor-2.jpg ide sorti Viktor, kao druga slika). Ništa se ne snima dok ne pregledaš i potvrdiš.")}
     <div class="card uploader">
       <div class="warnbox nowebp" hidden>${esc(NO_WEBP_MSG)}</div>
-      <label class="btn primary wide upbtn"><input type="file" data-import data-upload="" accept="${ACCEPT}" multiple hidden>Izaberi slike</label>
+      <label class="btn primary wide upbtn"><input type="file" id="impFiles" data-import="fajlovi" data-upload="" multiple hidden>Izaberi fajlove (čuva imena)</label>
+      <label class="btn outline wide upbtn" style="margin-top:8px"><input type="file" id="impGallery" data-import="galerija" data-upload="" accept="${ACCEPT}" multiple hidden>Izaberi iz galerije</label>
+      <p class="hint"><span>Iz galerije telefon često skrati imena fajlova pa se slike ne mogu uparivati po imenu.</span></p>
       <p class="hint"><span>Prefiks "web-" znači slika sa interneta. Broj na kraju imena određuje redoslijed.</span></p>
       ${IMP.resumed ? `<button type="button" class="btn ghost wide" id="impDiscard" style="margin-top:8px">Odbaci nedovršen uvoz</button>` : ""}
     </div>
