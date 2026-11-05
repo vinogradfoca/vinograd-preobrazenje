@@ -51,10 +51,12 @@ Sajt pokazuje količine kakve su bile u trenutku zadnje objave. Zato na sajtu pi
 
 **Dodavanje slika jednoj sorti:** otvori sortu, odjeljak **Slike**, pa **Dodaj slike**. Strelicama mijenjaš redoslijed. **Ukloni** briše sliku samo sa sorte, a u biblioteci ostaje.
 
+**Najviše 6 slika po sorti.** Kad sorta ima 6 slika, dugme **Dodaj slike** je neaktivno: prvo ukloni neku. Ako izabereš više slika nego što stane, panel doda samo koliko stane. Sorte koje već imaju više od 6 slika ostaju kakve jesu, samo im se ne mogu dodati nove.
+
 **Dodavanje više slika odjednom (Uvoz po imenu):**
 1. Imenuj fajlove po sorti: `viktor-1.jpg`, `viktor-2.jpg`, `black-grand-1.jpg`. Broj na kraju je redoslijed.
 2. Dodirni **Slike**, pa **Uvoz po imenu**, izaberi sve fotografije.
-3. Panel ih sam upari sa sortama. Pregledaj: ispravi ime ili izaberi sortu ručno tamo gdje nije prepoznato.
+3. Panel ih sam upari sa sortama. Pregledaj: ispravi ime ili izaberi sortu ručno tamo gdje nije prepoznato. Slika koja bi sorti dala više od 6 slika ide u **Preskočene** ("Sorta već ima 6 slika").
 4. Dodirni **Snimi N slika** (N je broj slika) i sačekaj da sve prođe.
 5. Pritisni **Objavi**.
 
