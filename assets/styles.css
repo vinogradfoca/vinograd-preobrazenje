@@ -132,14 +132,27 @@ footer{background:#10281c;color:#cfdcd4;padding:26px 22px;text-align:center;font
 footer a{color:#fff}
 
 /* stranica sorte (u nacrtu modal) */
-.mgrid{display:grid;grid-template-columns:1fr 1fr}
-.gallery{background:#eef2ee;padding:14px;align-self:start;position:sticky;top:0}
-#mainImg{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:12px}
-.thumbs{display:flex;gap:8px;margin-top:10px}
-.thumbs button{width:64px;height:64px;padding:0;border:2px solid transparent;border-radius:10px;overflow:hidden;background:none}
+/* minmax(0,1fr): sadržaj (npr. red sličica) ne smije proširiti kolonu i izgurati stranicu */
+.mgrid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.gallery{background:#eef2ee;padding:14px;align-self:start;position:sticky;top:0;min-width:0}
+/* galerija: vodoravni pregled sa scroll-snap, jedna slika po ekranu, fiksan omjer */
+.gview{position:relative}
+.gtrack{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;aspect-ratio:3/4;border-radius:12px;scrollbar-width:none;background:#e3e9e3}
+.gtrack::-webkit-scrollbar{display:none}
+.gtrack:focus-visible{outline:3px solid #2f6a4988;outline-offset:2px}
+.slide{flex:0 0 100%;margin:0;scroll-snap-align:start;scroll-snap-stop:always}
+.slide img{width:100%;height:100%;object-fit:cover;display:block}
+.gcount{position:absolute;left:10px;bottom:10px;background:#0a1a10b3;color:#fff;font-size:13px;font-weight:700;border-radius:999px;padding:3px 10px;pointer-events:none}
+.gfull,.garrow{position:absolute;width:44px;height:44px;border:0;border-radius:50%;background:#ffffffe6;color:var(--ink);box-shadow:0 2px 8px #0003;display:grid;place-items:center;font-size:22px;line-height:1;cursor:pointer}
+.gfull{top:10px;right:10px;font-size:20px}
+.garrow{top:50%;transform:translateY(-50%);font-size:28px;display:none}
+.garrow.prev{left:10px}.garrow.next{right:10px}
+@media(min-width:721px){.garrow{display:grid}}
+.thumbs{display:flex;gap:8px;margin-top:10px;overflow-x:auto;min-width:0;padding-bottom:4px;scrollbar-width:thin}
+.thumbs button{flex:0 0 64px;width:64px;height:64px;padding:0;border:2px solid transparent;border-radius:10px;overflow:hidden;background:none}
 .thumbs button.on{border-color:var(--wine)}
 .thumbs img{width:100%;height:100%;object-fit:cover}
-.minfo{padding:26px 24px 24px}
+.minfo{padding:26px 24px 24px;min-width:0}
 .minfo h1,.minfo h2{font-size:clamp(30px,4vw,42px);margin:6px 0 14px}
 .facts{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px}
 .facts span{background:var(--cream);border-radius:10px;padding:8px 14px}
@@ -189,9 +202,9 @@ footer a{color:#fff}
   .benefits article:last-child{border:0}
   .steps,.contact-grid{grid-template-columns:1fr}
   .wrap{padding:44px 16px}
-  .mgrid{grid-template-columns:1fr}
+  .mgrid{grid-template-columns:minmax(0,1fr)}
   .gallery{position:static;padding:10px}
-  #mainImg{aspect-ratio:1/1;max-height:44vh;width:100%}
+  .gtrack{aspect-ratio:1/1;max-height:44vh}
   .close{background:#ffffffe6;box-shadow:0 2px 8px #0003}
 }
 /* telefon: kompaktna lista rezultata dok se kuca (assets/shop.js) */
@@ -256,7 +269,7 @@ footer a{color:#fff}
 
 /* osobine sorte */
 .props{width:100%;border-collapse:collapse;font-size:15px}
-.props th,.props td{text-align:left;vertical-align:top;padding:8px 0;border-top:1px solid var(--line)}
+.props th,.props td{text-align:left;vertical-align:top;padding:8px 0;border-top:1px solid var(--line);white-space:normal;overflow-wrap:anywhere}
 .props tr:first-child th,.props tr:first-child td{border-top:0}
 .props th{width:42%;padding-right:12px;color:var(--muted);font-weight:600}
 @media(max-width:820px){.noimg.big{aspect-ratio:1/1;max-height:44vh}}
@@ -272,7 +285,16 @@ header{background:#fff}
 /* od 900 px naviše logo je viši (64 px); unutrašnji razmak zaglavlja se smanji da visina zaglavlja ostane 76 px */
 @media(min-width:900px){header{padding-top:6px;padding-bottom:6px}.logo{height:64px}}
 /* atribut height (zbog CLS) ne smije postati visina glavne slike sorte: omjer daje aspect-ratio */
-#mainImg{height:auto}
+/* cijeli ekran (galerija sorte): sloj preko stranice, ne Fullscreen API */
+body.lbopen{overflow:hidden}
+.lb{position:fixed;inset:0;z-index:90;background:#0b0f0c;color:#fff;display:flex;flex-direction:column}
+.lbtrack{flex:1;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;min-height:0}
+.lbtrack::-webkit-scrollbar{display:none}
+.lb .slide{display:flex;align-items:center;justify-content:center}
+.lb .slide img{width:100%;height:100%;object-fit:contain}
+.lb .gcount{left:14px;bottom:14px;background:#ffffff26}
+.lbclose{position:absolute;top:10px;right:10px;width:44px;height:44px;border:0;border-radius:50%;background:#ffffff26;color:#fff;font-size:28px;line-height:1;cursor:pointer}
+.lb .garrow{background:#ffffff26;color:#fff;box-shadow:none}
 
 /* traka za kontakt pri dnu ekrana */
 body{padding-bottom:76px}

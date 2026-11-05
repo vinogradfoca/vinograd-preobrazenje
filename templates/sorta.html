@@ -1,10 +1,17 @@
 <section class="page wrap sorta">
   <p class="crumbs"><a href="/sorte/">← Sve sorte</a></p>
   <div class="mgrid">
-    <div class="gallery">
-      {{#if v.hasImage}}<img id="mainImg" src="{{v.cover.src}}"{{#if v.cover.srcset}} srcset="{{v.cover.srcset}}" sizes="(max-width: 820px) 100vw, 600px"{{/if}} width="{{v.cover.w}}" height="{{v.cover.h}}" alt="{{v.cover.alt}}">{{else}}<div class="noimg big {{v.colorClass}}" role="img" aria-label="Sorta {{v.name}}, fotografija još nije dodata">{{v.name}}</div>{{/if}}
-      {{#if v.multiple}}<div class="thumbs">
-        {{#each v.images}}<button type="button"{{#if on}} class="on"{{/if}} data-src="{{src}}"{{#if srcset}} data-srcset="{{srcset}}"{{/if}} data-w="{{w}}" data-h="{{h}}" data-alt="{{alt}}" aria-label="{{label}}"><img src="{{thumb}}" width="{{w}}" height="{{h}}" alt=""></button>{{/each}}
+    <div class="gallery" id="gallery" data-name="{{v.name}}">
+      {{#if v.hasImage}}<div class="gview">
+        <div class="gtrack" id="gTrack" tabindex="0" role="region" aria-label="Fotografije sorte {{v.name}}">
+          {{#each v.images}}<figure class="slide" data-i="{{index}}" data-big="{{big}}"><img src="{{src}}"{{#if srcset}} srcset="{{srcset}}" sizes="(max-width: 820px) 100vw, 600px"{{/if}} width="{{w}}" height="{{h}}" alt="{{alt}}"></figure>{{/each}}
+        </div>
+        {{#if v.multiple}}<button type="button" class="garrow prev" aria-label="Prethodna slika">‹</button><button type="button" class="garrow next" aria-label="Sljedeća slika">›</button>
+        <span class="gcount" aria-live="polite"><span class="gnum">1</span> / {{v.imageCount}}</span>{{/if}}
+        <button type="button" class="gfull" id="gFull" aria-label="Cijeli ekran"><span aria-hidden="true">⤢</span></button>
+      </div>{{else}}<div class="noimg big {{v.colorClass}}" role="img" aria-label="Sorta {{v.name}}, fotografija još nije dodata">{{v.name}}</div>{{/if}}
+      {{#if v.multiple}}<div class="thumbs" id="gThumbs">
+        {{#each v.images}}<button type="button"{{#if on}} class="on" aria-current="true"{{/if}} data-i="{{index}}" aria-label="{{label}}"><img src="{{thumb}}" width="{{w}}" height="{{h}}" alt=""></button>{{/each}}
       </div>{{/if}}
     </div>
     <div class="minfo">

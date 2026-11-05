@@ -381,7 +381,7 @@ function buildModel(db) {
       color: v.color, colorClass: COLORS[v.color], ripen, type,
       tag: v.color === CHECK && ripen === CHECK ? CHECK : v.color + (ripen ? " · " + ripen : ""),
       featured: v.featured,
-      cover: images[0] || null, images, hasImage: images.length > 0, multiple: images.length > 1,
+      cover: images[0] || null, images, hasImage: images.length > 0, multiple: images.length > 1, imageCount: images.length,
       facts: [["Zrenje", ripen], ["Vrsta", type]].filter((f) => f[1]).map(([label, value]) => ({ label, value })),
       props: FACTS.filter(([k]) => isStr(facts[k])).map(([k, label]) => ({ label, value: facts[k] })),
       desc: v.desc || "", exp: v.exp || "", flaws: v.flaws || "",
