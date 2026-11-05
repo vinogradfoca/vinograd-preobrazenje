@@ -6,6 +6,7 @@ import { createDb } from "./db.js";
 import { similarVarieties, uniqueSlug, matchFile, findOldSlot } from "./match.js";
 import { convertImage, canMakeWebp, storagePaths, sha256Hex, ACCEPT, NO_WEBP_MSG, WIDTHS } from "./images.js";
 import { SECTIONS as PUB_SECTIONS, changedVarietyFields, changedSectionFields, whenText } from "./changes.js";
+import { EXTRA_PAGES, EXTRA_FIELDS, extraPage, hasContent } from "./stranice.js";
 
 // ------------------------------------------------------------------ konstante
 const COLORS = ["Bijela", "Crna", "Crvena", "Za provjeru"];
@@ -79,6 +80,12 @@ function imgSrc(ref, size = "400") {
   return S.oldFiles.has(ref) ? "/img/" + ref : "";
 }
 const thumbs = (key) => imgList(V(key)).map((r) => imgSrc(r)).filter(Boolean);
+// Najviše 6 slika po sorti. Sorte koje već imaju više ostaju kakve jesu, samo im se ne dodaju nove.
+const MAX_IMG = 6;
+const MAX_IMG_MSG = "Sorta može imati najviše 6 slika. Ukloni neku da dodaš novu.";
+// slike u toku slanja za sortu (još nisu u nizu, a zauzeće mjesto)
+const pendingUploads = (key) => [...uploadJobs.entries()].filter(([id, j]) => j.key === key && !["err", "dup"].includes(($("#" + id) || { dataset: {} }).dataset.state)).length;
+const imgRoom = (key) => (V(key) ? Math.max(0, MAX_IMG - imgList(V(key)).length - pendingUploads(key)) : 0);
 const F = {
   noImg: (key) => !thumbs(key).length,
   noPrice: (key) => KINDS.every(([k]) => num(kind(V(key), k).price) == null),
@@ -198,9 +205,10 @@ function onViewChange(e) {
   if (location.hash.startsWith("#/uvoz") && impOnChange(el)) return;
   if (el.matches("[data-sp]")) return commitSP(el);
   if (el.id === "showNoImg") return commitShowNoImg(el);
+  if (el.matches("[data-spstatus]")) return commitExtraStatus(el);
   if (el.matches("input[type=file][data-upload]")) return onFilesChosen(el);
   if (el.matches("input[data-imgalt]")) return commitAlt(el);
-  if (el.id === "libSorta") { const f = $("#libFile"); f.disabled = !el.value || !S.webp; f.closest("label").setAttribute("aria-disabled", String(f.disabled)); return; }
+  if (el.id === "libSorta") { updateUploadButtons(); return; }
   if (el.matches("input[data-f][data-v], textarea[data-f][data-v]")) commitInput(el);
   else if (el.matches("input[type=checkbox][data-f]")) {
     const key = el.closest("[data-key]").dataset.key;
@@ -636,12 +644,13 @@ function refreshImages(key) {
   const st = $("#strip"); if (st) st.innerHTML = stripHtml(key);
   const sm = $("#sumImg"); if (sm) sm.textContent = imgList(V(key)).length;
   renderImgBox(key);
+  updateUploadButtons();
 }
 function renderImgBox(key) {
   const box = $("#imgBox"); if (!box) return;
   const v = V(key), list = imgList(v);
   if (!list.length) { box.innerHTML = `<p class="muted">Sorta još nema slika.</p>`; return; }
-  box.innerHTML = (list.length > 8 ? `<p class="warnbox" id="manyImg">Mnogo slika usporava sajt i troši promet. Razmisli da neke ukloniš.</p>` : "") + `<p class="hint"><span>Prva slika je naslovna. Strelicama mijenjaš redoslijed. "Ukloni" sklanja sliku samo sa ove sorte, a slika ostaje u biblioteci.</span></p>` +
+  box.innerHTML = (list.length >= MAX_IMG ? `<p class="warnbox" id="manyImg">${MAX_IMG_MSG}</p>` : "") + `<p class="hint"><span>Prva slika je naslovna. Strelicama mijenjaš redoslijed. "Ukloni" sklanja sliku samo sa ove sorte, a slika ostaje u biblioteci.</span></p>` +
     list.map((ref, i) => {
       const src = imgSrc(ref), isNew = isNewImg(ref), im = isNew ? S.data.images[ref] : null;
       return `<div class="imrow">
@@ -690,17 +699,27 @@ function uploaderHtml(key) {
   return `<div class="uploader">
     <div class="warnbox nowebp" hidden>${esc(NO_WEBP_MSG)}</div>
     <label class="btn primary wide upbtn"><input type="file" data-upload="${esc(key)}" accept="${ACCEPT}" multiple hidden>＋ Dodaj slike</label>
-    <p class="hint"><span>Možeš izabrati više slika odjednom. Svaka se pretvara u 4 veličine i snima jedna po jedna.</span></p>
+    <p class="hint"><span>Možeš izabrati više slika odjednom (najviše ${MAX_IMG} po sorti). Svaka se pretvara u 4 veličine i snima jedna po jedna.</span></p>
+    <p class="warnbox imgfull" hidden>${MAX_IMG_MSG}</p>
     <div class="uplist" aria-live="polite"></div>
   </div>`;
 }
 async function checkWebp() {
   S.webp = await canMakeWebp();
   $$(".nowebp").forEach((w) => (w.hidden = S.webp));
+  updateUploadButtons();
+}
+// "Dodaj slike": neaktivno bez WebP-a, bez izabrane sorte (biblioteka) i kad sorta već ima 6 slika
+function updateUploadButtons() {
   $$("input[type=file][data-upload]").forEach((inp) => {
+    if (inp.hasAttribute("data-import")) { inp.disabled = !S.webp; inp.closest("label").setAttribute("aria-disabled", String(inp.disabled)); return; }
     const lib = inp.id === "libFile";
-    inp.disabled = !S.webp || (lib && !$("#libSorta").value);
+    const key = lib ? ($("#libSorta") || {}).value : inp.dataset.upload;
+    const full = !!key && !!V(key) && imgRoom(key) === 0;
+    inp.disabled = !S.webp || (lib && !key) || full;
     inp.closest("label").setAttribute("aria-disabled", String(inp.disabled));
+    const note = inp.closest(".uploader") && inp.closest(".uploader").querySelector(".imgfull");
+    if (note) note.hidden = !full;
   });
 }
 function onFilesChosen(input) {
@@ -709,6 +728,14 @@ function onFilesChosen(input) {
   input.value = "";
   if (!files.length || !key || !V(key)) return;
   if (!S.webp) return toast(NO_WEBP_MSG);
+  const room = imgRoom(key);
+  if (files.length > room) {
+    files.splice(room);
+    toast(MAX_IMG_MSG);
+    const note = input.closest(".uploader").querySelector(".imgfull");
+    if (note) note.hidden = false;
+    if (!files.length) { updateUploadButtons(); return; }
+  }
   const list = input.closest(".uploader").querySelector(".uplist");
   const ids = files.map((file) => {
     const id = "up" + ++jobSeq;
@@ -716,6 +743,7 @@ function onFilesChosen(input) {
     list.insertAdjacentHTML("beforeend", `<div class="uprow" id="${id}"><div class="upname">${esc(file.name)}</div><div class="bar"><span style="width:0%"></span></div><div class="upmsg muted small">Čeka…</div></div>`);
     return id;
   });
+  updateUploadButtons();
   runUploads(ids, list);
 }
 async function runUploads(ids, list) {
@@ -826,6 +854,7 @@ function attachExisting(b) {
   const imageId = b.dataset.attach, key = b.dataset.attachKey;
   if (!V(key)) return;
   const list = imgList(V(key));
+  if (!list.includes(imageId) && list.length >= MAX_IMG) { setRow(b.dataset.row, 1, esc(MAX_IMG_MSG), "warn"); return; }
   if (!list.includes(imageId)) {
     list.push(imageId);
     save(key, { images: list }); // cijeli niz u jednom upisu
@@ -874,6 +903,7 @@ function screenSlike() {
         <select id="libSorta" class="search"><option value="">Izaberi sortu…</option>${opts}</select></div>
       <label class="btn primary wide upbtn" style="margin-top:12px" aria-disabled="true"><input type="file" id="libFile" data-upload="" accept="${ACCEPT}" multiple hidden disabled>＋ Dodaj slike</label>
       <p class="hint"><span>Za mnogo slika odjednom koristi uvoz po imenu fajla.</span></p>
+      <p class="warnbox imgfull" hidden>${MAX_IMG_MSG}</p>
       <div class="uplist" aria-live="polite"></div>
     </div>
     <div class="card"><h2>Uvoz po imenu</h2><p class="muted small">Mnogo slika odjednom: sorta se nađe po imenu fajla (npr. viktor-2.jpg).</p>
@@ -1276,7 +1306,21 @@ function impOld(it) {
   // ista stara slika ne može biti zamijenjena dvaput u istom uvozu: zamjenjuje prva, ostale idu na kraj
   if (it.oldRef && IMP.items.some((o) => o !== it && o.oldRef === it.oldRef && o.key === it.key && impGroup(o) === "ok" && IMP.items.indexOf(o) < IMP.items.indexOf(it))) it.oldRef = "";
 }
-const impGroup = (it) => (it.dup || it.exclude ? "skip" : it.key ? "ok" : "none");
+const impGroup = (it) => (it.dup || it.exclude || it.full ? "skip" : it.key ? "ok" : "none");
+// Najviše 6 slika po sorti: slike koje bi prešle ograničenje idu u Preskočene. Slika koja
+// zamjenjuje staru (isto mjesto u nizu) ne zauzima novo mjesto. Redoslijed kao pri snimanju.
+function impCapacity() {
+  IMP.items.forEach((it) => { it.full = ""; });
+  const used = {};
+  const want = IMP.items.filter((it) => !it.dup && !it.exclude && it.key && it.state !== "ok")
+    .sort((a, b) => a.key.localeCompare(b.key) || (a.order ?? 1e9) - (b.order ?? 1e9) || String(a.fname).localeCompare(String(b.fname)));
+  for (const it of want) {
+    if (it.oldRef) continue;
+    if (used[it.key] == null) used[it.key] = V(it.key) ? imgList(V(it.key)).length : 0;
+    if (used[it.key] >= MAX_IMG) it.full = "Sorta već ima 6 slika";
+    else used[it.key]++;
+  }
+}
 
 // Dugme "Izaberi fajlove (čuva imena)" nema accept, da Android ponudi sistemski izbor datoteka
 // (izbor iz galerije često vrati generička imena, npr. 1000062053.jpg). Zato se ovdje zadrže
@@ -1328,6 +1372,7 @@ async function impPrepare() {
 function impStatus(it) {
   const m = it.match || { status: "none", candidates: [] }, nm = (k) => esc((V(k) || {}).name || k);
   if (it.dup) return `<span class="warntext">${esc(it.dup)} Preskočena.</span>`;
+  if (it.full) return `<span class="warntext">${esc(it.full)}. Preskočena.</span>`;
   if (it.key) return `<span class="oktext">✓ ${it.manualKey ? "Izabrano" : "Uparena"}: ${nm(it.key)}</span>` + (it.oldRef ? ` <span class="badge ft">zamjenjuje staru sliku ${esc(it.oldRef)}</span>` : "");
   if (m.status === "suggest") return `Mislili ste: <b>${nm(m.key)}</b>? <button type="button" class="btn outline sm" data-impyes="${it.id}">Da, ${nm(m.key)}</button>`;
   if (m.status === "ambiguous") return `<span class="warntext">Odgovara sortama ${m.candidates.map(nm).join(" i ")}. Izaberi iz liste.</span>`;
@@ -1353,6 +1398,7 @@ function renderImport() {
   if (IMP.phase === "pick") { box.innerHTML = ""; return; }
   if (IMP.phase === "prep") { box.innerHTML = `<p class="notice busy" id="impPrep">Pripremam pregled…</p>`; return; }
   const opts = keysSorted().map((k) => `<option value="${esc(k)}">${esc(V(k).name)}</option>`).join("");
+  impCapacity();
   const g = { ok: [], none: [], skip: [] };
   for (const it of IMP.items) g[impGroup(it)].push(it);
   const needFile = IMP.items.filter((it) => !it.file);
@@ -1506,6 +1552,15 @@ const SP_SECTIONS = () => {
       ["pages/kontakt/seoTitle", "Naslov za Google", "opt", "Prazno znači automatski.", 60],
       ["pages/kontakt/seoDescription", "Opis za Google", "optArea", "Prazno znači automatski.", 155],
     ] },
+    // Dodatne stranice (panel/stranice.js); status se mijenja prekidačem ispod polja
+    ...EXTRA_PAGES.map((x) => ({ id: x.id, title: x.menu, root: "pages/" + x.id, group: "Dodatne stranice", status: true, fields: [
+      [`pages/${x.id}/title`, "Naslov", "req"],
+      [`pages/${x.id}/eyebrow`, "Uvodni naslov", "opt", "Mali natpis iznad naslova."],
+      [`pages/${x.id}/subtitle`, "Podnaslov", "opt"],
+      [`pages/${x.id}/intro`, "Tekst", "reqArea", "Prazan red = novi odlomak."],
+      [`pages/${x.id}/note`, "Napomena", "optArea"],
+      [`pages/${x.id}/label`, "Oznaka", "opt", "Npr. \"U pripremi\"."],
+    ] })),
   ];
 };
 const SP_CHECK = {
@@ -1543,11 +1598,25 @@ function commitSP(el) {
   if ((cur === "" ? null : cur) === r.value) { if (el.value !== (r.value ?? "")) el.value = r.value ?? ""; return; }
   el.value = r.value ?? "";
   const root = path.startsWith("settings/") ? "settings" : path.split("/").slice(0, 2).join("/");
-  setIn(S.data, path, r.value);
-  setIn(S.data, root + "/updatedAt", Date.now()); setIn(S.data, root + "/updatedBy", S.user.uid);
-  send({ [path]: r.value, [root + "/updatedAt"]: S.db.TIMESTAMP, [root + "/updatedBy"]: S.user.uid });
+  spWrite(root, path, r.value);
   const sec = SP_SECTIONS().find((s) => s.root === root);
   const sm = $(`#sum-${sec.id}`); if (sm) sm.textContent = spSummary(sec);
+}
+// Upis polja + updatedAt i updatedBy. Dodatna stranica koje još nema u bazi: prvi upis zapiše
+// i ostala polja (zadane vrijednosti), jer Firebase čuva samo ono što se upiše.
+const EXTRA_SEED = new Set();
+function spWrite(root, path, value) {
+  setIn(S.data, path, value);
+  setIn(S.data, root + "/updatedAt", Date.now()); setIn(S.data, root + "/updatedBy", S.user.uid);
+  const paths = { [path]: value, [root + "/updatedAt"]: S.db.TIMESTAMP, [root + "/updatedBy"]: S.user.uid };
+  if (EXTRA_SEED.has(root)) {
+    for (const f of EXTRA_FIELDS) { const p = root + "/" + f, v = getIn(S.data, p); if (!(p in paths) && typeof v === "string" && v !== "") paths[p] = v; }
+    EXTRA_SEED.delete(root);
+  }
+  send(paths);
+}
+function commitExtraStatus(el) {
+  spWrite("pages/" + el.dataset.spstatus, `pages/${el.dataset.spstatus}/status`, el.checked ? "objavljeno" : "uskoro");
 }
 // settings/showWithoutImage: kad polja nema, build ga tretira kao uključeno (true)
 function commitShowNoImg(el) {
@@ -1569,8 +1638,14 @@ function spMeta(root) {
   return at ? `Zadnja izmjena: ${NAMES[by] || "nepoznat korisnik"}, ${fmtDate(at)}` : "";
 }
 function settingsSectionsHtml() {
-  return SP_SECTIONS().map((sec, i) => `<details class="sec" data-spsec="${sec.id}"${i === 0 ? " open" : ""}><summary>${sec.title} <small id="sum-${sec.id}">${spSummary(sec)}</small></summary>
-    <div class="secbody">${spMeta(sec.root) ? `<p class="hint"><span>${esc(spMeta(sec.root))}</span></p>` : ""}${sec.fields.map(spField).join("")}</div></details>`).join("");
+  let group = "";
+  return SP_SECTIONS().map((sec, i) => {
+    const head = sec.group && sec.group !== group ? `<h2 class="spgroup">${esc(sec.group)}</h2>` : "";
+    group = sec.group || "";
+    const st = sec.status ? `<label class="switch"><span>Objavljeno (vidljivo Googleu)<small>Isključeno: stranica je na sajtu i u meniju, ali je Google ne prikazuje i nije u sitemapi.</small></span><input type="checkbox" data-spstatus="${sec.id}"${getIn(S.data, sec.root + "/status") === "objavljeno" ? " checked" : ""}></label>` : "";
+    return head + `<details class="sec" data-spsec="${sec.id}"${i === 0 ? " open" : ""}><summary>${sec.title} <small id="sum-${sec.id}">${spSummary(sec)}</small></summary>
+    <div class="secbody">${spMeta(sec.root) ? `<p class="hint"><span>${esc(spMeta(sec.root))}</span></p>` : ""}${sec.fields.map(spField).join("")}${st}</div></details>`;
+  }).join("");
 }
 
 // ------------------------------------------------------------------ Brisanje (Dio 5)
@@ -1710,6 +1785,8 @@ async function startApp(user) {
       fetch("manifest.json", { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).catch(() => null),
     ]);
     S.data = { ...data, settings: data.settings || {}, varieties: data.varieties || {}, images: data.images || {} };
+    S.data.pages = S.data.pages || {};
+    for (const x of EXTRA_PAGES) if (!hasContent(S.data.pages[x.id])) { S.data.pages[x.id] = { ...extraPage(null, x.defaults), ...(S.data.pages[x.id] || {}) }; EXTRA_SEED.add("pages/" + x.id); }
     if (manifest) S.manifest = { images: manifest.images || {}, published: manifest.published || [] };
     S.oldFiles = new Set(Object.values(S.manifest.images).flat().map((p) => String(p).split("/").pop()));
   } catch (e) {

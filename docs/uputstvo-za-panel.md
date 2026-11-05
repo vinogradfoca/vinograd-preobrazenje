@@ -51,10 +51,12 @@ Sajt pokazuje količine kakve su bile u trenutku zadnje objave. Zato na sajtu pi
 
 **Dodavanje slika jednoj sorti:** otvori sortu, odjeljak **Slike**, pa **Dodaj slike**. Strelicama mijenjaš redoslijed. **Ukloni** briše sliku samo sa sorte, a u biblioteci ostaje.
 
+**Najviše 6 slika po sorti.** Kad sorta ima 6 slika, dugme **Dodaj slike** je neaktivno: prvo ukloni neku. Ako izabereš više slika nego što stane, panel doda samo koliko stane. Sorte koje već imaju više od 6 slika ostaju kakve jesu, samo im se ne mogu dodati nove.
+
 **Dodavanje više slika odjednom (Uvoz po imenu):**
 1. Imenuj fajlove po sorti: `viktor-1.jpg`, `viktor-2.jpg`, `black-grand-1.jpg`. Broj na kraju je redoslijed.
 2. Dodirni **Slike**, pa **Uvoz po imenu**, izaberi sve fotografije.
-3. Panel ih sam upari sa sortama. Pregledaj: ispravi ime ili izaberi sortu ručno tamo gdje nije prepoznato.
+3. Panel ih sam upari sa sortama. Pregledaj: ispravi ime ili izaberi sortu ručno tamo gdje nije prepoznato. Slika koja bi sorti dala više od 6 slika ide u **Preskočene** ("Sorta već ima 6 slika").
 4. Dodirni **Snimi N slika** (N je broj slika) i sačekaj da sve prođe.
 5. Pritisni **Objavi**.
 
@@ -79,12 +81,20 @@ U listi **Sorte** dodirni strelicu **↗** pored sorte, ili u uređivanju sorte 
 
 ## 8. Podešavanja (zupčanik)
 - **Kontakt:** telefon, WhatsApp broj (samo cifre, npr. 38765592120), mejl, adresa, link na mapu.
-- **Tekstovi stranica:** odjeljci *Početna stranica*, *Kako naručiti* i *O nama i kontakt (stranica)*. Pazi da nigdje ne piše *korpa*: sajt koristi riječ *upit*.
+- **Tekstovi stranica:** odjeljci *Početna stranica*, *Kako naručiti* i *O nama i kontakt (stranica)*.
 - **Prikaži na sajtu sorte bez slike:** isključi da se na sajtu vide samo sorte koje imaju sliku.
 - **Promijeni lozinku:** traži staru lozinku, pa novu (najmanje 8 znakova).
 - **Preuzmi kopiju podataka:** sprema sve podatke na telefon.
 
-## 9. Šta ako nešto ne radi
+## 9. Dodatne stranice
+Sajt ima dvije dodatne stranice: **Zaštita vinove loze** i **Vinjak Preobraženje**. U meniju su u grupi **Iz vinograda**, a linkovi su i u podnožju.
+
+1. Zupčanik → **Podešavanja**, pa ispod naslova **Dodatne stranice** otvori karticu stranice.
+2. Polja: **Naslov**, **Uvodni naslov** (mali natpis iznad naslova), **Podnaslov**, **Tekst** (prazan red = novi odlomak), **Napomena** i **Oznaka** (npr. *U pripremi*). Snima se samo, kao i ostala polja.
+3. Prekidač **Objavljeno (vidljivo Googleu)**: dok je isključen, stranica je na sajtu i u meniju, ali je Google ne prikazuje. Uključi ga kad je tekst gotov.
+4. Pritisni **Objavi**.
+
+## 10. Šta ako nešto ne radi
 - **Izmjenu ne vidim na sajtu:** pritisni **Objavi** i sačekaj. Zatim zatvori karticu i otvori sajt ponovo.
 - **Nove sorte nema na sajtu:** provjeri da je **Vidljiva na sajtu** uključena, pa **Objavi**.
 - **Sorta nema slike na sajtu:** dodaj bar jednu sliku i objavi. Ako je isključen prekidač *Prikaži na sajtu sorte bez slike*, sorte bez slike se ne vide.

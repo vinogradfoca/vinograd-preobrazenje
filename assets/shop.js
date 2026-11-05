@@ -54,9 +54,22 @@
     clearTimeout(tt); tt = setTimeout(function () { t.classList.remove("on"); }, 2200);
   }
 
-  /* ---------- traka pri dnu: Pošalji upit i Podijeli (stranica sorte) ---------- */
+  /* ---------- traka pri dnu stranice sorte: Podijeli, WhatsApp i glavno dugme ---------- */
+  // Prazna korpa: "Dodaj u korpu" vodi na odjeljak "Naručite" (fokus na prvu varijantu).
+  // Korpa sa stavkama: "Pošalji narudžbu (N)" otvara ladicu korpe.
   var barUpit = $("#barUpit");
-  if (barUpit) barUpit.addEventListener("click", function () { openPanel(cartEl, $("#cartBtn")); });
+  if (barUpit) barUpit.addEventListener("click", function () {
+    if (cart.length) { openPanel(cartEl, $("#cartBtn")); return; }
+    var ord = $(".order"); if (!ord) return;
+    ord.scrollIntoView({ block: "center" });
+    var first = $(".order [data-add]");
+    if (first) { try { first.focus({ preventScroll: true }); } catch (e) { first.focus(); } }
+  });
+  function updateBar() {
+    if (!barUpit) return;
+    barUpit.textContent = cart.length ? "Pošalji narudžbu (" + cart.length + ")" : "Dodaj u korpu";
+    if (cart.length) barUpit.setAttribute("aria-controls", "cart"); else barUpit.removeAttribute("aria-controls");
+  }
   var barShare = $("#barShare");
   if (barShare) barShare.addEventListener("click", function () {
     var d = barShare.dataset, url = d.url || location.href;
@@ -94,7 +107,7 @@
   }
   function addToCart(id, kind, qty) {
     if (!MAP) {
-      loadData().then(function () { addToCart(id, kind, qty); }, function () { toast("Upit trenutno nije dostupan. Nazovite nas."); });
+      loadData().then(function () { addToCart(id, kind, qty); }, function () { toast("Korpa trenutno nije dostupna. Nazovite nas."); });
       return;
     }
     var x = byId(id); if (!x) return;
@@ -104,12 +117,12 @@
     it.qty += qty;
     if (o.qty !== null) it.qty = Math.min(it.qty, o.qty);
     saveCart(); renderCart();
-    toast(x.name + " (" + KIND[kind].toLowerCase() + ") je dodan u upit");
+    toast("Dodano u korpu: " + x.name + " (" + KIND[kind].toLowerCase() + ")");
   }
   function setQty(id, kind, q) {
     var it = find(id, kind); if (!it) return;
-    var o = byId(id)[kind];
-    if (q <= 0) cart = cart.filter(function (i) { return i !== it; });
+    var x = byId(id), o = x[kind];
+    if (q <= 0) { cart = cart.filter(function (i) { return i !== it; }); toast(x.name + " (" + KIND[kind].toLowerCase() + ") uklonjena je iz korpe."); }
     else it.qty = o.qty !== null ? Math.min(q, o.qty) : q;
     saveCart(); renderCart();
   }
@@ -169,10 +182,11 @@
   }
   function renderCart() {
     $("#cartCount").textContent = cart.reduce(function (a, i) { return a + i.qty; }, 0);
+    updateBar();
     var box = $("#cartItems");
-    if (cart.length && !MAP) { $("#cartFoot").hidden = true; box.innerHTML = '<div class="empty">Učitavanje upita…</div>'; return; }
+    if (cart.length && !MAP) { $("#cartFoot").hidden = true; box.innerHTML = '<div class="empty">Učitavanje korpe…</div>'; return; }
     if (!cart.length) {
-      box.innerHTML = '<div class="empty">Upit je prazan.<br><a href="/sorte/" class="btn outline">Pogledajte sorte</a></div>';
+      box.innerHTML = '<div class="empty">Korpa je prazna.<br><a href="/sorte/" class="btn outline">Pogledajte sorte</a></div>';
       $("#cartFoot").hidden = true; return;
     }
     $("#cartFoot").hidden = false;
@@ -248,21 +262,109 @@
   // podaci se učitavaju odmah samo ako korpa nije prazna; inače pri prvom otvaranju ili dodavanju
   function ensureData() {
     loadData().then(function () { cleanCart(); renderCart(); }, function () {
-      if (cart.length) $("#cartItems").innerHTML = '<div class="empty">Upit trenutno nije dostupan. Pokušajte ponovo ili nas nazovite.</div>';
+      if (cart.length) $("#cartItems").innerHTML = '<div class="empty">Korpa trenutno nije dostupna. Pokušajte ponovo ili nas nazovite.</div>';
     });
   }
   if (cart.length) ensureData();
   $("#cartBtn").addEventListener("click", function () { if (!MAP) ensureData(); });
 
-  /* ---------- stranica sorte: galerija i narudžba ---------- */
-  var main = $("#mainImg");
-  $$(".thumbs button").forEach(function (b) {
-    b.addEventListener("click", function () {
-      if (b.dataset.srcset) main.srcset = b.dataset.srcset; else main.removeAttribute("srcset");
-      main.src = b.dataset.src; main.width = +b.dataset.w; main.height = +b.dataset.h; main.alt = b.dataset.alt;
-      $$(".thumbs button").forEach(function (o) { o.classList.toggle("on", o === b); });
+  /* ---------- stranica sorte: galerija (scroll-snap) i cijeli ekran ---------- */
+  var gTrack = $("#gTrack");
+  if (gTrack) (function () {
+    var slides = $$("#gTrack .slide"), n = slides.length, thumbBox = $("#gThumbs");
+    var thumbs = thumbBox ? $$("#gThumbs button") : [], gNum = $("#gallery .gnum"), cur = 0;
+    // cilj dok glatko pomjeranje traje: brzi uzastopni dodiri na strelicu idu dalje, ne na istu sliku
+    var want = new WeakMap(), wantT = 0;
+    var base = function (track, now) { var w = want.get(track); return w == null ? now : w; };
+    var indexOf = function (track) { return track.clientWidth ? Math.round(track.scrollLeft / track.clientWidth) : 0; };
+    var goTo = function (track, i, smooth) {
+      i = Math.max(0, Math.min(n - 1, i));
+      if (smooth) { want.set(track, i); clearTimeout(wantT); wantT = setTimeout(function () { want.delete(track); }, 1200); }
+      else want.delete(track);
+      track.scrollTo({ left: i * track.clientWidth, behavior: smooth ? "smooth" : "auto" });
+    };
+    // aktivna sličica: oznaka i pomjeranje u vidljivi dio reda (samo vodoravno, stranica se ne pomjera)
+    var mark = function (i) {
+      cur = i;
+      if (gNum) gNum.textContent = i + 1;
+      thumbs.forEach(function (t, k) { t.classList.toggle("on", k === i); if (k === i) t.setAttribute("aria-current", "true"); else t.removeAttribute("aria-current"); });
+      var t = thumbs[i];
+      if (t && thumbBox) thumbBox.scrollTo({ left: t.offsetLeft - thumbBox.offsetLeft - (thumbBox.clientWidth - t.offsetWidth) / 2, behavior: "smooth" });
+    };
+    var onScroll = function (track, cb) {
+      var raf = 0;
+      track.addEventListener("scroll", function () {
+        if (raf) return;
+        raf = requestAnimationFrame(function () { raf = 0; var i = indexOf(track); if (want.get(track) === i && Math.abs(track.scrollLeft - i * track.clientWidth) < 2) want.delete(track); cb(i); });
+      }, { passive: true });
+    };
+    onScroll(gTrack, function (i) { if (i !== cur) mark(i); });
+    thumbs.forEach(function (t, k) { t.addEventListener("click", function () { goTo(gTrack, k, true); }); });
+    var arrows = function (root, track, getCur) {
+      var p = root.querySelector(".garrow.prev"), nx = root.querySelector(".garrow.next");
+      if (p) p.addEventListener("click", function () { goTo(track, getCur() - 1, true); });
+      if (nx) nx.addEventListener("click", function () { goTo(track, getCur() + 1, true); });
+    };
+    arrows($("#gallery .gview"), gTrack, function () { return base(gTrack, cur); });
+    gTrack.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowLeft") { e.preventDefault(); goTo(gTrack, base(gTrack, cur) - 1, true); }
+      else if (e.key === "ArrowRight") { e.preventDefault(); goTo(gTrack, base(gTrack, cur) + 1, true); }
     });
-  });
+
+    // Cijeli ekran: sloj preko stranice (role="dialog"), ne Fullscreen API. Dugme "nazad" na
+    // telefonu zatvara sloj: pri otvaranju se doda zapis u istoriju (pushState), a popstate zatvara.
+    var fullBtn = $("#gFull"), lb = null, lbCur = 0;
+    var closeLb = function (fromHistory) {
+      if (!lb) return;
+      if (!fromHistory && history.state && history.state.vpGallery) { history.back(); return; } // popstate zatvara
+      var at = lbCur;
+      lb.remove(); lb = null;
+      document.body.classList.remove("lbopen");
+      document.removeEventListener("keydown", lbKeys, true);
+      goTo(gTrack, at, false); mark(at);
+      if (fullBtn) fullBtn.focus();
+    };
+    var lbKeys = function (e) {
+      if (!lb) return;
+      var t = lb.querySelector(".lbtrack");
+      if (e.key === "Escape") { e.preventDefault(); closeLb(false); }
+      else if (e.key === "ArrowLeft") { e.preventDefault(); goTo(t, base(t, lbCur) - 1, true); }
+      else if (e.key === "ArrowRight") { e.preventDefault(); goTo(t, base(t, lbCur) + 1, true); }
+      else if (e.key === "Tab") { // fokus ostaje u sloju
+        var f = $$(".lb button"); if (!f.length) return;
+        var i = f.indexOf(document.activeElement);
+        e.preventDefault(); f[(i + (e.shiftKey ? f.length - 1 : 1)) % f.length].focus();
+      }
+    };
+    var openLb = function () {
+      if (lb) return;
+      var start = cur, name = $("#gallery").dataset.name || "";
+      lb = document.createElement("div");
+      lb.className = "lb"; lb.setAttribute("role", "dialog"); lb.setAttribute("aria-modal", "true"); lb.setAttribute("aria-label", "Fotografije sorte " + name);
+      lb.innerHTML = '<div class="lbtrack" tabindex="-1">' + slides.map(function (s, k) {
+        var im = s.querySelector("img"), set = im.getAttribute("srcset");
+        return '<figure class="slide"><img src="' + esc(s.dataset.big || im.getAttribute("src")) + '"' + (set ? ' srcset="' + esc(set) + '" sizes="100vw"' : "") +
+          ' alt="' + esc(im.getAttribute("alt") || "") + '"' + (k === start ? "" : ' loading="lazy"') + "></figure>";
+      }).join("") + "</div>" +
+        (n > 1 ? '<button type="button" class="garrow prev" aria-label="Prethodna slika">‹</button><button type="button" class="garrow next" aria-label="Sljedeća slika">›</button>' : "") +
+        '<span class="gcount" aria-live="polite"><span class="gnum">' + (start + 1) + "</span> / " + n + "</span>" +
+        '<button type="button" class="lbclose" aria-label="Zatvori">×</button>';
+      document.body.appendChild(lb);
+      document.body.classList.add("lbopen");
+      var t = lb.querySelector(".lbtrack"), num = lb.querySelector(".gnum");
+      lbCur = start; goTo(t, start, false);
+      onScroll(t, function (i) { lbCur = i; num.textContent = i + 1; });
+      arrows(lb, t, function () { return base(t, lbCur); });
+      lb.querySelector(".lbclose").addEventListener("click", function () { closeLb(false); });
+      document.addEventListener("keydown", lbKeys, true);
+      try { history.pushState({ vpGallery: 1 }, ""); } catch (e) { /* bez istorije: zatvara se dugmetom */ }
+      lb.querySelector(".lbclose").focus();
+    };
+    if (fullBtn) fullBtn.addEventListener("click", openLb);
+    window.addEventListener("popstate", function () { if (lb) closeLb(true); });
+    // širina se promijenila (okretanje telefona): ostani na istoj slici
+    window.addEventListener("resize", function () { goTo(gTrack, cur, false); if (lb) goTo(lb.querySelector(".lbtrack"), lbCur, false); });
+  })();
   var order = $(".order[data-id]");
   if (order) {
     var vid = order.dataset.id, qty = { sapling: 1, cutting: 1 };
@@ -276,7 +378,7 @@
         qty[k] = q; st.querySelector("span").textContent = q;
       }
     });
-    loadData().catch(function () {}); // da "Dodaj u upit" radi odmah
+    loadData().catch(function () {}); // da "Dodaj u korpu" radi odmah
   }
 
   /* ---------- pretraga po nazivu: isto poređenje za katalog i cjenovnik ---------- */

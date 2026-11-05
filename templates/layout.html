@@ -28,13 +28,17 @@
     <img class="logo" data-logo src="{{logo.src}}" width="{{logo.w}}" height="{{logo.h}}" alt="Vinograd Preobraženje" onerror="this.parentNode.classList.add('nologo')">
     <span class="wordmark">Vinograd <b>Preobraženje</b></span>
   </a>
-  <button class="icon-btn" id="cartBtn" aria-label="Upit" aria-controls="cart" aria-expanded="false">🛒 <b id="cartCount" class="badge">0</b></button>
+  <button class="icon-btn" id="cartBtn" aria-label="Korpa" aria-controls="cart" aria-expanded="false">🛒 <b id="cartCount" class="badge">0</b></button>
 </header>
 
 <aside id="drawer" aria-label="Meni">
   <button class="close" id="closeMenu" aria-label="Zatvori">×</button>
   <nav>
-{{#each nav}}    <a href="{{href}}"{{#if on}} class="on" aria-current="page"{{/if}}>{{label}}</a>
+{{#each nav.main}}    <a href="{{href}}"{{#if on}} class="on" aria-current="page"{{/if}}>{{label}}</a>
+{{/each}}    <details class="navgroup"{{#if nav.extraOpen}} open{{/if}}><summary>Iz vinograda</summary>
+{{#each nav.extra}}      <a href="{{href}}"{{#if on}} class="on" aria-current="page"{{/if}}>{{label}}</a>
+{{/each}}    </details>
+{{#each nav.last}}    <a href="{{href}}"{{#if on}} class="on" aria-current="page"{{/if}}>{{label}}</a>
 {{/each}}  </nav>
   <a class="drawer-call" href="{{site.tel}}">☎ {{site.phone}}</a>
 </aside>
@@ -46,12 +50,13 @@
 
 <footer>
   <b>{{site.name}}</b> · {{site.address}} · <a href="{{site.tel}}">{{site.phone}}</a> · <a href="mailto:{{site.email}}">{{site.email}}</a>
+  <nav class="fnav" aria-label="Iz vinograda">{{#each nav.extra}}<a href="{{href}}">{{label}}</a>{{/each}}</nav>
 </footer>
 
-<aside id="cart" class="cart" aria-label="Upit">
+<aside id="cart" class="cart" aria-label="Korpa">
   <button class="close" id="cartClose" aria-label="Zatvori">×</button>
-  <h2>Vaš upit</h2>
-  <div id="cartItems"><div class="empty">Upit je prazan.<br><a href="/sorte/" class="btn outline">Pogledajte sorte</a></div></div>
+  <h2>Vaša korpa</h2>
+  <div id="cartItems"><div class="empty">Korpa je prazna.<br><a href="/sorte/" class="btn outline">Pogledajte sorte</a></div></div>
   <div id="cartFoot" hidden>
     <div class="cart-total">Ukupno <b id="total">0,00 KM</b></div>
     <p id="totalNote" class="muted small"></p>
@@ -60,8 +65,10 @@
     <label for="cEmail">E-mail <span class="opt">neobavezno</span></label><input id="cEmail" type="email" inputmode="email" autocomplete="email">
     <label for="cNote">Napomena <span class="opt">neobavezno</span></label><textarea id="cNote" rows="2"></textarea>
     <p id="cartErr" class="err" role="alert" aria-live="assertive"></p>
-    <a id="sendWa" class="btn primary wide" href="{{site.wa}}" target="_blank" rel="noopener">Pošalji upit na WhatsApp</a>
-    <a id="sendMail" class="btn outline wide" href="mailto:{{site.email}}">Pošalji upit e-mailom</a>
+    <h3 class="sendhead">Pošaljite upit za narudžbu</h3>
+    <p class="muted small sendnote">Upit je pripremljen. Pošaljite poruku preko WhatsApp-a ili e-maila da biste ga poslali.</p>
+    <a id="sendWa" class="btn primary wide" href="{{site.wa}}" target="_blank" rel="noopener">Preko WhatsApp-a</a>
+    <a id="sendMail" class="btn outline wide" href="mailto:{{site.email}}">Preko e-maila</a>
     <a class="btn ghost wide" href="{{site.tel}}">☎ Radije zovem</a>
   </div>
 </aside>
@@ -69,7 +76,7 @@
 <div class="cbar{{#if bar.variety}} cbar3{{/if}}" id="cbar">
 {{#if bar.variety}}  <button type="button" class="btn outline" id="barShare" data-url="{{bar.url}}" data-title="{{bar.title}}" data-text="{{bar.text}}">Podijeli</button>
   <a class="btn outline" href="{{site.wa}}" target="_blank" rel="noopener">WhatsApp</a>
-  <button type="button" class="btn primary" id="barUpit" aria-controls="cart">Pošalji upit</button>
+  <button type="button" class="btn primary" id="barUpit">Dodaj u korpu</button>
 {{else}}  <a class="btn outline" href="{{site.tel}}">☎ Pozovi</a>
   <a class="btn primary" href="{{site.wa}}" target="_blank" rel="noopener">WhatsApp</a>
 {{/if}}</div>
