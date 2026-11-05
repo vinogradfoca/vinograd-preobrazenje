@@ -19,6 +19,7 @@ import { webpSize } from "./webp.mjs";
 import { toFirebaseShape } from "./firebase-shape.mjs";
 import { uputstvoHtml } from "./uputstvo.mjs";
 import { snapshot as publishedSnapshot } from "../panel/changes.js";
+import { EXTRA_PAGES, extraPage, paragraphs } from "../panel/stranice.js";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const DIST = path.join(ROOT, "dist");
@@ -166,6 +167,7 @@ function normalizeDb(raw) {
       seoTitle: txt(k.seoTitle), seoDescription: txt(k.seoDescription),
     },
     kontakt: { title: txt(c.title), about: txt(c.about), seoTitle: txt(c.seoTitle), seoDescription: txt(c.seoDescription) },
+    ...Object.fromEntries(EXTRA_PAGES.map((x) => [x.id, P[x.id]])),
   };
 
   // Stavka niza slika sorte je ili imageId iz vinograd/images (nova slika iz panela, u Storageu)
@@ -419,13 +421,20 @@ function buildModel(db) {
     return [...known, ...[...vals].filter((x) => !known.includes(x)).sort((a, b) => a.localeCompare(b, "sr"))];
   };
 
-  const nav = (active) => [
-    { href: "/", label: "Početna", key: "home" },
-    { href: "/sorte/", label: "Sorte i web-shop", key: "sorte" },
-    ...(hasPrices ? [{ href: "/cjenovnik/", label: "Cjenovnik", key: "cjenovnik" }] : []),
-    { href: "/kako-naruciti/", label: "Kako naručiti", key: "kako" },
-    { href: "/kontakt/", label: "O nama i kontakt", key: "kontakt" },
-  ].map((n) => ({ ...n, on: n.key === active }));
+  const nav = (active) => {
+    const on = (n) => ({ ...n, on: n.key === active });
+    const extra = EXTRA_PAGES.map((x) => on({ href: x.route, label: x.menu, key: x.id }));
+    return {
+      main: [
+        { href: "/", label: "Početna", key: "home" },
+        { href: "/sorte/", label: "Sorte i web-shop", key: "sorte" },
+        ...(hasPrices ? [{ href: "/cjenovnik/", label: "Cjenovnik", key: "cjenovnik" }] : []),
+        { href: "/kako-naruciti/", label: "Kako naručiti", key: "kako" },
+      ].map(on),
+      extra, extraOpen: extra.some((n) => n.on),
+      last: [on({ href: "/kontakt/", label: "O nama i kontakt", key: "kontakt" })],
+    };
+  };
 
   const hero = img(db.pages.home.heroImage);
 
@@ -568,6 +577,16 @@ function pages(m, db) {
     schema: [m.localBusiness],
   }, { kontakt: { title: k.title, about: k.about } });
 
+  // dodatne stranice: dok je status "uskoro", noindex i bez sitemape
+  for (const x of EXTRA_PAGES) {
+    const p = P[x.id];
+    add(x.route, "stranica.html", x.id, {
+      title: `${p.title} | ${name}`,
+      description: clip(p.intro, 150),
+      noindex: p.status !== "objavljeno",
+    }, { p: { id: x.id, eyebrow: p.eyebrow, title: p.title, subtitle: p.subtitle, paras: paragraphs(p.intro), note: p.note, label: p.label } });
+  }
+
   // /404.html
   add("/404.html", "404.html", "", { title: "Stranica nije pronađena | " + name, description: "", noindex: true });
 
@@ -693,6 +712,9 @@ async function main() {
   const opts = readArgs();
   const db = opts.source === "db" ? await loadDb(opts.dbUrl) : loadSeed();
   console.log(`Izvor podataka: ${opts.source === "db" ? "Firebase baza" : "data/seed.json"}`);
+  // dodatne stranice: zadane vrijednosti kad ih nema u bazi (panel/stranice.js)
+  db.pages = db.pages || {};
+  for (const x of EXTRA_PAGES) db.pages[x.id] = extraPage(db.pages[x.id], x.defaults);
   validate(db);
 
   // pripremi sve u privremeni folder, pa ga zamijeni s dist/ tek kad sve uspije
@@ -725,7 +747,9 @@ async function main() {
     writeFile(path.join(tmp, "panel", "mock-data.json"), JSON.stringify(mock));
     // ekran Objavi, "Šta čeka objavu": snimak objavljenih vrijednosti, da panel zna koje polje je
     // promijenjeno (baza čuva samo vrijeme izmjene). Iz baze, ili iz seeda u obliku baze (kao mock).
-    writeFile(path.join(tmp, "panel", "objavljeno.json"), JSON.stringify({ builtAt: new Date().toISOString(), ...publishedSnapshot(db.raw || mock) }));
+    const snapSrc = db.raw || mock;
+    const snapData = { ...snapSrc, pages: { ...(snapSrc.pages || {}), ...Object.fromEntries(EXTRA_PAGES.map((x) => [x.id, db.pages[x.id]])) } };
+    writeFile(path.join(tmp, "panel", "objavljeno.json"), JSON.stringify({ builtAt: new Date().toISOString(), ...publishedSnapshot(snapData) }));
     // ekran Pomoć: uputstvo iz docs/uputstvo-za-panel.md kao gotov HTML (bez baze)
     let help;
     try { help = uputstvoHtml(fs.readFileSync(UPUTSTVO, "utf8")); }

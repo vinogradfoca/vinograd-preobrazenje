@@ -34,7 +34,11 @@
 <aside id="drawer" aria-label="Meni">
   <button class="close" id="closeMenu" aria-label="Zatvori">×</button>
   <nav>
-{{#each nav}}    <a href="{{href}}"{{#if on}} class="on" aria-current="page"{{/if}}>{{label}}</a>
+{{#each nav.main}}    <a href="{{href}}"{{#if on}} class="on" aria-current="page"{{/if}}>{{label}}</a>
+{{/each}}    <details class="navgroup"{{#if nav.extraOpen}} open{{/if}}><summary>Iz vinograda</summary>
+{{#each nav.extra}}      <a href="{{href}}"{{#if on}} class="on" aria-current="page"{{/if}}>{{label}}</a>
+{{/each}}    </details>
+{{#each nav.last}}    <a href="{{href}}"{{#if on}} class="on" aria-current="page"{{/if}}>{{label}}</a>
 {{/each}}  </nav>
   <a class="drawer-call" href="{{site.tel}}">☎ {{site.phone}}</a>
 </aside>
@@ -46,6 +50,7 @@
 
 <footer>
   <b>{{site.name}}</b> · {{site.address}} · <a href="{{site.tel}}">{{site.phone}}</a> · <a href="mailto:{{site.email}}">{{site.email}}</a>
+  <nav class="fnav" aria-label="Iz vinograda">{{#each nav.extra}}<a href="{{href}}">{{label}}</a>{{/each}}</nav>
 </footer>
 
 <aside id="cart" class="cart" aria-label="Korpa">

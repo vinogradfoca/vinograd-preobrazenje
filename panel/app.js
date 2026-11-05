@@ -6,6 +6,7 @@ import { createDb } from "./db.js";
 import { similarVarieties, uniqueSlug, matchFile, findOldSlot } from "./match.js";
 import { convertImage, canMakeWebp, storagePaths, sha256Hex, ACCEPT, NO_WEBP_MSG, WIDTHS } from "./images.js";
 import { SECTIONS as PUB_SECTIONS, changedVarietyFields, changedSectionFields, whenText } from "./changes.js";
+import { EXTRA_PAGES, EXTRA_FIELDS, extraPage, hasContent } from "./stranice.js";
 
 // ------------------------------------------------------------------ konstante
 const COLORS = ["Bijela", "Crna", "Crvena", "Za provjeru"];
@@ -204,6 +205,7 @@ function onViewChange(e) {
   if (location.hash.startsWith("#/uvoz") && impOnChange(el)) return;
   if (el.matches("[data-sp]")) return commitSP(el);
   if (el.id === "showNoImg") return commitShowNoImg(el);
+  if (el.matches("[data-spstatus]")) return commitExtraStatus(el);
   if (el.matches("input[type=file][data-upload]")) return onFilesChosen(el);
   if (el.matches("input[data-imgalt]")) return commitAlt(el);
   if (el.id === "libSorta") { updateUploadButtons(); return; }
@@ -1550,6 +1552,15 @@ const SP_SECTIONS = () => {
       ["pages/kontakt/seoTitle", "Naslov za Google", "opt", "Prazno znači automatski.", 60],
       ["pages/kontakt/seoDescription", "Opis za Google", "optArea", "Prazno znači automatski.", 155],
     ] },
+    // Dodatne stranice (panel/stranice.js); status se mijenja prekidačem ispod polja
+    ...EXTRA_PAGES.map((x) => ({ id: x.id, title: x.menu, root: "pages/" + x.id, group: "Dodatne stranice", status: true, fields: [
+      [`pages/${x.id}/title`, "Naslov", "req"],
+      [`pages/${x.id}/eyebrow`, "Uvodni naslov", "opt", "Mali natpis iznad naslova."],
+      [`pages/${x.id}/subtitle`, "Podnaslov", "opt"],
+      [`pages/${x.id}/intro`, "Tekst", "reqArea", "Prazan red = novi odlomak."],
+      [`pages/${x.id}/note`, "Napomena", "optArea"],
+      [`pages/${x.id}/label`, "Oznaka", "opt", "Npr. \"U pripremi\"."],
+    ] })),
   ];
 };
 const SP_CHECK = {
@@ -1587,11 +1598,25 @@ function commitSP(el) {
   if ((cur === "" ? null : cur) === r.value) { if (el.value !== (r.value ?? "")) el.value = r.value ?? ""; return; }
   el.value = r.value ?? "";
   const root = path.startsWith("settings/") ? "settings" : path.split("/").slice(0, 2).join("/");
-  setIn(S.data, path, r.value);
-  setIn(S.data, root + "/updatedAt", Date.now()); setIn(S.data, root + "/updatedBy", S.user.uid);
-  send({ [path]: r.value, [root + "/updatedAt"]: S.db.TIMESTAMP, [root + "/updatedBy"]: S.user.uid });
+  spWrite(root, path, r.value);
   const sec = SP_SECTIONS().find((s) => s.root === root);
   const sm = $(`#sum-${sec.id}`); if (sm) sm.textContent = spSummary(sec);
+}
+// Upis polja + updatedAt i updatedBy. Dodatna stranica koje još nema u bazi: prvi upis zapiše
+// i ostala polja (zadane vrijednosti), jer Firebase čuva samo ono što se upiše.
+const EXTRA_SEED = new Set();
+function spWrite(root, path, value) {
+  setIn(S.data, path, value);
+  setIn(S.data, root + "/updatedAt", Date.now()); setIn(S.data, root + "/updatedBy", S.user.uid);
+  const paths = { [path]: value, [root + "/updatedAt"]: S.db.TIMESTAMP, [root + "/updatedBy"]: S.user.uid };
+  if (EXTRA_SEED.has(root)) {
+    for (const f of EXTRA_FIELDS) { const p = root + "/" + f, v = getIn(S.data, p); if (!(p in paths) && typeof v === "string" && v !== "") paths[p] = v; }
+    EXTRA_SEED.delete(root);
+  }
+  send(paths);
+}
+function commitExtraStatus(el) {
+  spWrite("pages/" + el.dataset.spstatus, `pages/${el.dataset.spstatus}/status`, el.checked ? "objavljeno" : "uskoro");
 }
 // settings/showWithoutImage: kad polja nema, build ga tretira kao uključeno (true)
 function commitShowNoImg(el) {
@@ -1613,8 +1638,14 @@ function spMeta(root) {
   return at ? `Zadnja izmjena: ${NAMES[by] || "nepoznat korisnik"}, ${fmtDate(at)}` : "";
 }
 function settingsSectionsHtml() {
-  return SP_SECTIONS().map((sec, i) => `<details class="sec" data-spsec="${sec.id}"${i === 0 ? " open" : ""}><summary>${sec.title} <small id="sum-${sec.id}">${spSummary(sec)}</small></summary>
-    <div class="secbody">${spMeta(sec.root) ? `<p class="hint"><span>${esc(spMeta(sec.root))}</span></p>` : ""}${sec.fields.map(spField).join("")}</div></details>`).join("");
+  let group = "";
+  return SP_SECTIONS().map((sec, i) => {
+    const head = sec.group && sec.group !== group ? `<h2 class="spgroup">${esc(sec.group)}</h2>` : "";
+    group = sec.group || "";
+    const st = sec.status ? `<label class="switch"><span>Objavljeno (vidljivo Googleu)<small>Isključeno: stranica je na sajtu i u meniju, ali je Google ne prikazuje i nije u sitemapi.</small></span><input type="checkbox" data-spstatus="${sec.id}"${getIn(S.data, sec.root + "/status") === "objavljeno" ? " checked" : ""}></label>` : "";
+    return head + `<details class="sec" data-spsec="${sec.id}"${i === 0 ? " open" : ""}><summary>${sec.title} <small id="sum-${sec.id}">${spSummary(sec)}</small></summary>
+    <div class="secbody">${spMeta(sec.root) ? `<p class="hint"><span>${esc(spMeta(sec.root))}</span></p>` : ""}${sec.fields.map(spField).join("")}${st}</div></details>`;
+  }).join("");
 }
 
 // ------------------------------------------------------------------ Brisanje (Dio 5)
@@ -1754,6 +1785,8 @@ async function startApp(user) {
       fetch("manifest.json", { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).catch(() => null),
     ]);
     S.data = { ...data, settings: data.settings || {}, varieties: data.varieties || {}, images: data.images || {} };
+    S.data.pages = S.data.pages || {};
+    for (const x of EXTRA_PAGES) if (!hasContent(S.data.pages[x.id])) { S.data.pages[x.id] = { ...extraPage(null, x.defaults), ...(S.data.pages[x.id] || {}) }; EXTRA_SEED.add("pages/" + x.id); }
     if (manifest) S.manifest = { images: manifest.images || {}, published: manifest.published || [] };
     S.oldFiles = new Set(Object.values(S.manifest.images).flat().map((p) => String(p).split("/").pop()));
   } catch (e) {

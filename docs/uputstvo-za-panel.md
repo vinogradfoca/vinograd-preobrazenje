@@ -86,7 +86,15 @@ U listi **Sorte** dodirni strelicu **↗** pored sorte, ili u uređivanju sorte 
 - **Promijeni lozinku:** traži staru lozinku, pa novu (najmanje 8 znakova).
 - **Preuzmi kopiju podataka:** sprema sve podatke na telefon.
 
-## 9. Šta ako nešto ne radi
+## 9. Dodatne stranice
+Sajt ima dvije dodatne stranice: **Zaštita vinove loze** i **Vinjak Preobraženje**. U meniju su u grupi **Iz vinograda**, a linkovi su i u podnožju.
+
+1. Zupčanik → **Podešavanja**, pa ispod naslova **Dodatne stranice** otvori karticu stranice.
+2. Polja: **Naslov**, **Uvodni naslov** (mali natpis iznad naslova), **Podnaslov**, **Tekst** (prazan red = novi odlomak), **Napomena** i **Oznaka** (npr. *U pripremi*). Snima se samo, kao i ostala polja.
+3. Prekidač **Objavljeno (vidljivo Googleu)**: dok je isključen, stranica je na sajtu i u meniju, ali je Google ne prikazuje. Uključi ga kad je tekst gotov.
+4. Pritisni **Objavi**.
+
+## 10. Šta ako nešto ne radi
 - **Izmjenu ne vidim na sajtu:** pritisni **Objavi** i sačekaj. Zatim zatvori karticu i otvori sajt ponovo.
 - **Nove sorte nema na sajtu:** provjeri da je **Vidljiva na sajtu** uključena, pa **Objavi**.
 - **Sorta nema slike na sajtu:** dodaj bar jednu sliku i objavi. Ako je isključen prekidač *Prikaži na sajtu sorte bez slike*, sorte bez slike se ne vide.

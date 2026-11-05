@@ -29,6 +29,15 @@ header{height:76px;display:flex;align-items:center;justify-content:space-between
 #drawer nav{display:grid;gap:4px}
 #drawer nav a{padding:15px 12px;border-radius:10px;text-decoration:none;color:var(--ink);font-weight:600;font-size:17px}
 #drawer nav a.on,#drawer nav a:hover{background:#e6f1e7;color:var(--green)}
+/* meni: grupa "Iz vinograda" (sklopiva) */
+#drawer .navgroup>summary{list-style:none;display:flex;justify-content:space-between;align-items:center;min-height:44px;padding:15px 12px;border-radius:10px;font-weight:600;font-size:17px;color:var(--ink);cursor:pointer}
+#drawer .navgroup>summary::-webkit-details-marker{display:none}
+#drawer .navgroup>summary::after{content:"▾";color:var(--muted);transition:transform .2s}
+#drawer .navgroup[open]>summary::after{transform:rotate(180deg)}
+#drawer .navgroup a{display:block;padding-left:28px}
+/* podnožje: linkovi na dodatne stranice */
+.fnav{display:flex;flex-wrap:wrap;justify-content:center;gap:0 18px;margin-top:6px}
+.fnav a{display:inline-flex;align-items:center;min-height:44px}
 .drawer-call{margin-top:auto;padding:16px;background:var(--green);color:#fff;border-radius:12px;text-align:center;text-decoration:none;font-weight:700}
 .close{position:absolute;top:12px;right:14px;width:44px;height:44px;border:0;background:#f0f3f1;border-radius:50%;font-size:26px;line-height:1;color:var(--ink);z-index:2}
 

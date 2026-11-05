@@ -3,6 +3,7 @@
 import fs from "node:fs";
 import { snapshot, varietySnapshot, changedVarietyFields, changedSectionFields, SECTIONS, whenText } from "../panel/changes.js";
 import { toFirebaseShape } from "../build/firebase-shape.mjs";
+import { EXTRA_PAGES, extraPage, hasContent } from "../panel/stranice.js";
 const ok = (c, m) => { console.log((c ? "PROŠLO" : "PALO  ") + " " + m); if (!c) process.exitCode = 1; };
 const clone = (x) => JSON.parse(JSON.stringify(x));
 
@@ -21,6 +22,9 @@ ok(allSame, "isti podaci → nijedno promijenjeno polje");
 const distSnap = new URL("../dist/panel/objavljeno.json", import.meta.url), distMock = new URL("../dist/panel/mock-data.json", import.meta.url);
 if (fs.existsSync(distSnap) && fs.existsSync(distMock)) {
   const s2 = JSON.parse(fs.readFileSync(distSnap, "utf8")), mock = JSON.parse(fs.readFileSync(distMock, "utf8"));
+  // kao panel pri učitavanju: dodatne stranice kojih nema u bazi dobiju zadane vrijednosti
+  mock.pages = mock.pages || {};
+  for (const x of EXTRA_PAGES) if (!hasContent(mock.pages[x.id])) mock.pages[x.id] = extraPage(null, x.defaults);
   const diffs = Object.entries(mock.varieties).filter(([k, v]) => changedVarietyFields(s2.varieties[k], v).length).map(([k]) => k);
   ok(!diffs.length && SECTIONS.every((s) => !changedSectionFields(s2.sections[s.id], mock, s).length), "dist: objavljeno.json i mock-data.json bez lažnih razlika" + (diffs.length ? ": " + diffs.slice(0, 5) : ""));
   ok(typeof s2.builtAt === "string", "dist: objavljeno.json ima builtAt");

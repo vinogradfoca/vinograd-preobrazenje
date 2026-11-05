@@ -71,6 +71,8 @@ export const SECTIONS = [
     title: "naslov", intro: "uvod", steps: "koraci", seoTitle: "naslov za Google", seoDescription: "opis za Google" } },
   { id: "kontakt", title: "O nama i kontakt (stranica)", root: "pages/kontakt", labels: {
     title: "naslov", about: "tekst o nama", seoTitle: "naslov za Google", seoDescription: "opis za Google" } },
+  ...[["zastita", "Zaštita vinove loze (stranica)"], ["vinjak", "Vinjak Preobraženje (stranica)"]].map(([id, title]) => ({ id, title, root: "pages/" + id, labels: {
+    eyebrow: "uvodni naslov", title: "naslov", subtitle: "podnaslov", intro: "tekst", note: "napomena", label: "oznaka", status: "objavljeno (vidljivo Googleu)" } })),
 ];
 const SKIP = new Set(["updatedAt", "updatedBy"]);
 const getPath = (o, p) => p.split("/").reduce((x, k) => (x == null ? undefined : x[k]), o);
