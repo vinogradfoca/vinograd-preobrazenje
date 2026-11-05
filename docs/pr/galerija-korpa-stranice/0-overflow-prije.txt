@@ -1,0 +1,122 @@
+✓ / @360 (ladica zatvorena)
+✓ / @360 (ladica otvorena)
+✓ / @390 (ladica zatvorena)
+✓ / @390 (ladica otvorena)
+✓ / @412 (ladica zatvorena)
+✓ / @412 (ladica otvorena)
+✓ /sorte/ @360 (ladica zatvorena)
+✓ /sorte/ @360 (ladica otvorena)
+✓ /sorte/ @390 (ladica zatvorena)
+✓ /sorte/ @390 (ladica otvorena)
+✓ /sorte/ @412 (ladica zatvorena)
+✓ /sorte/ @412 (ladica otvorena)
+✓ /cjenovnik/ @360 (ladica zatvorena)
+✓ /cjenovnik/ @360 (ladica otvorena)
+✓ /cjenovnik/ @390 (ladica zatvorena)
+✓ /cjenovnik/ @390 (ladica otvorena)
+✓ /cjenovnik/ @412 (ladica zatvorena)
+✓ /cjenovnik/ @412 (ladica otvorena)
+✓ /kako-naruciti/ @360 (ladica zatvorena)
+✓ /kako-naruciti/ @360 (ladica otvorena)
+✓ /kako-naruciti/ @390 (ladica zatvorena)
+✓ /kako-naruciti/ @390 (ladica otvorena)
+✓ /kako-naruciti/ @412 (ladica zatvorena)
+✓ /kako-naruciti/ @412 (ladica otvorena)
+✓ /kontakt/ @360 (ladica zatvorena)
+✓ /kontakt/ @360 (ladica otvorena)
+✓ /kontakt/ @390 (ladica zatvorena)
+✓ /kontakt/ @390 (ladica otvorena)
+✓ /kontakt/ @412 (ladica zatvorena)
+✓ /kontakt/ @412 (ladica otvorena)
+✗ /sorte/ratatuj/ @360 (ladica zatvorena): 53 van ekrana
+    div.gallery  [17…605 / 360]
+    img#mainImg  [27…595 / 360]
+    div.thumbs  [27…595 / 360]
+    button "Fotografija 5"  [315…379 / 360]
+    img  [317…377 / 360]
+    button "Fotografija 6"  [387…451 / 360]
+    img  [389…449 / 360]
+    button "Fotografija 7"  [459…523 / 360]
+    img  [461…521 / 360]
+    button "Fotografija 8"  [531…595 / 360]
+    img  [533…593 / 360]
+    div.minfo "Bijela Ratatuj ZrenjeSrednje ranaVrstaBe"  [17…605 / 360]
+✗ /sorte/ratatuj/ @360 (ladica otvorena): 53 van ekrana
+    div.gallery  [17…605 / 360]
+    img#mainImg  [27…595 / 360]
+    div.thumbs  [27…595 / 360]
+    button "Fotografija 5"  [315…379 / 360]
+    img  [317…377 / 360]
+    button "Fotografija 6"  [387…451 / 360]
+    img  [389…449 / 360]
+    button "Fotografija 7"  [459…523 / 360]
+    img  [461…521 / 360]
+    button "Fotografija 8"  [531…595 / 360]
+    img  [533…593 / 360]
+    div.minfo "Bijela Ratatuj ZrenjeSrednje ranaVrstaBe"  [17…605 / 360]
+✗ /sorte/ratatuj/ @390 (ladica zatvorena): 51 van ekrana
+    div.gallery  [17…605 / 390]
+    img#mainImg  [27…595 / 390]
+    div.thumbs  [27…595 / 390]
+    button "Fotografija 6"  [387…451 / 390]
+    img  [389…449 / 390]
+    button "Fotografija 7"  [459…523 / 390]
+    img  [461…521 / 390]
+    button "Fotografija 8"  [531…595 / 390]
+    img  [533…593 / 390]
+    div.minfo "Bijela Ratatuj ZrenjeSrednje ranaVrstaBe"  [17…605 / 390]
+    h1 "Ratatuj"  [41…581 / 390]
+    div.facts "ZrenjeSrednje ranaVrstaBesjemena"  [41…581 / 390]
+✗ /sorte/ratatuj/ @390 (ladica otvorena): 51 van ekrana
+    div.gallery  [17…605 / 390]
+    img#mainImg  [27…595 / 390]
+    div.thumbs  [27…595 / 390]
+    button "Fotografija 6"  [387…451 / 390]
+    img  [389…449 / 390]
+    button "Fotografija 7"  [459…523 / 390]
+    img  [461…521 / 390]
+    button "Fotografija 8"  [531…595 / 390]
+    img  [533…593 / 390]
+    div.minfo "Bijela Ratatuj ZrenjeSrednje ranaVrstaBe"  [17…605 / 390]
+    h1 "Ratatuj"  [41…581 / 390]
+    div.facts "ZrenjeSrednje ranaVrstaBesjemena"  [41…581 / 390]
+✗ /sorte/ratatuj/ @412 (ladica zatvorena): 51 van ekrana
+    div.gallery  [17…605 / 412]
+    img#mainImg  [27…595 / 412]
+    div.thumbs  [27…595 / 412]
+    button "Fotografija 6"  [387…451 / 412]
+    img  [389…449 / 412]
+    button "Fotografija 7"  [459…523 / 412]
+    img  [461…521 / 412]
+    button "Fotografija 8"  [531…595 / 412]
+    img  [533…593 / 412]
+    div.minfo "Bijela Ratatuj ZrenjeSrednje ranaVrstaBe"  [17…605 / 412]
+    h1 "Ratatuj"  [41…581 / 412]
+    div.facts "ZrenjeSrednje ranaVrstaBesjemena"  [41…581 / 412]
+✗ /sorte/ratatuj/ @412 (ladica otvorena): 51 van ekrana
+    div.gallery  [17…605 / 412]
+    img#mainImg  [27…595 / 412]
+    div.thumbs  [27…595 / 412]
+    button "Fotografija 6"  [387…451 / 412]
+    img  [389…449 / 412]
+    button "Fotografija 7"  [459…523 / 412]
+    img  [461…521 / 412]
+    button "Fotografija 8"  [531…595 / 412]
+    img  [533…593 / 412]
+    div.minfo "Bijela Ratatuj ZrenjeSrednje ranaVrstaBe"  [17…605 / 412]
+    h1 "Ratatuj"  [41…581 / 412]
+    div.facts "ZrenjeSrednje ranaVrstaBesjemena"  [41…581 / 412]
+✓ /sorte/favor/ @360 (ladica zatvorena)
+✓ /sorte/favor/ @360 (ladica otvorena)
+✓ /sorte/favor/ @390 (ladica zatvorena)
+✓ /sorte/favor/ @390 (ladica otvorena)
+✓ /sorte/favor/ @412 (ladica zatvorena)
+✓ /sorte/favor/ @412 (ladica otvorena)
+- /zastita-vinove-loze/ @360: stranica ne postoji, preskočena
+- /zastita-vinove-loze/ @390: stranica ne postoji, preskočena
+- /zastita-vinove-loze/ @412: stranica ne postoji, preskočena
+- /vinjak/ @360: stranica ne postoji, preskočena
+- /vinjak/ @390: stranica ne postoji, preskočena
+- /vinjak/ @412: stranica ne postoji, preskočena
+
+PALO: 310 elemenata van ekrana (provjereno 42 stanja)
