@@ -189,6 +189,8 @@ footer a{color:#fff}
 .cart #cartFoot .bad{border:2px solid #b42318;background:#fff7f6}
 .cart #cartFoot .bad:focus{outline:3px solid #b4231840;outline-offset:1px}
 .err{color:#b42318;font-weight:700;min-height:20px;margin:10px 0 0}
+.cart .sendhead{font-size:18px;margin:16px 0 2px}
+.cart .sendnote{margin:0 0 4px}
 .err:not(:empty){background:#fff1f0;border:1px solid #f3c1bc;border-radius:10px;padding:10px 12px}
 
 #toast{position:fixed;left:50%;top:90px;transform:translate(-50%,-20px);background:var(--green);color:#fff;padding:12px 20px;border-radius:999px;opacity:0;pointer-events:none;transition:.25s;z-index:80;max-width:90vw;text-align:center}
@@ -301,4 +303,7 @@ body{padding-bottom:76px}
 .cbar{position:fixed;left:0;right:0;bottom:0;height:76px;background:#fff;border-top:1px solid var(--line);z-index:30;display:flex;align-items:center;gap:10px;padding:0 clamp(14px,4vw,64px)}
 .cbar .btn{flex:1;min-height:48px;padding:10px 12px;white-space:nowrap}
 .cbar3 .btn.primary{flex:1.6}
+/* traka na stranici sorte: glavno dugme (npr. "Pošalji narudžbu (2)") se prelama u dva reda kad ne stane */
+.cbar .btn{min-width:0}
+.cbar3 .btn.primary{white-space:normal;line-height:1.15;padding:6px 10px}
 @media(min-width:900px){.cbar{justify-content:center}.cbar .btn{flex:0 1 240px}.cbar3 .btn.primary{flex:0 1 300px}}

@@ -26,7 +26,7 @@
       <div class="order" data-id="{{v.id}}">
         <h2 class="h3">Naručite</h2>
         {{#each v.rows}}<div class="orow{{#unless orderable}} off{{/unless}}"><div><b>{{label}}</b><small>{{stock}}</small></div><div class="oprice">{{price}}</div>
-          {{#if orderable}}<div class="stepper" data-k="{{key}}"{{#if max}} data-max="{{max}}"{{/if}}><button type="button" data-d="-1" aria-label="Manje">−</button><span>1</span><button type="button" data-d="1" aria-label="Više">+</button></div><button type="button" class="btn primary add" data-add="{{key}}">Dodaj u upit</button>{{else}}<span class="muted">Nedostupno</span>{{/if}}</div>
+          {{#if orderable}}<div class="stepper" data-k="{{key}}"{{#if max}} data-max="{{max}}"{{/if}}><button type="button" data-d="-1" aria-label="Manje">−</button><span>1</span><button type="button" data-d="1" aria-label="Više">+</button></div><button type="button" class="btn primary add" data-add="{{key}}">Dodaj u korpu</button>{{else}}<span class="muted">Nedostupno</span>{{/if}}</div>
         {{/each}}
         <a class="ask" href="{{site.tel}}">Pitanje o sorti? Nazovite {{site.phone}}</a>
       </div>

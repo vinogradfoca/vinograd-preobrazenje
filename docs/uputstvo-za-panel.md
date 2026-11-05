@@ -81,7 +81,7 @@ U listi **Sorte** dodirni strelicu **↗** pored sorte, ili u uređivanju sorte 
 
 ## 8. Podešavanja (zupčanik)
 - **Kontakt:** telefon, WhatsApp broj (samo cifre, npr. 38765592120), mejl, adresa, link na mapu.
-- **Tekstovi stranica:** odjeljci *Početna stranica*, *Kako naručiti* i *O nama i kontakt (stranica)*. Pazi da nigdje ne piše *korpa*: sajt koristi riječ *upit*.
+- **Tekstovi stranica:** odjeljci *Početna stranica*, *Kako naručiti* i *O nama i kontakt (stranica)*.
 - **Prikaži na sajtu sorte bez slike:** isključi da se na sajtu vide samo sorte koje imaju sliku.
 - **Promijeni lozinku:** traži staru lozinku, pa novu (najmanje 8 znakova).
 - **Preuzmi kopiju podataka:** sprema sve podatke na telefon.

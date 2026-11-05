@@ -54,9 +54,22 @@
     clearTimeout(tt); tt = setTimeout(function () { t.classList.remove("on"); }, 2200);
   }
 
-  /* ---------- traka pri dnu: Pošalji upit i Podijeli (stranica sorte) ---------- */
+  /* ---------- traka pri dnu stranice sorte: Podijeli, WhatsApp i glavno dugme ---------- */
+  // Prazna korpa: "Dodaj u korpu" vodi na odjeljak "Naručite" (fokus na prvu varijantu).
+  // Korpa sa stavkama: "Pošalji narudžbu (N)" otvara ladicu korpe.
   var barUpit = $("#barUpit");
-  if (barUpit) barUpit.addEventListener("click", function () { openPanel(cartEl, $("#cartBtn")); });
+  if (barUpit) barUpit.addEventListener("click", function () {
+    if (cart.length) { openPanel(cartEl, $("#cartBtn")); return; }
+    var ord = $(".order"); if (!ord) return;
+    ord.scrollIntoView({ block: "center" });
+    var first = $(".order [data-add]");
+    if (first) { try { first.focus({ preventScroll: true }); } catch (e) { first.focus(); } }
+  });
+  function updateBar() {
+    if (!barUpit) return;
+    barUpit.textContent = cart.length ? "Pošalji narudžbu (" + cart.length + ")" : "Dodaj u korpu";
+    if (cart.length) barUpit.setAttribute("aria-controls", "cart"); else barUpit.removeAttribute("aria-controls");
+  }
   var barShare = $("#barShare");
   if (barShare) barShare.addEventListener("click", function () {
     var d = barShare.dataset, url = d.url || location.href;
@@ -94,7 +107,7 @@
   }
   function addToCart(id, kind, qty) {
     if (!MAP) {
-      loadData().then(function () { addToCart(id, kind, qty); }, function () { toast("Upit trenutno nije dostupan. Nazovite nas."); });
+      loadData().then(function () { addToCart(id, kind, qty); }, function () { toast("Korpa trenutno nije dostupna. Nazovite nas."); });
       return;
     }
     var x = byId(id); if (!x) return;
@@ -104,12 +117,12 @@
     it.qty += qty;
     if (o.qty !== null) it.qty = Math.min(it.qty, o.qty);
     saveCart(); renderCart();
-    toast(x.name + " (" + KIND[kind].toLowerCase() + ") je dodan u upit");
+    toast("Dodano u korpu: " + x.name + " (" + KIND[kind].toLowerCase() + ")");
   }
   function setQty(id, kind, q) {
     var it = find(id, kind); if (!it) return;
-    var o = byId(id)[kind];
-    if (q <= 0) cart = cart.filter(function (i) { return i !== it; });
+    var x = byId(id), o = x[kind];
+    if (q <= 0) { cart = cart.filter(function (i) { return i !== it; }); toast(x.name + " (" + KIND[kind].toLowerCase() + ") uklonjena je iz korpe."); }
     else it.qty = o.qty !== null ? Math.min(q, o.qty) : q;
     saveCart(); renderCart();
   }
@@ -169,10 +182,11 @@
   }
   function renderCart() {
     $("#cartCount").textContent = cart.reduce(function (a, i) { return a + i.qty; }, 0);
+    updateBar();
     var box = $("#cartItems");
-    if (cart.length && !MAP) { $("#cartFoot").hidden = true; box.innerHTML = '<div class="empty">Učitavanje upita…</div>'; return; }
+    if (cart.length && !MAP) { $("#cartFoot").hidden = true; box.innerHTML = '<div class="empty">Učitavanje korpe…</div>'; return; }
     if (!cart.length) {
-      box.innerHTML = '<div class="empty">Upit je prazan.<br><a href="/sorte/" class="btn outline">Pogledajte sorte</a></div>';
+      box.innerHTML = '<div class="empty">Korpa je prazna.<br><a href="/sorte/" class="btn outline">Pogledajte sorte</a></div>';
       $("#cartFoot").hidden = true; return;
     }
     $("#cartFoot").hidden = false;
@@ -248,7 +262,7 @@
   // podaci se učitavaju odmah samo ako korpa nije prazna; inače pri prvom otvaranju ili dodavanju
   function ensureData() {
     loadData().then(function () { cleanCart(); renderCart(); }, function () {
-      if (cart.length) $("#cartItems").innerHTML = '<div class="empty">Upit trenutno nije dostupan. Pokušajte ponovo ili nas nazovite.</div>';
+      if (cart.length) $("#cartItems").innerHTML = '<div class="empty">Korpa trenutno nije dostupna. Pokušajte ponovo ili nas nazovite.</div>';
     });
   }
   if (cart.length) ensureData();
@@ -364,7 +378,7 @@
         qty[k] = q; st.querySelector("span").textContent = q;
       }
     });
-    loadData().catch(function () {}); // da "Dodaj u upit" radi odmah
+    loadData().catch(function () {}); // da "Dodaj u korpu" radi odmah
   }
 
   /* ---------- pretraga po nazivu: isto poređenje za katalog i cjenovnik ---------- */
