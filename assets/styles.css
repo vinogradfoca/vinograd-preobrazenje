@@ -306,8 +306,16 @@ header{background:#fff}
 /* atribut height (zbog CLS) ne smije postati visina glavne slike sorte: omjer daje aspect-ratio */
 /* cijeli ekran (galerija sorte): sloj preko stranice, ne Fullscreen API */
 body.lbopen{overflow:hidden}
-.lb{position:fixed;inset:0;z-index:90;background:#0b0f0c;color:#fff;display:flex;flex-direction:column}
-.lbtrack{flex:1;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;min-height:0}
+.lb{position:fixed;inset:0;z-index:90;background:#0b0f0c;color:#fff;display:flex;flex-direction:column;overflow:hidden}
+/* pozadina: zamućena kopija trenutne slike (bez podrške za filter ostaje crna pozadina) */
+.lbbg{display:none}
+@supports (filter: blur(1px)) {
+  .lbbg{display:block;position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:blur(28px) brightness(.55);transform:scale(1.15);opacity:0;transition:opacity .15s;pointer-events:none;z-index:0}
+  .lbbg.on{opacity:1}
+}
+@media (prefers-reduced-motion: reduce) { .lbbg{transition:none} }
+.lbtrack{flex:1;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;min-height:0;position:relative;z-index:1}
+.lb .garrow,.lb .lbclose,.lb .gcount{z-index:2}
 .lbtrack::-webkit-scrollbar{display:none}
 .lb .slide{display:flex;align-items:center;justify-content:center}
 .lb .slide img{width:100%;height:100%;object-fit:contain}
