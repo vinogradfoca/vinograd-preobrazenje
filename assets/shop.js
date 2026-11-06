@@ -314,6 +314,7 @@
     // Cijeli ekran: sloj preko stranice (role="dialog"), ne Fullscreen API. Dugme "nazad" na
     // telefonu zatvara sloj: pri otvaranju se doda zapis u istoriju (pushState), a popstate zatvara.
     var fullBtn = $("#gFull"), lb = null, lbCur = 0;
+    var reduceMotion = function () { return !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches); };
     var closeLb = function (fromHistory) {
       if (!lb) return;
       if (!fromHistory && history.state && history.state.vpGallery) { history.back(); return; } // popstate zatvara
@@ -341,7 +342,9 @@
       var start = cur, name = $("#gallery").dataset.name || "";
       lb = document.createElement("div");
       lb.className = "lb"; lb.setAttribute("role", "dialog"); lb.setAttribute("aria-modal", "true"); lb.setAttribute("aria-label", "Fotografije sorte " + name);
-      lb.innerHTML = '<div class="lbtrack" tabindex="-1">' + slides.map(function (s, k) {
+      // pozadina: zamućena kopija trenutne slike (400 px); bez podrške za filter ostaje crna (CSS @supports)
+      lb.innerHTML = '<img class="lbbg" src="' + esc(slides[start].dataset.small || "") + '" alt="" aria-hidden="true">' +
+        '<div class="lbtrack" tabindex="-1">' + slides.map(function (s, k) {
         var im = s.querySelector("img"), set = im.getAttribute("srcset");
         return '<figure class="slide"><img src="' + esc(s.dataset.big || im.getAttribute("src")) + '"' + (set ? ' srcset="' + esc(set) + '" sizes="100vw"' : "") +
           ' alt="' + esc(im.getAttribute("alt") || "") + '"' + (k === start ? "" : ' loading="lazy"') + "></figure>";
@@ -354,6 +357,23 @@
       var t = lb.querySelector(".lbtrack"), num = lb.querySelector(".gnum");
       lbCur = start; goTo(t, start, false);
       onScroll(t, function (i) { lbCur = i; num.textContent = i + 1; });
+      // pozadina se mijenja tek kad se listanje smiri (scrollend ili 120 ms bez skrolovanja), ne tokom prevlačenja
+      var bg = lb.querySelector(".lbbg"), bgAt = start, bgT = 0, fadeT = 0;
+      var setBg = function () {
+        var i = indexOf(t); if (i === bgAt || !bg) return;
+        bgAt = i;
+        var src = slides[i].dataset.small || "";
+        clearTimeout(fadeT);
+        bg.classList.remove("on"); // prijelaz opacity 150 ms (bez prijelaza uz prefers-reduced-motion)
+        fadeT = setTimeout(function () {
+          if (!lb || bgAt !== i) return;
+          var show = function () { if (bgAt === i) bg.classList.add("on"); };
+          bg.onload = show; bg.src = src; if (bg.complete && bg.naturalWidth) show();
+        }, reduceMotion() ? 0 : 150);
+      };
+      if ("onscrollend" in window) t.addEventListener("scrollend", setBg);
+      else t.addEventListener("scroll", function () { clearTimeout(bgT); bgT = setTimeout(setBg, 120); }, { passive: true });
+      if (bg) { var first = function () { bg.classList.add("on"); }; if (bg.complete && bg.naturalWidth) first(); else bg.onload = first; }
       arrows(lb, t, function () { return base(t, lbCur); });
       lb.querySelector(".lbclose").addEventListener("click", function () { closeLb(false); });
       document.addEventListener("keydown", lbKeys, true);
