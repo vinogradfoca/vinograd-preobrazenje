@@ -346,9 +346,9 @@
         return '<figure class="slide"><img src="' + esc(s.dataset.big || im.getAttribute("src")) + '"' + (set ? ' srcset="' + esc(set) + '" sizes="100vw"' : "") +
           ' alt="' + esc(im.getAttribute("alt") || "") + '"' + (k === start ? "" : ' loading="lazy"') + "></figure>";
       }).join("") + "</div>" +
-        (n > 1 ? '<button type="button" class="garrow prev" aria-label="Prethodna slika">‹</button><button type="button" class="garrow next" aria-label="Sljedeća slika">›</button>' : "") +
+        (n > 1 ? '<button type="button" class="garrow prev" aria-label="Prethodna slika"><svg class="gicon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 18l-6-6 6-6"/></svg></button><button type="button" class="garrow next" aria-label="Sljedeća slika"><svg class="gicon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 18l6-6-6-6"/></svg></button>' : "") +
         '<span class="gcount" aria-live="polite"><span class="gnum">' + (start + 1) + "</span> / " + n + "</span>" +
-        '<button type="button" class="lbclose" aria-label="Zatvori">×</button>';
+        '<button type="button" class="lbclose" aria-label="Zatvori"><svg class="gicon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg></button>';
       document.body.appendChild(lb);
       document.body.classList.add("lbopen");
       var t = lb.querySelector(".lbtrack"), num = lb.querySelector(".gnum");
