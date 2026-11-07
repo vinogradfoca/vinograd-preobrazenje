@@ -96,7 +96,10 @@ Cilj: dodati mnogo slika odjednom (npr. 149) bez rada sliku po sliku.
 - Prije svega detekcija mogućnosti: probni canvas i provjera da `toBlob("image/webp")` stvarno vraća `image/webp`. Ne po nazivu pregledača.
 - Ako ne radi (npr. Safari): upozorenje "Ovaj pregledač ne pravi WebP. Otvori panel u Chromeu, Edgeu, Samsung Internetu ili Firefoxu." i **upload se blokira**. Ništa se ne snima tiho kao veliki PNG.
 - Kvalitet oko 0,8. Upis: Storage `vinograd/img/<imageId>/<širina>.webp`, zapis u `images/<imageId>` (`alt`, `w`, `h`, `variants`, `hash`, `source` (`own` ili `web`), `webApproved`, `createdAt`, `createdBy`).
-- Ograničenja: najviše 3 slike po sorti nema. Ostaje samo tehnička granica po fajlu (5 MB u Storage pravilima).
+- Ograničenja:
+  - najviše **6 slika po sorti** (granica je u panelu, `MAX_IMG` u `panel/app.js`). Kad sorta ima 6 slika, dugme Dodaj slike je neaktivno, a u uvozu po imenu slika koja bi prešla granicu ide u Preskočene ("Sorta već ima 6 slika"). Sorte koje već imaju više od 6 slika ostaju kakve jesu;
+  - ulazna fotografija najviše **40 MP i 25 MB**. Veća se odbija prije dekodiranja, s porukom "Slika je prevelika (najviše 40 MP i 25 MB). Smanji je pa pokušaj ponovo." U uvozu ide u Preskočene;
+  - Storage pravila: najviše 5 MB po fajlu, samo `image/webp` (400, 800, 1600) i `image/jpeg` (`og.jpg`).
 
 ## 6. Šta panel upisuje (dopuna modela iz `PLAN.md` sekcija 3)
 

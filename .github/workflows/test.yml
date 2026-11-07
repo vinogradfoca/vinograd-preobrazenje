@@ -1,0 +1,32 @@
+# Testovi bez npm instalacije: izgradnja iz data/seed.json i svi tests/*.test.mjs.
+# Testovi s pregledačem (overflow, tastatura, korpa, panel-objavi) traže Playwright i pokreću se ručno (README).
+name: Testovi
+
+# push samo na main (grane se testiraju kroz PR, da se isti commit ne testira dvaput)
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+      - name: Izgradnja (seed)
+        run: node build/build.mjs --seed
+      - name: Testovi
+        run: |
+          status=0
+          for f in tests/*.test.mjs; do
+            echo "::group::$f"
+            node "$f" || { echo "::error::PALO: $f"; status=1; }
+            echo "::endgroup::"
+          done
+          exit $status

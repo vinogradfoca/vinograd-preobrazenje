@@ -118,7 +118,7 @@ if (isMain) {
 }
 
 // mali statički server za dist/ (čisti URL-ovi: /putanja/ → /putanja/index.html)
-function serve(dir) {
+export function serve(dir) {
   const T = { ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".css": "text/css", ".json": "application/json", ".webp": "image/webp", ".svg": "image/svg+xml", ".xml": "application/xml", ".txt": "text/plain" };
   return new Promise((resolve) => {
     const s = http.createServer((req, res) => {

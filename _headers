@@ -1,6 +1,11 @@
 # Cloudflare Pages: zaglavlja. Build kopira ovaj fajl u dist/_headers.
 # Stranice su u folderima s index.html, pa čisti URL-ovi i završna kosa crta
-# ne trebaju posebna podešavanja.
+# ne trebaju posebna podešavanja. Kad više pravila pogađa istu adresu, Cloudflare ih spaja.
+
+# Sve stranice: pregledač ne pogađa vrstu fajla; drugim sajtovima ide samo domen, ne cijela adresa.
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
 
 # CSS i JS imaju heš sadržaja u imenu, pa smiju biti immutable.
 /assets/*
@@ -12,6 +17,9 @@
 /build.json
   Cache-Control: no-cache
 
-# Panel nije za pretraživače.
+# Panel nije za pretraživače i ne smije se ugraditi u tuđu stranicu (iframe).
+# CSP je zasad samo "Report-Only": ništa ne blokira, samo prijavljuje kršenja u konzoli preglednika.
 /panel/*
   X-Robots-Tag: noindex
+  X-Frame-Options: DENY
+  Content-Security-Policy-Report-Only: default-src 'self'; script-src 'self' https://www.gstatic.com; connect-src 'self' https://*.firebaseio.com wss://*.firebaseio.com https://*.googleapis.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com; img-src 'self' blob: data: https://firebasestorage.googleapis.com; style-src 'self' 'unsafe-inline'; frame-ancestors 'none'

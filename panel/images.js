@@ -11,6 +11,11 @@ const OG_MAX_UPSCALE = 2; // og se ne povećava više od 2×
 const OG_BG = "#f5f3ec"; // krem iz palete, ako mala slika ne pokrije cijeli og
 
 export const ACCEPT = "image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif";
+// Granica prije dekodiranja: velika fotografija u memoriji zauzima širina × visina × 4 bajta
+// (40 MP ≈ 160 MB), pa slabiji telefon može zatvoriti karticu bez poruke.
+export const MAX_PIXELS = 40e6;
+export const MAX_BYTES = 25 * 1024 * 1024;
+export const TOO_BIG_MSG = "Slika je prevelika (najviše 40 MP i 25 MB). Smanji je pa pokušaj ponovo.";
 export const NO_WEBP_MSG = "Ovaj pregledač ne pravi WebP. Otvori panel u Chromeu, Edgeu, Samsung Internetu ili Firefoxu.";
 
 class ConvertError extends Error {
@@ -44,6 +49,44 @@ export async function sha256Hex(buf) {
   return [...new Uint8Array(d)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
+// Širina i visina iz zaglavlja JPEG, PNG ili WebP fajla, bez dekodiranja slike.
+// Vraća null kad format nije prepoznat (npr. HEIC); tada se veličina provjeri poslije dekodiranja.
+export function headerSize(buf) {
+  const b = new Uint8Array(buf), n = b.length;
+  const u16 = (i) => (b[i] << 8) | b[i + 1], u32 = (i) => ((b[i] << 24) | (b[i + 1] << 16) | (b[i + 2] << 8) | b[i + 3]) >>> 0;
+  const le16 = (i) => b[i] | (b[i + 1] << 8), le24 = (i) => b[i] | (b[i + 1] << 8) | (b[i + 2] << 16);
+  // PNG: IHDR odmah poslije potpisa
+  if (n >= 24 && b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47) return { w: u32(16), h: u32(20) };
+  // WebP: RIFF....WEBP + VP8 / VP8L / VP8X
+  if (n >= 30 && b[0] === 0x52 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x46 && b[8] === 0x57 && b[9] === 0x45 && b[10] === 0x42 && b[11] === 0x50) {
+    const tag = String.fromCharCode(b[12], b[13], b[14], b[15]);
+    if (tag === "VP8X") return { w: le24(24) + 1, h: le24(27) + 1 };
+    if (tag === "VP8L") { const v = b[21] | (b[22] << 8) | (b[23] << 16) | (b[24] << 24); return { w: (v & 0x3fff) + 1, h: ((v >>> 14) & 0x3fff) + 1 }; }
+    if (tag === "VP8 ") return { w: le16(26) & 0x3fff, h: le16(28) & 0x3fff };
+    return null;
+  }
+  // JPEG: prvi SOF marker (C0–CF osim C4, C8 i CC)
+  if (n >= 4 && b[0] === 0xff && b[1] === 0xd8) {
+    let i = 2;
+    while (i + 9 < n) {
+      if (b[i] !== 0xff) { i++; continue; }
+      const m = b[i + 1];
+      if (m === 0xff) { i++; continue; }
+      if (m === 0xd8 || m === 0x01 || (m >= 0xd0 && m <= 0xd7)) { i += 2; continue; }
+      if (m >= 0xc0 && m <= 0xcf && m !== 0xc4 && m !== 0xc8 && m !== 0xcc) return { w: u16(i + 7), h: u16(i + 5) };
+      i += 2 + u16(i + 2);
+    }
+  }
+  return null;
+}
+
+// Provjera prije dekodiranja: vraća poruku TOO_BIG_MSG ili "" (slika je u granicama ili format nije prepoznat).
+export async function sizeProblem(file) {
+  if (file.size > MAX_BYTES) return TOO_BIG_MSG;
+  const d = headerSize(await file.arrayBuffer());
+  return d && d.w * d.h > MAX_PIXELS ? TOO_BIG_MSG : "";
+}
+
 // Iscrta bitmap u canvas zadane veličine (za smanjivanje velikih slika ide u koracima
 // po pola, da rezultat bude oštar i bez nazubljenosti).
 function drawScaled(bitmap, w, h) {
@@ -71,7 +114,10 @@ export async function convertImage(file, onStep = () => {}) {
   if (!(await canMakeWebp())) throw new ConvertError(NO_WEBP_MSG, "no-webp");
   const warnings = [];
   onStep("čitam");
+  if (file.size > MAX_BYTES) throw new ConvertError(TOO_BIG_MSG, "too-big");
   const buf = await file.arrayBuffer();
+  const dim = headerSize(buf);
+  if (dim && dim.w * dim.h > MAX_PIXELS) throw new ConvertError(TOO_BIG_MSG, "too-big");
   const hash = await sha256Hex(buf);
 
   let bitmap;
@@ -84,6 +130,8 @@ export async function convertImage(file, onStep = () => {}) {
       : "Ovo nije slika koju pregledač zna otvoriti. Koristi JPG, PNG ili WEBP.", "decode");
   }
   const W = bitmap.width, H = bitmap.height;
+  // format bez čitljivog zaglavlja (npr. HEIC): provjera poslije dekodiranja
+  if (W * H > MAX_PIXELS) { bitmap.close(); throw new ConvertError(TOO_BIG_MSG, "too-big"); }
   const variants = {};
   try {
     for (const target of WIDTHS) {

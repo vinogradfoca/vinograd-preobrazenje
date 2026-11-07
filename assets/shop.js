@@ -31,22 +31,49 @@
   var orderable = function (o) { return !!o && o.enabled && (o.qty === null || o.qty > 0); };
 
   /* ---------- meni, korpa, overlay ---------- */
-  var drawer = $("#drawer"), cartEl = $("#cart"), overlay = $("#overlay");
-  function closeAll() {
-    drawer.classList.remove("open"); cartEl.classList.remove("open"); overlay.classList.remove("on");
-    document.body.classList.remove("lock");
+  // Zatvorene ladice su sakrivene (visibility: hidden u CSS-u), pa ih Tab ne dohvata. Otvorena
+  // ladica dobija fokus na dugme Zatvori, Tab kruži unutar nje, a zatvaranje vraća fokus na
+  // dugme koje ju je otvorilo.
+  var drawer = $("#drawer"), cartEl = $("#cart"), overlay = $("#overlay"), opener = null;
+  var openEl = function () { return drawer.classList.contains("open") ? drawer : cartEl.classList.contains("open") ? cartEl : null; };
+  var focusNoScroll = function (el) { try { el.focus({ preventScroll: true }); } catch (e) { el.focus(); } };
+  function shut() {
+    drawer.classList.remove("open"); cartEl.classList.remove("open");
     $("#menuBtn").setAttribute("aria-expanded", "false"); $("#cartBtn").setAttribute("aria-expanded", "false");
   }
-  function openPanel(el, btn) {
+  function closeAll() {
+    var was = openEl();
+    shut(); overlay.classList.remove("on"); document.body.classList.remove("lock");
+    if (was && opener && document.contains(opener)) focusNoScroll(opener);
+    opener = null;
+  }
+  // el: ladica; btn: dugme u zaglavlju (aria-expanded); from: dugme koje ju je stvarno otvorilo (npr. traka pri dnu)
+  function openPanel(el, btn, from) {
+    if (!openEl()) opener = from || btn;
+    else if (openEl() !== el) shut();
     el.classList.add("open"); overlay.classList.add("on"); document.body.classList.add("lock");
     btn.setAttribute("aria-expanded", "true");
+    focusNoScroll(el.querySelector(".close"));
   }
+  var FOCUSABLE = "a[href],button:not([disabled]),input:not([disabled]),textarea:not([disabled]),select:not([disabled]),summary";
+  var focusables = function (box) {
+    return Array.prototype.slice.call(box.querySelectorAll(FOCUSABLE))
+      .filter(function (x) { return x.getClientRects().length && getComputedStyle(x).visibility !== "hidden"; });
+  };
   $("#menuBtn").addEventListener("click", function () { openPanel(drawer, this); });
   $("#cartBtn").addEventListener("click", function () { openPanel(cartEl, this); });
   $("#closeMenu").addEventListener("click", closeAll);
   $("#cartClose").addEventListener("click", closeAll);
   overlay.addEventListener("click", closeAll);
-  document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeAll(); });
+  document.addEventListener("keydown", function (e) {
+    var box = openEl(); if (!box) return;
+    if (e.key === "Escape") { closeAll(); return; }
+    if (e.key !== "Tab") return;
+    var f = focusables(box); if (!f.length) return;
+    var i = f.indexOf(document.activeElement);
+    if (e.shiftKey && i <= 0) { e.preventDefault(); f[f.length - 1].focus(); }
+    else if (!e.shiftKey && (i === -1 || i === f.length - 1)) { e.preventDefault(); f[0].focus(); }
+  });
 
   var tt;
   function toast(msg) {
@@ -59,7 +86,7 @@
   // Korpa sa stavkama: "Pošalji narudžbu (N)" otvara ladicu korpe.
   var barUpit = $("#barUpit");
   if (barUpit) barUpit.addEventListener("click", function () {
-    if (cart.length) { openPanel(cartEl, $("#cartBtn")); return; }
+    if (cart.length) { openPanel(cartEl, $("#cartBtn"), barUpit); return; }
     var ord = $(".order"); if (!ord) return;
     ord.scrollIntoView({ block: "center" });
     var first = $(".order [data-add]");
@@ -87,18 +114,29 @@
   });
 
   /* ---------- korpa (localStorage) ---------- */
-  var CART_KEY = "vp-cart-v1";
+  var CART_KEY = "vp-cart-v1", MAX_QTY = 9999;
+  // stavka iz localStorage je ispravna samo ako je id tekst, vrsta poznata i količina cijeli broj 1–9999
+  var validItem = function (i) {
+    return !!i && typeof i.id === "string" && Object.prototype.hasOwnProperty.call(KIND, i.kind) &&
+      Number.isInteger(i.qty) && i.qty > 0 && i.qty <= MAX_QTY;
+  };
+  var readCart = function (text) {
+    try { var a = JSON.parse(text || "[]"); return Array.isArray(a) ? a.filter(validItem) : []; } catch (e) { return []; }
+  };
   var cart = [];
-  try {
-    cart = JSON.parse(localStorage.getItem(CART_KEY) || "[]").filter(function (i) {
-      return i && typeof i.id === "string" && KIND[i.kind] && i.qty > 0;
-    });
-  } catch (e) { cart = []; }
-  // kad stignu podaci, izbaci stavke koje više ne postoje ili se ne mogu poručiti
+  try { cart = readCart(localStorage.getItem(CART_KEY)); } catch (e) { cart = []; }
+  // kad stignu podaci: izbaci stavke koje više ne postoje ili se ne mogu poručiti,
+  // a količinu smanji na stanje ako je stanje u međuvremenu palo
   function cleanCart() {
-    var before = cart.length;
-    cart = cart.filter(function (i) { var x = byId(i.id); return x && orderable(x[i.kind]); });
-    if (cart.length !== before) saveCart();
+    var changed = false;
+    cart = cart.filter(function (i) {
+      if (!validItem(i)) { changed = true; return false; }
+      var x = byId(i.id), o = x && x[i.kind];
+      if (!orderable(o)) { changed = true; return false; }
+      if (o.qty !== null && i.qty > o.qty) { i.qty = o.qty; changed = true; }
+      return true;
+    });
+    if (changed) saveCart();
   }
   function saveCart() { try { localStorage.setItem(CART_KEY, JSON.stringify(cart)); } catch (e) {} }
   function find(id, kind) {
@@ -114,8 +152,7 @@
     var o = x[kind]; if (!orderable(o)) return;
     var it = find(id, kind);
     if (!it) { it = { id: id, kind: kind, qty: 0 }; cart.push(it); }
-    it.qty += qty;
-    if (o.qty !== null) it.qty = Math.min(it.qty, o.qty);
+    it.qty = Math.min(it.qty + qty, o.qty !== null ? o.qty : MAX_QTY);
     saveCart(); renderCart();
     toast("Dodano u korpu: " + x.name + " (" + KIND[kind].toLowerCase() + ")");
   }
@@ -123,7 +160,7 @@
     var it = find(id, kind); if (!it) return;
     var x = byId(id), o = x[kind];
     if (q <= 0) { cart = cart.filter(function (i) { return i !== it; }); toast(x.name + " (" + KIND[kind].toLowerCase() + ") uklonjena je iz korpe."); }
-    else it.qty = o.qty !== null ? Math.min(q, o.qty) : q;
+    else it.qty = Math.min(q, o.qty !== null ? o.qty : MAX_QTY);
     saveCart(); renderCart();
   }
   function cartTotals() {
@@ -254,7 +291,7 @@
   // korpa otvorena u drugoj kartici
   window.addEventListener("storage", function (e) {
     if (e.key !== CART_KEY) return;
-    try { cart = JSON.parse(e.newValue || "[]").filter(function (i) { return i && KIND[i.kind] && i.qty > 0; }); } catch (x) { cart = []; }
+    cart = readCart(e.newValue);
     if (MAP) cleanCart();
     renderCart();
   });
