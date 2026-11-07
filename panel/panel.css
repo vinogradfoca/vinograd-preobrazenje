@@ -1,5 +1,5 @@
 /* Panel: iste boje i naslovi kao sajt. Telefon prvo, jedna kolona, donja navigacija. */
-:root{--green:#193d2b;--green2:#2f6a49;--wine:#891f3d;--cream:#f5f3ec;--ink:#17241d;--muted:#68736d;--line:#dfe5e0;--gold:#e8c88e;--ok:#2f6a49;--warn:#a05a00;--bad:#891f3d}
+:root{--green:#193d2b;--green2:#2f6a49;--wine:#891f3d;--cream:#f5f3ec;--ink:#17241d;--muted:#5f6a64;--line:#dfe5e0;--gold:#e8c88e;--ok:#2f6a49;--warn:#a05a00;--bad:#891f3d}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:var(--cream);line-height:1.45;padding-bottom:calc(76px + env(safe-area-inset-bottom))}
