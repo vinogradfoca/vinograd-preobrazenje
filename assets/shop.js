@@ -87,18 +87,29 @@
   });
 
   /* ---------- korpa (localStorage) ---------- */
-  var CART_KEY = "vp-cart-v1";
+  var CART_KEY = "vp-cart-v1", MAX_QTY = 9999;
+  // stavka iz localStorage je ispravna samo ako je id tekst, vrsta poznata i količina cijeli broj 1–9999
+  var validItem = function (i) {
+    return !!i && typeof i.id === "string" && Object.prototype.hasOwnProperty.call(KIND, i.kind) &&
+      Number.isInteger(i.qty) && i.qty > 0 && i.qty <= MAX_QTY;
+  };
+  var readCart = function (text) {
+    try { var a = JSON.parse(text || "[]"); return Array.isArray(a) ? a.filter(validItem) : []; } catch (e) { return []; }
+  };
   var cart = [];
-  try {
-    cart = JSON.parse(localStorage.getItem(CART_KEY) || "[]").filter(function (i) {
-      return i && typeof i.id === "string" && KIND[i.kind] && i.qty > 0;
-    });
-  } catch (e) { cart = []; }
-  // kad stignu podaci, izbaci stavke koje više ne postoje ili se ne mogu poručiti
+  try { cart = readCart(localStorage.getItem(CART_KEY)); } catch (e) { cart = []; }
+  // kad stignu podaci: izbaci stavke koje više ne postoje ili se ne mogu poručiti,
+  // a količinu smanji na stanje ako je stanje u međuvremenu palo
   function cleanCart() {
-    var before = cart.length;
-    cart = cart.filter(function (i) { var x = byId(i.id); return x && orderable(x[i.kind]); });
-    if (cart.length !== before) saveCart();
+    var changed = false;
+    cart = cart.filter(function (i) {
+      if (!validItem(i)) { changed = true; return false; }
+      var x = byId(i.id), o = x && x[i.kind];
+      if (!orderable(o)) { changed = true; return false; }
+      if (o.qty !== null && i.qty > o.qty) { i.qty = o.qty; changed = true; }
+      return true;
+    });
+    if (changed) saveCart();
   }
   function saveCart() { try { localStorage.setItem(CART_KEY, JSON.stringify(cart)); } catch (e) {} }
   function find(id, kind) {
@@ -114,8 +125,7 @@
     var o = x[kind]; if (!orderable(o)) return;
     var it = find(id, kind);
     if (!it) { it = { id: id, kind: kind, qty: 0 }; cart.push(it); }
-    it.qty += qty;
-    if (o.qty !== null) it.qty = Math.min(it.qty, o.qty);
+    it.qty = Math.min(it.qty + qty, o.qty !== null ? o.qty : MAX_QTY);
     saveCart(); renderCart();
     toast("Dodano u korpu: " + x.name + " (" + KIND[kind].toLowerCase() + ")");
   }
@@ -123,7 +133,7 @@
     var it = find(id, kind); if (!it) return;
     var x = byId(id), o = x[kind];
     if (q <= 0) { cart = cart.filter(function (i) { return i !== it; }); toast(x.name + " (" + KIND[kind].toLowerCase() + ") uklonjena je iz korpe."); }
-    else it.qty = o.qty !== null ? Math.min(q, o.qty) : q;
+    else it.qty = Math.min(q, o.qty !== null ? o.qty : MAX_QTY);
     saveCart(); renderCart();
   }
   function cartTotals() {
@@ -254,7 +264,7 @@
   // korpa otvorena u drugoj kartici
   window.addEventListener("storage", function (e) {
     if (e.key !== CART_KEY) return;
-    try { cart = JSON.parse(e.newValue || "[]").filter(function (i) { return i && KIND[i.kind] && i.qty > 0; }); } catch (x) { cart = []; }
+    cart = readCart(e.newValue);
     if (MAP) cleanCart();
     renderCart();
   });
