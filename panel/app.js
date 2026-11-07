@@ -129,6 +129,7 @@ V8.type = V8.pick(TYPES, "Vrsta");
 // Svako snimanje je multi-path update samo izmijenjenih polja + updatedAt i updatedBy.
 const pending = new Map(); // putanja -> vrijednost (nije snimljeno, čeka "Pokušaj ponovo")
 let inflight = 0;
+const sending = new Set(); // obećanja upisa u toku (Objavi ih čeka)
 function setStatus() {
   const bar = $("#saveBar");
   bar.hidden = false;
@@ -138,7 +139,17 @@ function setStatus() {
   } else if (inflight) bar.innerHTML = `<div class="busy"><span>Snimam…</span></div>`;
   else bar.innerHTML = `<div class="ok"><span>✓ Snimljeno u nacrt</span><span class="small">Posjetioci vide tek poslije objave</span></div>`;
 }
-async function send(paths) {
+function send(paths) {
+  const p = sendNow(paths);
+  sending.add(p);
+  p.finally(() => sending.delete(p));
+  return p;
+}
+// čeka sve upise u toku, i one koji krenu dok se čeka
+async function settled() {
+  while (sending.size) await Promise.all([...sending]);
+}
+async function sendNow(paths) {
   inflight++; setStatus();
   try {
     await S.db.update(paths);
@@ -981,6 +992,7 @@ function renderPubStatus() {
   else if (PUB.phase === "building") html = `<div class="notice busy"><b>Objavljuje se…</b><br><span class="small">Pokrenuto u ${hhmm(PUB.requestedAt)}. Obično traje 1 do 3 minute.</span></div>`;
   else if (PUB.phase === "done") html = `<div class="notice ok"><b>Objavljeno u ${hhmm(PUB.builtAt)}</b></div>`;
   else if (PUB.phase === "failed") html = `<div class="notice bad"><b>Izgradnja nije uspjela ili još traje. Sajt ostaje na prethodnoj verziji.</b><br><button type="button" class="btn primary" data-pub-retry style="margin-top:8px">Pokušaj ponovo</button></div>`;
+  else if (PUB.phase === "unsaved") html = `<div class="notice bad"><b>Prvo snimi izmjene.</b><br><span class="small">Neka izmjena nije snimljena (nema veze), pa objava nije pokrenuta.</span><br><button type="button" class="btn primary" data-pub-retry style="margin-top:8px">Pokušaj ponovo</button></div>`;
   else if (PUB.phase === "error") html = `<div class="notice bad"><b>${esc(PUB.error)}</b><br><button type="button" class="btn primary" data-pub-retry style="margin-top:8px">Pokušaj ponovo</button></div>`;
   else if (PUB.builtAt) html = `<div class="notice ok">Zadnja objava: ${esc(fmtDate(PUB.builtAt))}</div>`;
   box.innerHTML = html;
@@ -997,8 +1009,12 @@ const PUB_ERR = {
 };
 async function doPublish() {
   if (PUB.phase === "sending" || PUB.phase === "building") return;
-  flushLater();
   PUB.phase = "sending"; PUB.error = ""; renderPubStatus();
+  // sve izmjene moraju biti u bazi prije izgradnje: odgođena snimanja odmah, pali upisi još jednom
+  flushLater();
+  if (pending.size) retry();
+  await settled();
+  if (pending.size) { PUB.phase = "unsaved"; renderPubStatus(); return; }
   let requestedAt;
   if (S.mock) {
     await new Promise((r) => setTimeout(r, 400));
