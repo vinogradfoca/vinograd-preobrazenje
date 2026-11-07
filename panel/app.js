@@ -4,7 +4,7 @@
 // Podešavanja (kontakt, tekstovi stranica, promjena lozinke).
 import { createDb } from "./db.js";
 import { similarVarieties, uniqueSlug, matchFile, findOldSlot } from "./match.js";
-import { convertImage, canMakeWebp, storagePaths, sha256Hex, ACCEPT, NO_WEBP_MSG, WIDTHS } from "./images.js";
+import { convertImage, canMakeWebp, storagePaths, sha256Hex, sizeProblem, ACCEPT, NO_WEBP_MSG, WIDTHS } from "./images.js";
 import { SECTIONS as PUB_SECTIONS, changedVarietyFields, changedSectionFields, whenText } from "./changes.js";
 import { EXTRA_PAGES, EXTRA_FIELDS, extraPage, hasContent } from "./stranice.js";
 
@@ -1322,13 +1322,13 @@ function impOld(it) {
   // ista stara slika ne može biti zamijenjena dvaput u istom uvozu: zamjenjuje prva, ostale idu na kraj
   if (it.oldRef && IMP.items.some((o) => o !== it && o.oldRef === it.oldRef && o.key === it.key && impGroup(o) === "ok" && IMP.items.indexOf(o) < IMP.items.indexOf(it))) it.oldRef = "";
 }
-const impGroup = (it) => (it.dup || it.exclude || it.full ? "skip" : it.key ? "ok" : "none");
+const impGroup = (it) => (it.tooBig || it.dup || it.exclude || it.full ? "skip" : it.key ? "ok" : "none");
 // Najviše 6 slika po sorti: slike koje bi prešle ograničenje idu u Preskočene. Slika koja
 // zamjenjuje staru (isto mjesto u nizu) ne zauzima novo mjesto. Redoslijed kao pri snimanju.
 function impCapacity() {
   IMP.items.forEach((it) => { it.full = ""; });
   const used = {};
-  const want = IMP.items.filter((it) => !it.dup && !it.exclude && it.key && it.state !== "ok")
+  const want = IMP.items.filter((it) => !it.tooBig && !it.dup && !it.exclude && it.key && it.state !== "ok")
     .sort((a, b) => a.key.localeCompare(b.key) || (a.order ?? 1e9) - (b.order ?? 1e9) || String(a.fname).localeCompare(String(b.fname)));
   for (const it of want) {
     if (it.oldRef) continue;
@@ -1373,9 +1373,12 @@ async function impPrepare() {
     const it = IMP.items[i];
     IMP.prep = i + 1; const pr = $("#impPrep"); if (pr) pr.textContent = `Pripremam pregled: ${i + 1} od ${IMP.items.length}…`;
     if (!it.file) { it.dup = ""; continue; }
+    // prevelika slika: u Preskočene, bez sličice i dekodiranja (zaštita memorije telefona)
+    it.tooBig = await sizeProblem(it.file).catch(() => "");
+    if (!it.key || !it.manualKey) impMatch(it);
+    if (it.tooBig) continue;
     if (!it.hash) it.hash = await sha256Hex(await it.file.arrayBuffer());
     if (!it.thumb) it.thumb = await makeThumb(it.file);
-    if (!it.key || !it.manualKey) impMatch(it);
     if (seen.has(it.hash)) it.dup = "Isti fajl je izabran dva puta.";
     else {
       seen.set(it.hash, it.id);
@@ -1387,6 +1390,7 @@ async function impPrepare() {
 
 function impStatus(it) {
   const m = it.match || { status: "none", candidates: [] }, nm = (k) => esc((V(k) || {}).name || k);
+  if (it.tooBig) return `<span class="warntext">${esc(it.tooBig)} Preskočena.</span>`;
   if (it.dup) return `<span class="warntext">${esc(it.dup)} Preskočena.</span>`;
   if (it.full) return `<span class="warntext">${esc(it.full)}. Preskočena.</span>`;
   if (it.key) return `<span class="oktext">✓ ${it.manualKey ? "Izabrano" : "Uparena"}: ${nm(it.key)}</span>` + (it.oldRef ? ` <span class="badge ft">zamjenjuje staru sliku ${esc(it.oldRef)}</span>` : "");
@@ -1405,7 +1409,7 @@ function impCard(it, opts) {
       <div class="field"><label for="ik-${it.id}">Sorta</label><select id="ik-${it.id}" class="search" data-impkey="${it.id}"><option value="">— izaberi sortu —</option>${opts.replace(`value="${esc(it.key)}"`, `value="${esc(it.key)}" selected`)}</select></div>
       <div class="impstat small" id="is-${it.id}">${impStatus(it)}</div>
       ${it.web ? `<div class="impweb"><span class="badge warn">sa interneta</span><label class="check"><input type="checkbox" data-impok="${it.id}"${it.approved ? " checked" : ""}> Provjereno da smijem koristiti</label>${it.approved ? "" : `<div class="hint"><span>Bez kvačice slika se snima, ali se ne objavljuje na sajtu.</span></div>`}</div>` : ""}
-      ${it.dup ? "" : `<label class="check"><input type="checkbox" data-impskip="${it.id}"${it.exclude ? " checked" : ""}> Preskoči ovu sliku</label>`}
+      ${it.dup || it.tooBig ? "" : `<label class="check"><input type="checkbox" data-impskip="${it.id}"${it.exclude ? " checked" : ""}> Preskoči ovu sliku</label>`}
       ${it.state ? `<div class="bar"><span style="width:${Math.round((it.pct || 0) * 100)}%"></span></div><div class="upmsg small">${it.msg || ""}</div>` : ""}
     </div></div>`;
 }
@@ -1484,6 +1488,7 @@ async function impSave() {
       it.state = "ok"; it.pct = 1; it.msg = `<span class="oktext">✓ Snimljeno (${kb(it.file.size)} → ${kb(sum)})${it.oldRef ? `, umjesto ${esc(it.oldRef)}` : ""}</span>`;
       await idbDel(it.id);
     } catch (e) {
+      if (e && e.code === "too-big") { it.tooBig = e.message; it.state = ""; it.msg = ""; await idbDel(it.id); IMP.done++; renderImport(); continue; }
       it.state = "err"; it.pct = 0; it.msg = `<span class="error">${esc(e && e.code === "no-webp" ? e.message : "Nije snimljeno: veza je prekinuta. Ostaje za nastavak.")}</span>`;
     }
     IMP.done++; IMP.sizes = `Veličina: ${kb(before)} prije, ${kb(after)} poslije (sve 4 veličine).`; renderImport();
