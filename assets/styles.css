@@ -24,8 +24,8 @@ header{height:76px;display:flex;align-items:center;justify-content:space-between
 /* drawer */
 #overlay{position:fixed;inset:0;background:#0a1a1099;opacity:0;pointer-events:none;transition:.25s;z-index:40}
 #overlay.on{opacity:1;pointer-events:auto}
-#drawer{position:fixed;top:0;left:0;bottom:0;width:min(330px,86vw);background:#fff;z-index:50;transform:translateX(-102%);transition:.28s;padding:70px 22px 22px;display:flex;flex-direction:column;overflow:auto}
-#drawer.open{transform:none}
+#drawer{position:fixed;top:0;left:0;bottom:0;width:min(330px,86vw);background:#fff;z-index:50;transform:translateX(-102%);visibility:hidden;transition:transform .28s,visibility 0s .28s;padding:70px 22px 22px;display:flex;flex-direction:column;overflow:auto}
+#drawer.open{transform:none;visibility:visible;transition:transform .28s,visibility 0s}
 #drawer nav{display:grid;gap:4px}
 #drawer nav a{padding:15px 12px;border-radius:10px;text-decoration:none;color:var(--ink);font-weight:600;font-size:17px}
 #drawer nav a.on,#drawer nav a:hover{background:#e6f1e7;color:var(--green)}
@@ -191,8 +191,8 @@ footer a{color:#fff}
 .ask{display:block;margin-top:12px;font-size:14px}
 
 /* korpa */
-.cart{position:fixed;top:0;right:0;bottom:0;width:min(430px,100%);background:#fff;z-index:50;transform:translateX(102%);transition:.28s;padding:22px;overflow:auto}
-.cart.open{transform:none}
+.cart{position:fixed;top:0;right:0;bottom:0;width:min(430px,100%);background:#fff;z-index:50;transform:translateX(102%);visibility:hidden;transition:transform .28s,visibility 0s .28s;padding:22px;overflow:auto}
+.cart.open{transform:none;visibility:visible;transition:transform .28s,visibility 0s}
 .cart h2{font-size:28px;margin:6px 0 16px}
 .citem{display:grid;grid-template-columns:64px 1fr 44px;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
 .citem img{width:64px;height:80px;object-fit:cover;border-radius:8px}

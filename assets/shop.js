@@ -31,22 +31,49 @@
   var orderable = function (o) { return !!o && o.enabled && (o.qty === null || o.qty > 0); };
 
   /* ---------- meni, korpa, overlay ---------- */
-  var drawer = $("#drawer"), cartEl = $("#cart"), overlay = $("#overlay");
-  function closeAll() {
-    drawer.classList.remove("open"); cartEl.classList.remove("open"); overlay.classList.remove("on");
-    document.body.classList.remove("lock");
+  // Zatvorene ladice su sakrivene (visibility: hidden u CSS-u), pa ih Tab ne dohvata. Otvorena
+  // ladica dobija fokus na dugme Zatvori, Tab kruži unutar nje, a zatvaranje vraća fokus na
+  // dugme koje ju je otvorilo.
+  var drawer = $("#drawer"), cartEl = $("#cart"), overlay = $("#overlay"), opener = null;
+  var openEl = function () { return drawer.classList.contains("open") ? drawer : cartEl.classList.contains("open") ? cartEl : null; };
+  var focusNoScroll = function (el) { try { el.focus({ preventScroll: true }); } catch (e) { el.focus(); } };
+  function shut() {
+    drawer.classList.remove("open"); cartEl.classList.remove("open");
     $("#menuBtn").setAttribute("aria-expanded", "false"); $("#cartBtn").setAttribute("aria-expanded", "false");
   }
-  function openPanel(el, btn) {
+  function closeAll() {
+    var was = openEl();
+    shut(); overlay.classList.remove("on"); document.body.classList.remove("lock");
+    if (was && opener && document.contains(opener)) focusNoScroll(opener);
+    opener = null;
+  }
+  // el: ladica; btn: dugme u zaglavlju (aria-expanded); from: dugme koje ju je stvarno otvorilo (npr. traka pri dnu)
+  function openPanel(el, btn, from) {
+    if (!openEl()) opener = from || btn;
+    else if (openEl() !== el) shut();
     el.classList.add("open"); overlay.classList.add("on"); document.body.classList.add("lock");
     btn.setAttribute("aria-expanded", "true");
+    focusNoScroll(el.querySelector(".close"));
   }
+  var FOCUSABLE = "a[href],button:not([disabled]),input:not([disabled]),textarea:not([disabled]),select:not([disabled]),summary";
+  var focusables = function (box) {
+    return Array.prototype.slice.call(box.querySelectorAll(FOCUSABLE))
+      .filter(function (x) { return x.getClientRects().length && getComputedStyle(x).visibility !== "hidden"; });
+  };
   $("#menuBtn").addEventListener("click", function () { openPanel(drawer, this); });
   $("#cartBtn").addEventListener("click", function () { openPanel(cartEl, this); });
   $("#closeMenu").addEventListener("click", closeAll);
   $("#cartClose").addEventListener("click", closeAll);
   overlay.addEventListener("click", closeAll);
-  document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeAll(); });
+  document.addEventListener("keydown", function (e) {
+    var box = openEl(); if (!box) return;
+    if (e.key === "Escape") { closeAll(); return; }
+    if (e.key !== "Tab") return;
+    var f = focusables(box); if (!f.length) return;
+    var i = f.indexOf(document.activeElement);
+    if (e.shiftKey && i <= 0) { e.preventDefault(); f[f.length - 1].focus(); }
+    else if (!e.shiftKey && (i === -1 || i === f.length - 1)) { e.preventDefault(); f[0].focus(); }
+  });
 
   var tt;
   function toast(msg) {
@@ -59,7 +86,7 @@
   // Korpa sa stavkama: "Pošalji narudžbu (N)" otvara ladicu korpe.
   var barUpit = $("#barUpit");
   if (barUpit) barUpit.addEventListener("click", function () {
-    if (cart.length) { openPanel(cartEl, $("#cartBtn")); return; }
+    if (cart.length) { openPanel(cartEl, $("#cartBtn"), barUpit); return; }
     var ord = $(".order"); if (!ord) return;
     ord.scrollIntoView({ block: "center" });
     var first = $(".order [data-add]");
