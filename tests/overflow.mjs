@@ -11,7 +11,7 @@
 //   node build/build.mjs --seed
 //   node tests/overflow.mjs                      služi dist/ na slobodnom portu i provjerava
 //   node tests/overflow.mjs --url=http://localhost:8080   provjerava već pokrenut sajt
-//   dodatno: --paths=/,/sorte/   --widths=360,390,412
+//   dodatno: --paths=/,/sorte/   --widths=320,360,390,412 (zadano)
 // Izlaz: spisak elemenata van ekrana po stranici, širini i stanju ladice; kod 1 ako ih ima.
 import fs from "node:fs";
 import path from "node:path";
@@ -88,7 +88,7 @@ if (isMain) {
     server = await serve(dist); base = `http://localhost:${server.address().port}`;
   }
   base = base.replace(/\/+$/, "");
-  const widths = (arg("widths") || "360,390,412").split(",").map(Number);
+  const widths = (arg("widths") || "320,360,390,412").split(",").map(Number);
   let paths = arg("paths") ? arg("paths").split(",") : null;
   if (!paths) {
     // sve vrste stranica: osnovne + sorta s najviše slika i sorta s jednom slikom (iz kataloga)
