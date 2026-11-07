@@ -4,7 +4,7 @@
 // Zahtjev:  POST, zaglavlje Authorization: Bearer <Firebase ID token>
 // Odgovor:  200 { ok: true, requestedAt }   (vrijeme servera, ms)
 //           401 nema tokena ili token nije ispravan
-//           403 prijavljen, ali nije admin
+//           403 prijavljen, ali nije admin (ili je nalog isključen u Firebaseu)
 //           405 GET (ostale metode Cloudflare ne prosljeđuje ovoj funkciji)
 //           429 objava je pokrenuta prije manje od 30 s
 //           500 funkcija nije podešena (nedostaje varijabla okruženja)
@@ -44,7 +44,7 @@ export async function onRequestPost(context) {
   if (!m) return json(401, { ok: false, error: "no-token" });
 
   // 1) ko je to: Identity Toolkit vraća korisnika samo za važeći, neistekao token
-  let uid;
+  let uid, disabled = false;
   try {
     const r = await fetch(`${LOOKUP}?key=${encodeURIComponent(apiKey)}`, {
       method: "POST",
@@ -55,7 +55,9 @@ export async function onRequestPost(context) {
     if (r.status === 400 || r.status === 401) return json(401, { ok: false, error: "bad-token" });
     if (!r.ok) { console.error("publish: Identity Toolkit HTTP", r.status); return json(502, { ok: false, error: "auth-service" }); }
     const data = await r.json();
-    uid = data && Array.isArray(data.users) && data.users[0] && data.users[0].localId;
+    const u = data && Array.isArray(data.users) && data.users[0];
+    uid = u && u.localId;
+    disabled = !!(u && u.disabled === true);
   } catch (e) {
     console.error("publish: Identity Toolkit nedostupan:", e && e.name);
     return json(502, { ok: false, error: "auth-service" });
@@ -64,21 +66,25 @@ export async function onRequestPost(context) {
 
   // 2) da li je admin
   if (!admins.includes(uid)) return json(403, { ok: false, error: "not-admin" });
+  if (disabled) return json(403, { ok: false, error: "disabled" });
 
-  // 3) ne češće od jednom na 30 s
+  // 3) ne češće od jednom na 30 s. Vrijeme se upisuje PRIJE poziva hooka, da dva istovremena
+  //    zahtjeva ne prođu oba; ako hook padne, vraća se staro vrijeme (može se odmah pokušati ponovo).
   const now = Date.now();
   if (now - lastPublishAt < MIN_GAP_MS) {
     return json(429, { ok: false, error: "too-soon", retryAfter: Math.ceil((MIN_GAP_MS - (now - lastPublishAt)) / 1000) });
   }
+  const prevPublishAt = lastPublishAt;
+  lastPublishAt = now;
 
   // 4) deploy hook (adresa se nigdje ne vraća ni ne ispisuje)
   try {
     const h = await fetch(hook, { method: "POST", signal: AbortSignal.timeout(15000) });
-    if (!h.ok) { console.error("publish: deploy hook HTTP", h.status); return json(502, { ok: false, error: "hook" }); }
+    if (!h.ok) { if (lastPublishAt === now) lastPublishAt = prevPublishAt; console.error("publish: deploy hook HTTP", h.status); return json(502, { ok: false, error: "hook" }); }
   } catch (e) {
+    if (lastPublishAt === now) lastPublishAt = prevPublishAt;
     console.error("publish: deploy hook nedostupan:", e && e.name);
     return json(502, { ok: false, error: "hook" });
   }
-  lastPublishAt = now;
   return json(200, { ok: true, requestedAt: now });
 }

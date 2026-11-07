@@ -180,7 +180,7 @@ Build ne piše u bazu. Panel dobija stanje preko `build.json` na samom sajtu:
 - Token provjerava preko Google Identity Toolkit (`accounts:lookup`) i ne piše vlastitu kriptografiju.
 - Poredi `localId` sa listom `ADMIN_UIDS` iz varijable okruženja.
 - Samo ako je uid na listi, šalje POST na `DEPLOY_HOOK_URL`. Inače vraća 401 ili 403.
-- Ne vraća hook URL ni tajne i ne ispisuje ih. Odbija zahtjeve češće od jednog na 30 sekundi (u okviru jedne instance funkcije).
+- Ne vraća hook URL ni tajne i ne ispisuje ih. Odbija zahtjeve češće od jednog na 30 sekundi (u okviru jedne instance funkcije; vrijeme se upisuje prije poziva hooka i vraća ako hook padne). Odbija (403) i admina čiji je nalog isključen u Firebaseu (`disabled`).
 - Testovi: `node tests/publish.test.mjs` (lažni Identity Toolkit i lažni hook).
 
 ---
