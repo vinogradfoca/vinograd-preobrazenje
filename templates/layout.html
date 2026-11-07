@@ -40,7 +40,7 @@
 {{/each}}    </details>
 {{#each nav.last}}    <a href="{{href}}"{{#if on}} class="on" aria-current="page"{{/if}}>{{label}}</a>
 {{/each}}  </nav>
-  <a class="drawer-call" href="{{site.tel}}">☎ {{site.phone}}</a>
+  <a class="drawer-call" href="{{site.tel}}">☎ <span class="nowrap">{{site.phone}}</span></a>
 </aside>
 <div id="overlay"></div>
 
@@ -49,8 +49,10 @@
 </main>
 
 <footer>
-  <b>{{site.name}}</b> · {{site.address}} · <a href="{{site.tel}}">{{site.phone}}</a> · <a href="mailto:{{site.email}}">{{site.email}}</a>
-  <nav class="fnav" aria-label="Iz vinograda">{{#each nav.extra}}<a href="{{href}}">{{label}}</a>{{/each}}</nav>
+  <p class="fname nowrap">{{site.name}}</p>
+  <p class="faddr nowrap">{{site.address}}</p>
+  <p class="frow fcontact"><a class="nowrap" href="{{site.tel}}">{{site.phone}}</a><a class="nowrap" href="mailto:{{site.email}}">{{site.email}}</a></p>
+  <nav class="frow fnav" aria-label="Iz vinograda">{{#each nav.extra}}<a class="nowrap" href="{{href}}">{{label}}</a>{{/each}}</nav>
 </footer>
 
 <aside id="cart" class="cart" aria-label="Korpa">

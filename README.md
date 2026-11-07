@@ -52,10 +52,11 @@ Isti testovi i `node build/build.mjs --seed` rade automatski na GitHubu (`.githu
 - Svaki test sam služi `dist/` na slobodnom portu.
 
 ```sh
-node tests/overflow.mjs        # nijedan element van ekrana (360, 390, 412 px; --url=, --paths=, --widths=)
+node tests/overflow.mjs        # nijedan element van ekrana (320, 360, 390, 412 px; --url=, --paths=, --widths=)
 node tests/tastatura.mjs       # meni, korpa i cijeli ekran galerije tastaturom (390 i 1280 px)
 node tests/korpa.mjs           # korpa: oštećen localStorage, količina veća od stanja
 node tests/panel-objavi.mjs    # panel ?mock=1: Objavi čeka upise i ne objavljuje nesnimljeno
+node tests/prelomi.mjs         # telefon, mejl, adresa i nazivi u jednom redu; kartice koraka; podnožje (320–1280 px)
 ```
 
 Ako je Playwright instaliran globalno, a Node ga ne nalazi, pokreni sa `NODE_PATH="$(npm root -g)" node tests/…`.
