@@ -567,7 +567,7 @@ function pages(m, db) {
   add("/kako-naruciti/", "kako.html", "kako", {
     title: kako.seoTitle || kako.title + " | " + name,
     description: kako.seoDescription || clip(kako.intro || kako.steps.map((s) => s.title + " " + s.text).join(" ")),
-  }, { kako: { title: kako.title, intro: kako.intro || "", steps: kako.steps.map((s) => ({ title: s.title.replace(/(?<!\.)\.\s*$/, ""), text: s.text })) } });
+  }, { kako: { title: kako.title, intro: kako.intro || "", steps: kako.steps } });
 
   // /kontakt/
   const k = P.kontakt;
