@@ -2,8 +2,10 @@
 # Testovi s pregledačem (overflow, tastatura, korpa, panel-objavi) traže Playwright i pokreću se ručno (README).
 name: Testovi
 
+# push samo na main (grane se testiraju kroz PR, da se isti commit ne testira dvaput)
 on:
   push:
+    branches: [main]
   pull_request:
 
 permissions:
