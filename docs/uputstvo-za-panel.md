@@ -47,7 +47,7 @@ Ako piše **Nije snimljeno**, nema internet veze. Dodirni **Pokušaj ponovo**.
 Sajt pokazuje količine kakve su bile u trenutku zadnje objave. Zato na sajtu piše da se dostupnost potvrđuje u odgovoru na upit.
 
 ## 4. Slike
-**Kakve slike:** grozd u ruci ili na čokotu, uspravno, dobra svjetlost, jedna sorta po slici. Prva slika sorte je ona koja se vidi u katalogu. Slike ne moraš smanjivati: panel ih sam pretvara u lagane. Slike s tuđim potpisom ili s interneta ne stavljaj.
+**Kakve slike:** grozd u ruci ili na čokotu, uspravno, dobra svjetlost, jedna sorta po slici. Prva slika sorte je ona koja se vidi u katalogu. Slike ne moraš smanjivati: panel ih sam pretvara u lagane. Izuzetak su vrlo velike fotografije (više od 40 MP ili 25 MB): panel ih odbije porukom **Slika je prevelika**, pa ih smanji ili na telefonu snimaj u manjoj rezoluciji. Slike s tuđim potpisom ili s interneta ne stavljaj.
 
 **Dodavanje slika jednoj sorti:** otvori sortu, odjeljak **Slike**, pa **Dodaj slike**. Strelicama mijenjaš redoslijed. **Ukloni** briše sliku samo sa sorte, a u biblioteci ostaje.
 

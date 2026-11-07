@@ -104,7 +104,7 @@ Pravila značenja:
 - `price: null` znači "Cijena na upit". Ništa se ne izmišlja.
 - `qty: null` znači "Na upit", `qty: 0` znači "Nema na stanju", a broj znači dostupno.
 - `slug` se pravi pri prvom snimanju (bez dijakritika, malim slovima) i poslije se ne mijenja kad se promijeni naziv. Panel provjerava da nema duplikata.
-- `alt` je obavezan pri uploadu slike.
+- `alt` (opis slike) se pri uploadu sam popuni ("Grozd sorte Viktor") i kasnije se može urediti u panelu. Nije obavezno upisivati ga prije snimanja.
 - `og` varijantu pravi panel u pregledaču (izrezana slika). Build bez biblioteka ne može mijenjati dimenzije slika.
 
 ### Pravila baze
@@ -133,7 +133,7 @@ Napomena: baza se čita javno, pa je i neobjavljeni nacrt tehnički čitljiv ono
 
 ### Pravila Storagea
 - Čitanje javno za `vinograd/img/**`.
-- Upis samo ta dva uid-a, samo `image/webp`, najviše 5 MB po fajlu.
+- Upis samo ta dva uid-a, samo `image/webp` (veličine 400, 800, 1600) i `image/jpeg` (`og.jpg` za pregled linka), najviše 5 MB po fajlu.
 
 UID-ovi nisu tajne i mogu biti u pravilima. Hook, API ključevi i sve ostalo tajno idu samo u varijable (tajne) Cloudflare Pages projekta.
 
@@ -191,7 +191,8 @@ Build ne piše u bazu. Panel dobija stanje preko `build.json` na samom sajtu:
 - Izlaz: WebP u širinama 400, 800, 1600 (nikad šire od originala) i `og` 1200×630 izrezano na sredinu.
 - Prije svega panel detektuje mogućnost: napravi probni canvas i provjeri da `toBlob("image/webp")` stvarno vraća `image/webp`.
 - Ako ne vraća (npr. Safari): upozorenje "Ovaj pregledač ne pravi WebP. Otvorite panel u Chromeu, Edgeu, Samsung Internetu ili Firefoxu." i **upload se blokira**. Ništa se tiho ne snima kao veliki PNG.
-- Kvalitet oko 0,8, prikaz veličine fajla prije i poslije, obavezan `alt`.
+- Kvalitet oko 0,8, prikaz veličine fajla prije i poslije. `alt` se sam popuni i može se urediti poslije.
+- Najviše 6 slika po sorti (granica u panelu). Ulazna fotografija najviše 40 MP i 25 MB, provjera prije dekodiranja.
 - Upis: fajlovi u Storage (`vinograd/img/<imageId>/<širina>.webp`), zapis u `images/<imageId>`.
 - AVIF je moguća dorada kasnije, pri izgradnji, ali traži biblioteku pa je odluka za poslije.
 
