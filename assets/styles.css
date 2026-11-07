@@ -130,7 +130,13 @@ input,select,textarea{border:1px solid #c9d3cc;border-radius:10px;padding:12px 1
 .steps span{display:inline-grid;place-items:center;width:36px;height:36px;border-radius:50%;background:var(--gold);color:var(--green);font-weight:800;margin-bottom:10px}
 .steps b{display:block;font-size:18px}
 .steps p{margin:6px 0 0;color:#dbe6df}
-.how{padding-left:22px;display:grid;gap:14px;font-size:17px;margin-bottom:22px}
+/* Kako naručiti: svaki korak je kartica, broj pravi CSS brojač */
+.how{list-style:none;counter-reset:korak;padding:0;margin:0 0 22px;display:grid;gap:10px;max-width:640px}
+.how li{counter-increment:korak;display:flex;align-items:flex-start;gap:12px;background:#fff;border:1px solid #d6dcd6;border-radius:14px;padding:14px}
+.how li::before{content:counter(korak);flex:0 0 34px;width:34px;height:34px;border-radius:50%;background:#e8c88e;color:#193d2b;font-weight:500;font-size:15px;line-height:1;display:flex;align-items:center;justify-content:center}
+.how li>div{min-width:0;padding-top:6px}
+.how .how-t{display:block;font-size:15px;font-weight:500;line-height:1.4}
+.how p{margin:2px 0 0;font-size:14px;line-height:1.5;color:var(--ink)}
 
 /* kontakt */
 .contact-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:34px;margin-top:20px}
