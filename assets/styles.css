@@ -153,6 +153,8 @@ input,select,textarea{border:1px solid #c9d3cc;border-radius:10px;padding:12px 1
 .contact-card p{margin:0;padding:10px 0}
 /* u kartici je svaki podatak sam u svom redu: prelama se samo kad je širi od kartice (uzak ekran, uvećan tekst) */
 .contact-card .nowrap{white-space:normal;overflow-wrap:anywhere;min-width:0}
+/* naziv firme u naslovu stranice Kontakt: na najužim ekranima malo manji (28 umjesto 30 px), da stane u jedan red */
+@media (max-width:340px){#kontakt h1{font-size:28px}}
 /* podnožje u redovima: naziv, adresa, telefon i mejl, dodatne stranice */
 footer{background:#10281c;color:#cfdcd4;padding:18px 22px 10px;text-align:center;font-size:14px}
 footer a{color:#fff}
