@@ -4,7 +4,7 @@
     <div class="hero-copy">
       {{#if home.eyebrow}}<span>{{home.eyebrow}}</span>{{/if}}
       <h1>{{#each home.titleLines}}{{#if br}}<br>{{/if}}{{t}}{{/each}}</h1>
-      <p>{{home.text}}</p>
+      <p>{{text home.text}}</p>
       <a class="btn primary" href="/sorte/">Pogledajte sorte →</a>
     </div>
   </div>
@@ -12,7 +12,7 @@
   <div class="benefits">
     <article><i>✓</i><div><b>Provjerene sorte</b><small>Lično iskustvo uzgoja</small></div></article>
     <article><i>◷</i><div><b>{{sortCount}}</b><small>Bijele, crne i crvene</small></div></article>
-    <article><i>☎</i><div><b>Pomoć pri izboru</b><small>{{site.phone}}</small></div></article>
+    <article><i>☎</i><div><b>Pomoć pri izboru</b><small class="nowrap">{{site.phone}}</small></div></article>
   </div>
 
   <div class="wrap">

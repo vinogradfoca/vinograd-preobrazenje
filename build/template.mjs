@@ -2,6 +2,9 @@
 //
 //   {{a.b}}                 vrijednost, HTML-escaped
 //   {{{a.b}}}               vrijednost bez escapinga (samo za HTML koji pravi build)
+//   {{text a.b}}            tekst iz baze: HTML-escaped, pa su brojevi telefona (065/592-120,
+//                           065 592 120, +387 65 592 120) umotani u <span class="nowrap">, da se ne prelome.
+//                           Samo za sadržaj elementa, nikad u atributu.
 //   {{#if a}}…{{else}}…{{/if}}
 //   {{#unless a}}…{{/unless}}
 //   {{#each lista}}…{{/each}}   unutra: this, @index, @first, @last i polja stavke
@@ -13,7 +16,12 @@
 const ESC = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
 export const escapeHtml = (v) => String(v).replace(/[&<>"']/g, (c) => ESC[c]);
 
-const TOKEN = /\{\{\{\s*([\w.@]+)\s*\}\}\}|\{\{\s*(#if|#unless|#each|\/if|\/unless|\/each|else|>)\s*([\w.@-]*)\s*\}\}|\{\{\s*([\w.@]+)\s*\}\}/g;
+// Broj telefona u tekstu: lokalni oblik 0XX/XXX-XXX (ili s razmacima) i međunarodni +387 XX XXX XXX.
+// Ne poklapa se unutar dužeg niza cifara. Primjenjuje se na već escapiran tekst (/, -, + i razmak se ne escapiraju).
+export const PHONE_RE = /(?<![\d+\/])(?:\+387[ \u00a0\/-]?\d{2}|0\d{2})[ \u00a0\/]\d{3}[ \u00a0-]\d{3,4}(?![\d\/-])/g;
+export const wrapPhones = (html) => String(html).replace(PHONE_RE, (m) => `<span class="nowrap">${m}</span>`);
+
+const TOKEN = /\{\{\{\s*([\w.@]+)\s*\}\}\}|\{\{\s*(#if|#unless|#each|\/if|\/unless|\/each|else|>)\s*([\w.@-]*)\s*\}\}|\{\{\s*([\w.@]+)\s*\}\}|\{\{\s*text\s+([\w.@]+)\s*\}\}/g;
 
 function parse(src, name) {
   const root = { type: "root", children: [] };
@@ -29,6 +37,7 @@ function parse(src, name) {
     const where = `${name}:${line(m.index)}`;
     if (m[1]) { top().children.push({ type: "raw", path: m[1], where }); continue; }
     if (m[4]) { top().children.push({ type: "var", path: m[4], where }); continue; }
+    if (m[5]) { top().children.push({ type: "text-db", path: m[5], where }); continue; }
     const tag = m[2], arg = m[3];
     if (tag === "#if" || tag === "#unless" || tag === "#each") {
       if (!arg) throw new Error(`Šablon ${where}: ${tag} bez argumenta`);
@@ -93,11 +102,12 @@ export function createEngine(loadTemplate) {
       switch (n.type) {
         case "text": out += n.value; break;
         case "var":
-        case "raw": {
+        case "raw":
+        case "text-db": {
           const r = lookup(scopes, n.path);
           if (!r.found || r.value === undefined) throw new Error(`Šablon ${n.where}: nepoznata vrijednost "${n.path}"`);
           const v = r.value == null ? "" : r.value;
-          out += n.type === "var" ? escapeHtml(v) : String(v);
+          out += n.type === "var" ? escapeHtml(v) : n.type === "text-db" ? wrapPhones(escapeHtml(v)) : String(v);
           break;
         }
         case "if":

@@ -3,14 +3,14 @@
   <h1>{{site.name}}</h1>
   <div class="contact-grid">
     <div>
-      <h2>{{kontakt.title}}</h2>
-      <p>{{kontakt.about}}</p>
+      <h2>{{text kontakt.title}}</h2>
+      <p>{{text kontakt.about}}</p>
     </div>
     <div class="contact-card">
-      <a href="{{site.tel}}">☎ {{site.phone}}</a>
+      <a class="nowrap" href="{{site.tel}}">☎ {{site.phone}}</a>
       <a href="{{site.wa}}" target="_blank" rel="noopener">💬 WhatsApp</a>
-      <a href="mailto:{{site.email}}">✉ {{site.email}}</a>
-      <p>⌖ {{site.address}}</p>
+      <a class="nowrap" href="mailto:{{site.email}}">✉ {{site.email}}</a>
+      <p class="nowrap">⌖ {{site.address}}</p>
       {{#if site.mapUrl}}<a href="{{site.mapUrl}}" target="_blank" rel="noopener">Prikaži na mapi →</a>{{/if}}
     </div>
   </div>

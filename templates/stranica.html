@@ -1,8 +1,8 @@
 <section id="{{p.id}}" class="page wrap narrow extra">
   {{#if p.eyebrow}}<p class="eyebrow">{{p.eyebrow}}</p>{{/if}}
   <h1>{{p.title}}</h1>
-  {{#if p.subtitle}}<p class="lead">{{p.subtitle}}</p>{{/if}}
+  {{#if p.subtitle}}<p class="lead">{{text p.subtitle}}</p>{{/if}}
   {{#if p.label}}<p><span class="tag">{{p.label}}</span></p>{{/if}}
-  {{#each p.paras}}<p>{{this}}</p>
-  {{/each}}{{#if p.note}}<p class="muted">{{p.note}}</p>{{/if}}
+  {{#each p.paras}}<p>{{text this}}</p>
+  {{/each}}{{#if p.note}}<p class="muted">{{text p.note}}</p>{{/if}}
 </section>
